@@ -1,36 +1,80 @@
 # Claude Code Hook System - Multi-Repository Template
 
-**Version**: 3.0 (Complete Hook Collection)
+**Version**: 3.0 (Complete Hook Collection - Organized Structure)
 **Author**: Consolidated from N8N_dev + UTXOracle implementations
 **Purpose**: Reusable Claude Code hooks for session tracking, safety, and UX across multiple repositories
 
 ---
 
+## 📁 Repository Structure
+
+```
+claude-hooks-shared/
+├── hooks/
+│   ├── core/                    # Session tracking (both architectures)
+│   │   ├── context_bundle_builder.py
+│   │   ├── post-tool-use.py
+│   │   └── session-end.sh
+│   │
+│   ├── safety/                  # Git + Bash protection
+│   │   ├── git-safety-check.py
+│   │   └── smart-safety-check.py
+│   │
+│   ├── ux/                      # Voice notifications
+│   │   ├── stop.py
+│   │   └── notification.py
+│   │
+│   └── productivity/            # Optional enhancements
+│       ├── auto-format.py
+│       └── subagent-checkpoint.sh
+│
+├── scripts/                     # Utilities & libraries
+│   ├── session_manager.py       # PostgreSQL wrapper (required for hooks)
+│   └── context-monitor.py       # StatusLine display
+│
+├── database/                    # PostgreSQL schema
+│   ├── init_db.py
+│   └── migrate_add_project_name.sql
+│
+└── docs/                        # Documentation
+    ├── HOOK_INVENTORY.md
+    ├── GIT_SAFETY_GUIDE.md
+    ├── SMART_SAFETY_GUIDE.md
+    ├── AUTO_FORMAT_GUIDE.md
+    └── CLAUDE_STRUCTURE_AUTO_UPDATE.md
+```
+
+---
+
 ## 📦 What's Included
 
-### **Core Session Tracking** (Multi-Project)
+### **Core Session Tracking** (`hooks/core/`)
 - `context_bundle_builder.py` - Pre-tool-use hook (logs operations)
 - `post-tool-use.py` - Post-tool-use hook (tracks duration + errors)
-- `session_manager.py` - PostgreSQL wrapper (CRUD operations)
 - `session-end.sh` - Session cleanup + N8N webhook trigger
 
-### **Safety & Protection Hooks**
+### **Safety & Protection** (`hooks/safety/`)
 - `git-safety-check.py` - Git operation protection (force push, secrets, large files)
 - `smart-safety-check.py` - Intelligent command safety (checkpoint + confirm + CWD limit)
 
-### **UX Enhancement Hooks**
+### **UX Enhancement** (`hooks/ux/`)
 - `stop.py` - Voice announcement "Work complete!" (TTS)
 - `notification.py` - Voice alert "Agent needs your input" (TTS)
 
-### **Developer Productivity**
+### **Developer Productivity** (`hooks/productivity/`)
 - `auto-format.py` - Automatic Ruff formatting after Python edits
 - `subagent-checkpoint.sh` - Auto-commit after subagent completion
 
-### **Database Management**
+### **Utilities** (`scripts/`)
+- `session_manager.py` - PostgreSQL wrapper (CRUD operations, required by core hooks)
+- `context-monitor.py` - StatusLine display (token tracking + contextual metadata)
+
+### **Database Management** (`database/`)
 - `init_db.py` - Create PostgreSQL schema
 - `migrate_add_project_name.sql` - Migration for multi-repo support
 
-### **Documentation**
+### **Documentation** (`docs/`)
+- `HOOK_INVENTORY.md` - Complete hook classification and usage patterns
 - `GIT_SAFETY_GUIDE.md` - Git safety hook details
 - `SMART_SAFETY_GUIDE.md` - Smart safety philosophy
 - `AUTO_FORMAT_GUIDE.md` - Auto-format configuration
@@ -97,27 +141,35 @@ WHERE table_name = 'sessions' AND column_name = 'project_name';
 
 ### Step 2: Install Hooks in Target Repository
 
-**Example: Installing in UTXOracle**
+**Option A: Clone Repository** (Recommended)
 
 ```bash
 # Navigate to target repository
-cd /media/sam/1TB/UTXOracle
+cd /media/sam/1TB/YourProject
+
+# Clone as subdirectory
+git clone https://github.com/gptprojectmanager/claude-hooks-shared.git .claude-hooks
+
+# Or use as git submodule
+git submodule add https://github.com/gptprojectmanager/claude-hooks-shared.git .claude-hooks
+```
+
+**Option B: Copy Specific Hooks**
+
+```bash
+# Navigate to target repository
+cd /media/sam/1TB/YourProject
 
 # Create directory structure
 mkdir -p .claude/hooks
 mkdir -p .claude/scripts
-mkdir -p .claude/context_bundles
-mkdir -p .claude/logs
 
-# Copy hook files
-cp /media/sam/1TB/claude-hooks-shared/context_bundle_builder.py .claude/hooks/
-cp /media/sam/1TB/claude-hooks-shared/post-tool-use.py .claude/hooks/
-cp /media/sam/1TB/claude-hooks-shared/session-end.sh .claude/hooks/
-cp /media/sam/1TB/claude-hooks-shared/session_manager.py .claude/scripts/
+# Copy only what you need
+cp /path/to/claude-hooks-shared/hooks/ux/stop.py .claude/hooks/
+cp /path/to/claude-hooks-shared/hooks/safety/git-safety-check.py .claude/hooks/
 
 # Make executable
 chmod +x .claude/hooks/*.py
-chmod +x .claude/hooks/*.sh
 ```
 
 ---
