@@ -1,7 +1,7 @@
 # Hook Inventory & Usage Guide
 
-**Last Updated**: 2025-10-27
-**Total Hooks**: 11 files (8 Python, 1 Bash, 2 SQL)
+**Last Updated**: 2025-11-22
+**Total Hooks**: 12 files (9 Python, 1 Bash, 2 SQL)
 
 ---
 
@@ -31,6 +31,16 @@
 |------|-------|---------|--------------|
 | `auto-format.py` | PostToolUse (Write/Edit) | Ruff auto-format | `uv`, `ruff` |
 | `subagent-checkpoint.sh` | SubagentStop | Auto-commit after Task | Git, `jq` |
+
+### Tier 4: Experimental/Research 🧪
+
+| Hook | Event | Purpose | Dependencies |
+|------|-------|---------|--------------|
+| `verbalized_sampling.py` | UserPromptSubmit | A/B test: Claude Sonnet 4.5 vs Gemini 2.5 Pro (Verbalized Sampling) | `mcp__gemini-cli__ask-gemini` |
+
+**Usage**: `/vsample [N] <request>` (e.g., `/vsample 5 write a haiku about Bitcoin`)
+
+**Output**: Comparative analysis of creative generation quality between Claude and Gemini
 
 ---
 
@@ -158,6 +168,7 @@ See Pattern A or Pattern B above.
 | `context_bundle_builder.py` | `session_manager.py` (if PostgreSQL) | `CLAUDE_PROJECT_NAME`, `DATABASE_URL` |
 | `post-tool-use.py` | `session_manager.py` (if PostgreSQL) | `CLAUDE_PROJECT_NAME`, `DATABASE_URL` |
 | `session-end.sh` | `curl`, `git` | - |
+| `verbalized_sampling.py` | `gemini` CLI, `mcp__gemini-cli__ask-gemini` | - |
 
 ---
 
@@ -185,3 +196,108 @@ sudo apt install jq
 - **Git Safety**: `/media/sam/1TB/claude-hooks-shared/GIT_SAFETY_GUIDE.md`
 - **Smart Safety**: `/media/sam/1TB/claude-hooks-shared/SMART_SAFETY_GUIDE.md`
 - **Auto-Format**: `/media/sam/1TB/claude-hooks-shared/AUTO_FORMAT_GUIDE.md`
+
+---
+
+## 🧪 Verbalized Sampling Hook (Experimental)
+
+**Purpose**: Compare creative generation quality between Claude Sonnet 4.5 and Gemini 2.5 Pro using the Verbalized Sampling technique from Stanford CHATS lab.
+
+**Research Paper**: https://github.com/CHATS-lab/verbalized-sampling
+
+### How It Works
+
+1. User types: `/vsample [N] <request>`
+2. Hook transforms prompt into dual-track A/B test instructions
+3. Claude Sonnet 4.5:
+   - Generates N diverse responses (default: 5)
+   - Self-selects best response
+4. Gemini 2.5 Pro (via MCP):
+   - Generates N diverse responses
+   - Self-selects best response
+5. Output shows comparative analysis
+
+### Example
+
+**Input**:
+```
+/vsample write a haiku about Bitcoin mining
+```
+
+**Output**:
+```
+═══════════════════════════════════════════════════════════
+🎭 VERBALIZED SAMPLING A/B TEST RESULTS
+═══════════════════════════════════════════════════════════
+
+📝 Request: "write a haiku about Bitcoin mining"
+🔢 Samples per track: 5
+
+───────────────────────────────────────────────────────────
+🧠 CLAUDE SONNET 4.5 TRACK
+───────────────────────────────────────────────────────────
+
+Generated Responses:
+1. (p=0.35) Hashing through the night / Nonce by nonce...
+[... 4 more responses ...]
+
+✅ Claude's Selection: #1 (p=0.35)
+📌 Reasoning: Best technical accuracy
+
+───────────────────────────────────────────────────────────
+🤖 GEMINI 2.5 PRO TRACK
+───────────────────────────────────────────────────────────
+
+Generated Responses:
+1. (p=0.40) Power plants hum deep / Processors hunt...
+[... 4 more responses ...]
+
+✅ Gemini's Selection: #2 (p=0.28)
+📌 Reasoning: Poetic balance
+
+───────────────────────────────────────────────────────────
+📊 COMPARATIVE ANALYSIS
+───────────────────────────────────────────────────────────
+
+• Diversity: Both models show good probability spread
+• Creativity: Gemini favors metaphor, Claude favors technical
+• Recommendation: Claude for accuracy, Gemini for imagery
+═══════════════════════════════════════════════════════════
+```
+
+### Configuration
+
+Add to `settings.local.json`:
+```json
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/media/sam/1TB/claude-hooks-shared/hooks/ux/verbalized_sampling.py",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+### Use Cases
+
+- **Creative Writing**: Poetry, jokes, stories
+- **Technical Explanations**: Different pedagogical approaches
+- **Problem Solving**: Multiple solution strategies
+- **Brainstorming**: Diverse ideation
+- **A/B Testing**: Evaluate model strengths over time
+
+### Notes
+
+- Default: 5 samples per model (customizable with `/vsample N`)
+- Requires `mcp__gemini-cli__ask-gemini` tool access
+- KISS architecture: Single hook, Claude orchestrates
+- Research context: 1-week A/B testing recommended

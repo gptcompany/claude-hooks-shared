@@ -1,0 +1,94 @@
+# PROJECT_NAME
+
+[Short project description - 1-2 sentences]
+
+## Quick Start
+
+```bash
+# Install dependencies
+uv sync
+
+# Run tests
+uv run pytest
+
+# [Add project-specific quick start commands]
+```
+
+## Architecture
+
+[Brief architecture overview - see CLAUDE.md for details]
+
+## Data
+
+- **Source**: `data/raw/` (symlinked to external data source)
+- **Processed**: `data/processed/` (DuckDB databases)
+- **Cache**: `data/cache/` (temporary cache files)
+
+## Development
+
+### Setup
+
+```bash
+# Clone repository
+git clone <repo-url>
+cd PROJECT_NAME
+
+# Install dependencies
+uv sync
+
+# Copy environment template
+cp .env.example .env
+# Edit .env with your configuration
+```
+
+### Testing
+
+```bash
+# Run all tests
+uv run pytest
+
+# Run with coverage
+uv run pytest --cov=src --cov-report=html
+
+# Run specific test
+uv run pytest tests/test_module.py::test_function
+```
+
+### TDD Workflow
+
+This project uses Test-Driven Development (TDD):
+
+1. **RED**: Write failing test first
+2. **GREEN**: Write minimal code to pass test
+3. **REFACTOR**: Clean up code while tests pass
+
+See `CLAUDE.md` for detailed TDD workflow.
+
+## Project Structure
+
+```
+PROJECT_NAME/
+├── src/              # Core application code
+├── tests/            # Test suite
+├── scripts/          # Utilities and batch jobs
+├── data/             # Data directory
+│   ├── raw/          # External data (symlink)
+│   ├── processed/    # DuckDB databases
+│   └── cache/        # Temporary cache
+├── frontend/         # Visualization (if applicable)
+├── CLAUDE.md         # Development guide for Claude Code
+├── README.md         # This file
+└── pyproject.toml    # Dependencies (UV)
+```
+
+## Contributing
+
+1. Follow TDD workflow (see `CLAUDE.md`)
+2. Run tests before committing
+3. Format code with `ruff format .`
+4. Lint code with `ruff check .`
+5. Write clear commit messages (explain WHY, not just WHAT)
+
+## License
+
+[License information]
