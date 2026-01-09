@@ -12,7 +12,8 @@ from datetime import datetime
 from pathlib import Path
 
 METRICS_DIR = Path.home() / ".claude" / "metrics"
-EXPORT_SCRIPT = Path("/media/sam/1TB/claude-hooks-shared/scripts/metrics-export-questdb.py")
+# Use relative path from hook location for portability
+EXPORT_SCRIPT = Path(__file__).resolve().parent.parent.parent / "scripts" / "metrics-export-questdb.py"
 SESSION_STATE = METRICS_DIR / "session_state.json"
 DAILY_LOG = METRICS_DIR / "daily.jsonl"
 

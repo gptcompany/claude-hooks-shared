@@ -17,6 +17,7 @@ Enterprise Features (v2.0):
 - Proper error handling (no silent fails)
 """
 
+import fcntl
 import json
 import logging
 import os
@@ -364,10 +365,14 @@ def log_iteration(data: dict):
         **data,
     }
 
-    # File log (always)
+    # File log (always, with lock to prevent race conditions)
     try:
         with open(RALPH_LOG, "a") as f:
-            f.write(json.dumps(entry) + "\n")
+            fcntl.flock(f.fileno(), fcntl.LOCK_EX)
+            try:
+                f.write(json.dumps(entry) + "\n")
+            finally:
+                fcntl.flock(f.fileno(), fcntl.LOCK_UN)
     except OSError as e:
         logger.error(f"Failed to write iteration log: {e}")
 
@@ -509,16 +514,20 @@ def check_rate_limit() -> tuple[bool, str]:
         last_iteration_time = None
 
         with open(RALPH_LOG) as f:
-            for line in f:
-                try:
-                    entry = json.loads(line)
-                    ts = datetime.fromisoformat(entry.get("timestamp", "")).timestamp()
-                    if ts > cutoff:
-                        iterations_in_window += 1
-                        if last_iteration_time is None or ts > last_iteration_time:
-                            last_iteration_time = ts
-                except (json.JSONDecodeError, ValueError):
-                    continue
+            fcntl.flock(f.fileno(), fcntl.LOCK_SH)  # Shared lock for read
+            try:
+                for line in f:
+                    try:
+                        entry = json.loads(line)
+                        ts = datetime.fromisoformat(entry.get("timestamp", "")).timestamp()
+                        if ts > cutoff:
+                            iterations_in_window += 1
+                            if last_iteration_time is None or ts > last_iteration_time:
+                                last_iteration_time = ts
+                    except (json.JSONDecodeError, ValueError):
+                        continue
+            finally:
+                fcntl.flock(f.fileno(), fcntl.LOCK_UN)
 
         # Check max iterations per hour
         if iterations_in_window >= MAX_ITERATIONS_PER_HOUR:

@@ -14,6 +14,7 @@ DUAL-SOURCE DETECTION:
 - Fallback: Last commit if recent (< MAX_COMMIT_AGE_MINUTES)
 """
 
+import fcntl
 import fnmatch
 import json
 import os
@@ -348,38 +349,54 @@ def is_ralph_already_active() -> bool:
 
 
 def is_in_cooldown() -> tuple[bool, float]:
-    """Check if we're still in cooldown period."""
+    """Check if we're still in cooldown period (with file locking)."""
     project_dir = Path(os.environ.get("CLAUDE_PROJECT_DIR", "."))
     cooldown_file = project_dir / ".claude" / "stats" / COOLDOWN_FILE
+    lock_file = cooldown_file.with_suffix(".lock")
 
     try:
         if not cooldown_file.exists():
             return False, 0
 
-        data = json.loads(cooldown_file.read_text())
-        last_trigger = data.get("last_trigger_time", 0)
-        elapsed_minutes = (time.time() - last_trigger) / 60
-        remaining = COOLDOWN_MINUTES - elapsed_minutes
+        # Use file lock to prevent race conditions
+        lock_file.parent.mkdir(parents=True, exist_ok=True)
+        with open(lock_file, "w") as lf:
+            fcntl.flock(lf.fileno(), fcntl.LOCK_SH)  # Shared lock for read
+            try:
+                data = json.loads(cooldown_file.read_text())
+                last_trigger = data.get("last_trigger_time", 0)
+                elapsed_minutes = (time.time() - last_trigger) / 60
+                remaining = COOLDOWN_MINUTES - elapsed_minutes
 
-        if remaining > 0:
-            return True, remaining
-        return False, 0
+                if remaining > 0:
+                    return True, remaining
+                return False, 0
+            finally:
+                fcntl.flock(lf.fileno(), fcntl.LOCK_UN)
     except (OSError, json.JSONDecodeError, ValueError):
         return False, 0
 
 
 def update_cooldown() -> None:
-    """Update cooldown timestamp after triggering."""
+    """Update cooldown timestamp after triggering (with file locking)."""
     project_dir = Path(os.environ.get("CLAUDE_PROJECT_DIR", "."))
     cooldown_file = project_dir / ".claude" / "stats" / COOLDOWN_FILE
+    lock_file = cooldown_file.with_suffix(".lock")
 
     try:
         cooldown_file.parent.mkdir(parents=True, exist_ok=True)
-        data = {
-            "last_trigger_time": time.time(),
-            "last_trigger_iso": datetime.now().isoformat(),
-        }
-        cooldown_file.write_text(json.dumps(data, indent=2))
+
+        # Use exclusive lock for write
+        with open(lock_file, "w") as lf:
+            fcntl.flock(lf.fileno(), fcntl.LOCK_EX)  # Exclusive lock for write
+            try:
+                data = {
+                    "last_trigger_time": time.time(),
+                    "last_trigger_iso": datetime.now().isoformat(),
+                }
+                cooldown_file.write_text(json.dumps(data, indent=2))
+            finally:
+                fcntl.flock(lf.fileno(), fcntl.LOCK_UN)
     except (OSError, PermissionError) as e:
         print(f"Warning: Could not update cooldown: {e}", file=sys.stderr)
 
