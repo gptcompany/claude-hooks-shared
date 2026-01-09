@@ -18,13 +18,14 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, Any, List
 
-# Add .claude/scripts to path to import session_manager
-sys.path.insert(0, str(Path.cwd() / ".claude" / "scripts"))
+# Add shared scripts to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "scripts"))
 try:
-    from session_manager import ClaudeSessionManager
+    from questdb_metrics import QuestDBMetrics
+    _metrics_writer = None  # Lazy init
 except ImportError:
-    # Fail gracefully if session_manager not available
-    ClaudeSessionManager = None
+    QuestDBMetrics = None
+    _metrics_writer = None
 
 def get_session_id(input_data):
     """Get the current session ID from input data or fallback"""
@@ -87,12 +88,12 @@ def save_bundle(bundle, bundle_path):
     except Exception as e:
         print(f"Error saving context bundle: {e}", file=sys.stderr)
 
-def persist_tool_to_postgresql(session_id, tool_name, tool_details):
+def persist_tool_to_questdb(session_id, tool_name, tool_details):
     """
-    Write tool usage to PostgreSQL (in addition to file).
+    Write tool usage to QuestDB via ILP protocol.
 
     HYBRID ARCHITECTURE: Data written to both context_bundles/*.json (debugging)
-    and PostgreSQL (n8n workflow queries).
+    and QuestDB (time-series metrics/dashboards).
 
     Args:
         session_id: Claude session ID
@@ -102,24 +103,25 @@ def persist_tool_to_postgresql(session_id, tool_name, tool_details):
     Returns:
         bool: True if written successfully
     """
-    if ClaudeSessionManager is None:
-        return False  # Session manager not available
+    global _metrics_writer
+
+    if QuestDBMetrics is None:
+        return False  # QuestDB module not available
 
     try:
-        manager = ClaudeSessionManager()
+        # Lazy init singleton
+        if _metrics_writer is None:
+            _metrics_writer = QuestDBMetrics()
 
-        # Log tool use with tool_params
-        # Note: duration_ms=0 will be updated later by post-tool-use.py
-        manager.log_tool_use(
+        # Log tool use (duration_ms=0, will be updated by post-tool-use.py)
+        return _metrics_writer.log_tool_use(
             session_id=session_id,
             tool_name=tool_name,
-            duration_ms=0,  # Placeholder, will be updated by post-tool-use.py
-            success=True,   # Assume success at this point
-            tool_params=tool_details
+            tool_params=tool_details,
+            duration_ms=0,  # Pre-tool, duration unknown
+            success=True    # Assume success at this point
         )
-        manager.close()
-        return True
-    except Exception as e:
+    except Exception:
         # Fail silently - don't break hook
         return False
 
@@ -225,9 +227,9 @@ def record_operation():
         # Save bundle
         save_bundle(bundle, bundle_path)
 
-        # HYBRID ARCHITECTURE: Write to PostgreSQL as well
+        # HYBRID ARCHITECTURE: Write to QuestDB as well
         session_id = get_session_id(input_data)
-        persist_tool_to_postgresql(session_id, tool_name, tool_details)
+        persist_tool_to_questdb(session_id, tool_name, tool_details)
 
         # Output for debugging (optional)
         if operation_type == "task" and "subagent_type" in tool_details:
