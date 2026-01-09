@@ -31,6 +31,13 @@ import re
 from pathlib import Path
 from datetime import datetime
 
+# QuestDB metrics integration
+try:
+    from questdb_metrics import QuestDBMetrics
+    QUESTDB_AVAILABLE = True
+except ImportError:
+    QUESTDB_AVAILABLE = False
+
 def parse_context_from_transcript(transcript_path):
     """Parse context usage from transcript file."""
     if not transcript_path or not os.path.exists(transcript_path):
@@ -292,6 +299,48 @@ def persist_metrics(session_id, context_info, cost_data, model_name, workspace_d
         # Append to JSONL (atomic write for concurrent sessions)
         with open(metrics_file, "a") as f:
             f.write(json.dumps(metrics) + "\n")
+
+        # NEW: Send to QuestDB for real-time tracking
+        if QUESTDB_AVAILABLE:
+            try:
+                writer = QuestDBMetrics()
+                # Log context utilization
+                writer.log_context(
+                    session_id=session_id,
+                    context_used=total_tokens,
+                    context_max=200000,
+                    message_count=0  # Could count from transcript
+                )
+
+                # Infer task type from task description (Cost Attribution)
+                task_type = None
+                if task_description:
+                    desc_lower = task_description.lower()
+                    if any(w in desc_lower for w in ['fix', 'bug', 'error', 'issue']):
+                        task_type = 'bugfix'
+                    elif any(w in desc_lower for w in ['refactor', 'clean', 'optimize']):
+                        task_type = 'refactor'
+                    elif any(w in desc_lower for w in ['test', 'coverage']):
+                        task_type = 'testing'
+                    elif any(w in desc_lower for w in ['doc', 'readme', 'comment']):
+                        task_type = 'docs'
+                    elif any(w in desc_lower for w in ['add', 'implement', 'feature', 'new']):
+                        task_type = 'feature'
+
+                # Log session metrics snapshot with Cost Attribution
+                writer.log_session_metric(
+                    session_id=session_id,
+                    tokens_input=input_tokens,
+                    tokens_output=output_tokens,
+                    tokens_cache=cache_read + cache_creation,
+                    cost_usd=total_cost,
+                    lines_added=cost_data.get('total_lines_added', 0) if cost_data else 0,
+                    lines_removed=cost_data.get('total_lines_removed', 0) if cost_data else 0,
+                    git_branch=git_branch,
+                    task_type=task_type
+                )
+            except Exception:
+                pass  # Don't fail statusline if QuestDB unavailable
 
         return True
     except Exception as e:

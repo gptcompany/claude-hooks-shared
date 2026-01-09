@@ -19,6 +19,17 @@ import re
 import subprocess
 from pathlib import Path
 
+# Self-healing integration
+scripts_dir = Path(__file__).resolve().parent.parent.parent / "scripts"
+sys.path.insert(0, str(scripts_dir))
+try:
+    from hook_health import HookHealth
+    HOOK_HEALTH_AVAILABLE = True
+except ImportError:
+    HOOK_HEALTH_AVAILABLE = False
+
+HOOK_NAME = "smart-safety-check"
+
 # Risk Categories
 RISK_CRITICAL = "CRITICAL"  # Block entirely (fork bombs, etc.)
 RISK_HIGH = "HIGH"          # Checkpoint + confirm + CWD limit
@@ -163,32 +174,49 @@ def limit_to_cwd(command, cwd):
 
 
 def main():
+    # Self-healing: check if hook is disabled
+    if HOOK_HEALTH_AVAILABLE:
+        health = HookHealth(HOOK_NAME)
+        if health.is_disabled():
+            # Hook temporarily disabled due to failures
+            sys.exit(0)
+    else:
+        health = None
+
     try:
         # Read input from Claude Code
         input_data = json.loads(sys.stdin.read())
-        
+
         tool_name = input_data.get("tool_name", "")
         tool_input = input_data.get("tool_input", {})
         
         # Only check Bash commands
         if tool_name != "Bash":
+            if health:
+                health.report_success()
             sys.exit(0)
-        
+
         command = tool_input.get("command", "")
         if not command:
+            if health:
+                health.report_success()
             sys.exit(0)
-        
+
         # Categorize risk
         risk_level, reason = categorize_risk(command)
-        
+
         if not risk_level:
             # Safe command
+            if health:
+                health.report_success()
             sys.exit(0)
         
         cwd = get_cwd()
         
         # Handle CRITICAL risk - BLOCK entirely
         if risk_level == RISK_CRITICAL:
+            if health:
+                health.report_success()  # Hook worked correctly
             output = {
                 "hookSpecificOutput": {
                     "hookEventName": "PreToolUse",
@@ -223,6 +251,8 @@ def main():
             else:
                 cwd_msg += f"💡 Consider limiting to CWD: {cwd}\n\n"
             
+            if health:
+                health.report_success()
             output = {
                 "hookSpecificOutput": {
                     "hookEventName": "PreToolUse",
@@ -243,6 +273,8 @@ def main():
         
         # Handle MEDIUM risk - Warning only
         if risk_level == RISK_MEDIUM:
+            if health:
+                health.report_success()
             output = {
                 "hookSpecificOutput": {
                     "hookEventName": "PreToolUse",
@@ -257,15 +289,21 @@ def main():
             }
             print(json.dumps(output))
             sys.exit(0)
-        
+
         # Default: allow
+        if health:
+            health.report_success()
         sys.exit(0)
         
     except json.JSONDecodeError:
         # Not valid JSON, allow
+        if health:
+            health.report_success()
         sys.exit(0)
     except Exception as e:
         # On error, fail open but log
+        if health:
+            health.report_failure(str(e))
         print(json.dumps({
             "hookSpecificOutput": {
                 "message": f"⚠️  Safety check error: {str(e)}"

@@ -221,17 +221,29 @@ class QuestDBMetrics:
         tokens_cache: int = 0,
         cost_usd: float = 0.0,
         lines_added: int = 0,
-        lines_removed: int = 0
+        lines_removed: int = 0,
+        git_branch: str = None,
+        task_type: str = None
     ) -> bool:
         """
         Log session metrics snapshot to QuestDB.
 
         Table: claude_sessions
+
+        Cost Attribution fields:
+        - git_branch: Feature branch for cost tracking
+        - task_type: Category (feature, bugfix, refactor, etc.)
         """
         tags = {
             "project": self.project_name,
             "session_id": session_id[:50] if session_id else "unknown",
         }
+
+        # Cost Attribution tags
+        if git_branch:
+            tags["git_branch"] = git_branch[:50]
+        if task_type:
+            tags["task_type"] = task_type[:20]
 
         fields = {
             "tokens_input": tokens_input,
@@ -244,6 +256,149 @@ class QuestDBMetrics:
 
         timestamp_ns = int(datetime.now().timestamp() * 1e9)
         line = _to_ilp("claude_sessions", tags, fields, timestamp_ns)
+
+        return self._send(line)
+
+    def log_agent(
+        self,
+        session_id: str,
+        agent_type: str,
+        duration_ms: int = 0,
+        success: bool = True,
+        tokens_used: int = 0,
+        tool_calls: int = 0,
+        prompt_length: int = 0,
+        result_length: int = 0,
+        error: str = None,
+        parent_agent: str = None
+    ) -> bool:
+        """
+        Log agent spawn and execution to QuestDB.
+
+        Table: claude_agents
+        """
+        tags = {
+            "project": self.project_name,
+            "session_id": session_id[:50] if session_id else "unknown",
+            "agent_type": agent_type or "unknown",
+        }
+        if parent_agent:
+            tags["parent_agent"] = parent_agent
+
+        fields = {
+            "duration_ms": duration_ms,
+            "success": success,
+            "tokens_used": tokens_used,
+            "tool_calls": tool_calls,
+            "prompt_length": prompt_length,
+            "result_length": result_length,
+        }
+        if error:
+            fields["error"] = error[:200]
+
+        timestamp_ns = int(datetime.now().timestamp() * 1e9)
+        line = _to_ilp("claude_agents", tags, fields, timestamp_ns)
+
+        return self._send(line)
+
+    def log_hook(
+        self,
+        hook_type: str,
+        hook_name: str,
+        duration_ms: int = 0,
+        success: bool = True,
+        blocked: bool = False,
+        modified: bool = False,
+        tool_matcher: str = None,
+        error: str = None
+    ) -> bool:
+        """
+        Log hook execution to QuestDB.
+
+        Table: claude_hooks
+        """
+        tags = {
+            "project": self.project_name,
+            "hook_type": hook_type,
+            "hook_name": hook_name,
+        }
+        if tool_matcher:
+            tags["tool_matcher"] = tool_matcher
+
+        fields = {
+            "duration_ms": duration_ms,
+            "success": success,
+            "blocked": blocked,
+            "modified": modified,
+        }
+        if error:
+            fields["error"] = error[:200]
+
+        timestamp_ns = int(datetime.now().timestamp() * 1e9)
+        line = _to_ilp("claude_hooks", tags, fields, timestamp_ns)
+
+        return self._send(line)
+
+    def log_task(
+        self,
+        session_id: str,
+        task_content: str,
+        task_status: str,
+        duration_min: float = 0.0,
+        tool_calls: int = 0,
+        tokens_used: int = 0
+    ) -> bool:
+        """
+        Log task lifecycle to QuestDB.
+
+        Table: claude_tasks
+        """
+        tags = {
+            "project": self.project_name,
+            "session_id": session_id[:50] if session_id else "unknown",
+            "task_status": task_status,
+        }
+
+        fields = {
+            "task_content": task_content[:200] if task_content else "",
+            "duration_min": duration_min,
+            "tool_calls": tool_calls,
+            "tokens_used": tokens_used,
+        }
+
+        timestamp_ns = int(datetime.now().timestamp() * 1e9)
+        line = _to_ilp("claude_tasks", tags, fields, timestamp_ns)
+
+        return self._send(line)
+
+    def log_context(
+        self,
+        session_id: str,
+        context_used: int,
+        context_max: int = 200000,
+        message_count: int = 0
+    ) -> bool:
+        """
+        Log context window utilization to QuestDB.
+
+        Table: claude_context
+        """
+        tags = {
+            "project": self.project_name,
+            "session_id": session_id[:50] if session_id else "unknown",
+        }
+
+        utilization_pct = (context_used / context_max * 100) if context_max > 0 else 0
+
+        fields = {
+            "context_used": context_used,
+            "context_max": context_max,
+            "utilization_pct": utilization_pct,
+            "message_count": message_count,
+        }
+
+        timestamp_ns = int(datetime.now().timestamp() * 1e9)
+        line = _to_ilp("claude_context", tags, fields, timestamp_ns)
 
         return self._send(line)
 

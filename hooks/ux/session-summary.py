@@ -16,6 +16,7 @@ METRICS_DIR = Path.home() / ".claude" / "metrics"
 EXPORT_SCRIPT = Path(__file__).resolve().parent.parent.parent / "scripts" / "metrics-export-questdb.py"
 SESSION_STATE = METRICS_DIR / "session_state.json"
 DAILY_LOG = METRICS_DIR / "daily.jsonl"
+TIPS_FILE = METRICS_DIR / "last_session_tips.json"
 
 
 def get_session_stats() -> dict:
@@ -84,6 +85,70 @@ def format_duration(seconds: float) -> str:
         return f"{hours:.0f}h {minutes:.0f}m"
 
 
+def generate_optimization_suggestions(session: dict, metrics: dict) -> list:
+    """
+    Generate actionable optimization suggestions based on session patterns.
+
+    Returns list of (priority, suggestion) tuples.
+    Priority: 1=high, 2=medium, 3=low
+    """
+    suggestions = []
+
+    tool_calls = session.get("tool_calls", 0)
+    errors = session.get("errors", 0)
+    error_rate = errors / tool_calls if tool_calls > 0 else 0
+
+    file_edits = metrics.get("file_edits", 0)
+    reworks = metrics.get("reworks", 0)
+    agent_spawns = metrics.get("agent_spawns", 0)
+    agent_successes = metrics.get("agent_successes", 0)
+    test_runs = metrics.get("test_runs", 0)
+    tests_passed = metrics.get("tests_passed", 0)
+
+    # 1. High rework rate - suggests insufficient planning
+    if file_edits > 3 and reworks > file_edits * 0.3:
+        rework_pct = (reworks / file_edits) * 100
+        suggestions.append((1, f"High rework rate ({rework_pct:.0f}%): Use /tdd:cycle or plan before implementing"))
+
+    # 2. High error rate - suggests command issues
+    if tool_calls > 10 and error_rate > 0.15:
+        suggestions.append((1, f"High error rate ({error_rate:.0%}): Check Bash commands syntax"))
+
+    # 3. Agent overuse for simple tasks
+    if agent_spawns > 5 and tool_calls > 0:
+        agent_ratio = agent_spawns / tool_calls
+        if agent_ratio > 0.2:
+            suggestions.append((2, f"Consider direct Glob/Grep instead of Task agent for simple searches"))
+
+    # 4. Agent failure rate
+    if agent_spawns > 3 and agent_successes < agent_spawns * 0.7:
+        success_rate = (agent_successes / agent_spawns) * 100
+        suggestions.append((1, f"Low agent success ({success_rate:.0f}%): Check agent prompts clarity"))
+
+    # 5. No tests run despite file changes
+    if file_edits > 5 and test_runs == 0:
+        suggestions.append((2, "Consider running tests after file changes: /tdd:cycle"))
+
+    # 6. Low test pass rate
+    if test_runs > 2 and tests_passed < test_runs * 0.6:
+        pass_rate = (tests_passed / test_runs) * 100
+        suggestions.append((1, f"Low test pass rate ({pass_rate:.0f}%): Focus on one test at a time"))
+
+    # 7. Long session without checkpoints
+    start_time = session.get("start_time")
+    if start_time:
+        duration = (datetime.now() - datetime.fromisoformat(start_time)).total_seconds()
+        if duration > 1800 and tool_calls > 30:  # 30min+ with many tool calls
+            suggestions.append((3, "Consider /undo:checkpoint for rollback safety"))
+
+    # 8. Many tool calls without tasks
+    tasks_completed = len(session.get("tasks_completed", []))
+    if tool_calls > 20 and tasks_completed == 0:
+        suggestions.append((3, "Track progress with TodoWrite for complex tasks"))
+
+    return sorted(suggestions, key=lambda x: x[0])  # Sort by priority
+
+
 def generate_summary(session: dict, metrics: dict) -> str:
     """Generate session summary message."""
     lines = ["\n" + "=" * 50]
@@ -140,6 +205,16 @@ def generate_summary(session: dict, metrics: dict) -> str:
         lines.append("  Status: High rework - consider planning more")
     else:
         lines.append("  Status: Normal session")
+
+    # Optimization suggestions (NEW)
+    suggestions = generate_optimization_suggestions(session, metrics)
+    if suggestions:
+        lines.append("\n" + "-" * 50)
+        lines.append("  OPTIMIZATION TIPS")
+        lines.append("-" * 50)
+        for priority, suggestion in suggestions[:3]:  # Max 3 suggestions
+            icon = "!" if priority == 1 else ">" if priority == 2 else "-"
+            lines.append(f"  {icon} {suggestion}")
 
     lines.append("=" * 50 + "\n")
 
@@ -202,7 +277,29 @@ def main():
         except Exception:
             pass  # Don't fail session end if export fails
 
-    # Return notification
+    # Get optimization suggestions
+    suggestions = generate_optimization_suggestions(session, metrics)
+
+    # Save tips for next session (user can choose to inject)
+    if suggestions:
+        try:
+            TIPS_FILE.parent.mkdir(parents=True, exist_ok=True)
+            tips_data = {
+                "timestamp": datetime.now().isoformat(),
+                "session_id": session_id,
+                "tips": [{"priority": p, "tip": t} for p, t in suggestions],
+                "summary": {
+                    "duration_min": round((datetime.now() - datetime.fromisoformat(session.get("start_time", datetime.now().isoformat()))).total_seconds() / 60, 1) if session.get("start_time") else 0,
+                    "tool_calls": tool_calls,
+                    "errors": session.get("errors", 0),
+                }
+            }
+            with open(TIPS_FILE, "w") as f:
+                json.dump(tips_data, f, indent=2)
+        except Exception:
+            pass
+
+    # Build output
     output = {"notification": summary}
     print(json.dumps(output))
     sys.exit(0)
