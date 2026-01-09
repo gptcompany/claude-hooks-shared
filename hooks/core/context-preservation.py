@@ -13,11 +13,13 @@ import json
 import sys
 from pathlib import Path
 
-
 # Agent recommendations based on task patterns
 AGENT_SUGGESTIONS = {
     "exploration": ("Explore", "Codebase exploration, finding files/patterns"),
-    "debugging": ("alpha-debug", "Iterative bug hunting after implementation"),
+    "debugging": (
+        "Ralph Loop",
+        "Iterative debugging with circuit breakers (type 'use ralph mode')",
+    ),
     "algorithms": (
         "alpha-evolve",
         "Complex algorithmic tasks, multi-approach generation",
@@ -48,9 +50,7 @@ def estimate_context_usage(transcript_path: str) -> dict:
 
         # Count messages and tool calls
         lines = content.splitlines()
-        messages = sum(
-            1 for l in lines if '"type":"human"' in l or '"type":"assistant"' in l
-        )
+        messages = sum(1 for l in lines if '"type":"human"' in l or '"type":"assistant"' in l)
         tool_calls = sum(1 for l in lines if '"tool_name"' in l)
 
         return {

@@ -17,14 +17,14 @@ KISS Approach: Single hook modifies prompt, Claude orchestrates everything.
 """
 
 import json
-import sys
 import re
+import sys
 
 
 def main():
     # Read hook input
     input_data = json.loads(sys.stdin.read())
-    prompt = input_data.get("userPrompt", "")
+    prompt = input_data.get("prompt", "")
 
     # Detect /vsample command
     if not prompt.strip().startswith("/vsample"):
