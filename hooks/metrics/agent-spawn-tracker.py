@@ -33,12 +33,17 @@ def main():
     # Extract agent info from tool input
     tool_input = input_data.get("tool_input", {})
 
-    # Handle both string and dict input formats
-    if isinstance(tool_input, str):
+    # Handle various input formats (string, dict, None, list)
+    if tool_input is None:
+        tool_input = {}
+    elif isinstance(tool_input, str):
         try:
             tool_input = json.loads(tool_input)
         except json.JSONDecodeError:
             tool_input = {}
+    elif not isinstance(tool_input, dict):
+        # Handle unexpected types (list, int, etc.)
+        tool_input = {}
 
     subagent_type = tool_input.get("subagent_type", "unknown")
     description = tool_input.get("description", "")

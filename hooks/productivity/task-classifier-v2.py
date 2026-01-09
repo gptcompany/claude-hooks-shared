@@ -152,10 +152,13 @@ def main():
 
     # Escape commands
     if prompt_lower == "stop ralph":
-        if RALPH_STATE.exists():
-            state = json.loads(RALPH_STATE.read_text())
-            state["active"] = False
-            RALPH_STATE.write_text(json.dumps(state, indent=2))
+        try:
+            if RALPH_STATE.exists():
+                state = json.loads(RALPH_STATE.read_text())
+                state["active"] = False
+                RALPH_STATE.write_text(json.dumps(state, indent=2))
+        except (json.JSONDecodeError, OSError):
+            pass  # State file corrupted, ignore
         notify_user("[Task Classifier] Ralph mode deactivated.")
         print(
             json.dumps(
@@ -171,10 +174,13 @@ def main():
 
     if prompt_lower == "ralph status":
         status = "not active"
-        if RALPH_STATE.exists():
-            state = json.loads(RALPH_STATE.read_text())
-            if state.get("active"):
-                status = f"active, iteration {state.get('iteration', 0)}/15"
+        try:
+            if RALPH_STATE.exists():
+                state = json.loads(RALPH_STATE.read_text())
+                if state.get("active"):
+                    status = f"active, iteration {state.get('iteration', 0)}/15"
+        except (json.JSONDecodeError, OSError):
+            status = "unknown (state file error)"
         notify_user(f"[Task Classifier] Ralph status: {status}")
         print(
             json.dumps(

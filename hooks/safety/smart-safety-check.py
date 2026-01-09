@@ -155,7 +155,8 @@ def limit_to_cwd(command, cwd):
                 break
         
         if target:
-            safe_cmd = command.replace(target, f"{cwd}/{target}")
+            # Use count=1 to only replace first occurrence (avoid unintended replacements)
+            safe_cmd = command.replace(target, f"{cwd}/{target}", 1)
             return safe_cmd
     
     return None

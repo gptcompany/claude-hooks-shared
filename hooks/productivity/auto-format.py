@@ -58,8 +58,10 @@ def format_file(file_path):
         )
         
         # Check if any changes were made
+        # Note: returncode == 0 means "no errors" NOT "fixed something"
+        # We only set fixed=True if ruff actually fixed something (stdout contains "Fixed")
         formatted = format_result.returncode == 0
-        fixed = check_result.returncode == 0 or 'fixed' in check_result.stdout.lower()
+        fixed = 'fixed' in check_result.stdout.lower()
         
         return {
             'formatted': formatted,
