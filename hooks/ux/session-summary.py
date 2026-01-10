@@ -24,14 +24,14 @@ TIPS_FILE = METRICS_DIR / "last_session_tips.json"
 
 # Import tips engine v2
 try:
-    from tips_engine import (
-        SessionMetrics,
-        generate_all_tips,
-        format_tips_for_display,
-        tips_to_dict,
-        IndustryDefaults,
-    )
     from questdb_client import get_historical_stats
+    from tips_engine import (
+        IndustryDefaults,
+        SessionMetrics,
+        format_tips_for_display,
+        generate_all_tips,
+        tips_to_dict,
+    )
     TIPS_ENGINE_AVAILABLE = True
 except ImportError:
     TIPS_ENGINE_AVAILABLE = False
@@ -136,7 +136,7 @@ def generate_optimization_suggestions(session: dict, metrics: dict) -> list:
     if agent_spawns > 5 and tool_calls > 0:
         agent_ratio = agent_spawns / tool_calls
         if agent_ratio > 0.2:
-            suggestions.append((2, f"Consider direct Glob/Grep instead of Task agent for simple searches"))
+            suggestions.append((2, "Consider direct Glob/Grep instead of Task agent for simple searches"))
 
     # 4. Agent failure rate
     if agent_spawns > 3 and agent_successes < agent_spawns * 0.7:
@@ -303,7 +303,7 @@ def generate_summary(session: dict, metrics: dict) -> str:
 
 def main():
     try:
-        input_data = json.load(sys.stdin)
+        _ = json.load(sys.stdin)  # Consume stdin (hook protocol)
     except json.JSONDecodeError:
         print(json.dumps({}))
         sys.exit(0)

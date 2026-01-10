@@ -11,7 +11,6 @@ Generates optimization tips based on:
 
 from dataclasses import dataclass, field
 from typing import Callable, Optional
-import math
 
 
 @dataclass

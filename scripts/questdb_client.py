@@ -11,11 +11,8 @@ Provides:
 
 import json
 import os
-import urllib.request
 import urllib.parse
-from dataclasses import dataclass
-from datetime import datetime, timedelta
-from pathlib import Path
+import urllib.request
 from typing import Optional
 
 # Import from tips_engine
@@ -76,10 +73,13 @@ def get_historical_stats(project: str, days: int = 30) -> HistoricalStats:
     if cross_project_stats and cross_project_stats.session_count >= 10:
         result = cross_project_stats.with_lower_confidence(0.8)
         result.data_source = "cross_project"
+        _save_to_redis(f"historical_stats:{project}", _stats_to_dict(result))
         return result
 
-    # Tier 3: Industry defaults
-    return IndustryDefaults.to_historical_stats()
+    # Tier 3: Industry defaults - cache to avoid repeated lookups
+    defaults = IndustryDefaults.to_historical_stats()
+    _save_to_redis(f"historical_stats:{project}", _stats_to_dict(defaults))
+    return defaults
 
 
 def _query_project_stats(project: Optional[str], days: int) -> Optional[HistoricalStats]:

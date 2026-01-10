@@ -29,12 +29,11 @@ STATE FILE:
 """
 
 import json
-import os
 import sys
+import threading
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Optional
-import threading
 
 # Configuration
 MAX_FAILURES = 3

@@ -20,18 +20,19 @@ ENV VARIABLES:
     DATABASE_URL: PostgreSQL connection string
 """
 
-import psycopg2
-import psycopg2.pool
 import os
 import sys
 import threading
 from datetime import datetime
 from pathlib import Path
 
+import psycopg2
+import psycopg2.pool
+
 # Import auto-detect utility
 sys.path.insert(0, str(Path(__file__).parent))
 try:
-    from project_utils import get_project_name, get_database_url
+    from project_utils import get_database_url, get_project_name
 except ImportError:
     # Fallback if project_utils not available
     def get_project_name():

@@ -25,11 +25,11 @@ USAGE:
 """
 
 import json
-import sys
 import os
 import re
-from pathlib import Path
+import sys
 from datetime import datetime
+from pathlib import Path
 
 # QuestDB metrics integration
 try:
@@ -137,7 +137,7 @@ def get_git_branch():
         if result.returncode == 0:
             branch = result.stdout.strip()
             return branch if branch else None
-    except:
+    except Exception:
         pass
     return None
 
@@ -165,7 +165,7 @@ def get_session_context():
             content = desc_file.read_text().strip()
             if content:
                 return content
-        except:
+        except Exception:
             pass
 
     # 3. Fallback: last commit message (if in git repo)
@@ -181,7 +181,7 @@ def get_session_context():
         if result.returncode == 0 and result.stdout.strip():
             commit_msg = result.stdout.strip()[:100]
             return f"Recent commit: {commit_msg}"
-    except:
+    except Exception:
         pass
 
     return None
@@ -343,7 +343,7 @@ def persist_metrics(session_id, context_info, cost_data, model_name, workspace_d
                 pass  # Don't fail statusline if QuestDB unavailable
 
         return True
-    except Exception as e:
+    except Exception:
         # Fail silently - don't break statusline display
         return False
 
