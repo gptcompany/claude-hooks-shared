@@ -37,6 +37,7 @@ except ImportError:
     # Fallback if project_utils not available
     def get_project_name():
         return os.getenv("CLAUDE_PROJECT_NAME", "unknown")
+
     def get_database_url():
         return os.getenv("DATABASE_URL", "postgresql://localhost:5432/claude_sessions")
 
@@ -53,11 +54,7 @@ def get_connection_pool():
         with _pool_lock:
             if _connection_pool is None:
                 try:
-                    _connection_pool = psycopg2.pool.SimpleConnectionPool(
-                        minconn=1,
-                        maxconn=5,
-                        dsn=get_database_url()
-                    )
+                    _connection_pool = psycopg2.pool.SimpleConnectionPool(minconn=1, maxconn=5, dsn=get_database_url())
                 except psycopg2.Error:
                     _connection_pool = None
     return _connection_pool
@@ -105,11 +102,14 @@ class ClaudeSessionManager:
         """Initialize new session record."""
         try:
             cursor = self.conn.cursor()
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT INTO sessions (session_id, project_name, started_at, git_branch, task_description)
                 VALUES (%s, %s, %s, %s, %s)
                 ON CONFLICT (session_id) DO NOTHING
-            """, (session_id, self.project_name, datetime.now(), git_branch, task))
+            """,
+                (session_id, self.project_name, datetime.now(), git_branch, task),
+            )
             self.conn.commit()
             cursor.close()
             return session_id
@@ -123,42 +123,65 @@ class ClaudeSessionManager:
             cursor = self.conn.cursor()
             # Convert tool_params dict to JSON string for JSONB column
             import json
+
             tool_params_json = json.dumps(tool_params) if tool_params else None
 
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT INTO tool_usage (session_id, project_name, tool_name, tool_params, timestamp, duration_ms, success, error)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-            """, (session_id, self.project_name, tool_name, tool_params_json, datetime.now(), duration_ms, success, error))
+            """,
+                (
+                    session_id,
+                    self.project_name,
+                    tool_name,
+                    tool_params_json,
+                    datetime.now(),
+                    duration_ms,
+                    success,
+                    error,
+                ),
+            )
             self.conn.commit()
             cursor.close()
         except psycopg2.Error as e:
             print(f"Warning: Failed to log tool use for {tool_name}: {e}", file=sys.stderr)
 
-    def log_event(self, session_id, event_type, tool_name=None, error_message=None, severity='medium'):
+    def log_event(self, session_id, event_type, tool_name=None, error_message=None, severity="medium"):
         """Log error/block event (uses JSONB data field for flexible storage)."""
         try:
             cursor = self.conn.cursor()
             import json
 
             # Pack event details into JSONB data field
-            event_data = {
-                "tool_name": tool_name,
-                "error_message": error_message,
-                "severity": severity
-            }
+            event_data = {"tool_name": tool_name, "error_message": error_message, "severity": severity}
             event_data_json = json.dumps(event_data)
 
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT INTO events (session_id, project_name, event_type, timestamp, data)
                 VALUES (%s, %s, %s, %s, %s)
-            """, (session_id, self.project_name, event_type, datetime.now(), event_data_json))
+            """,
+                (session_id, self.project_name, event_type, datetime.now(), event_data_json),
+            )
             self.conn.commit()
             cursor.close()
         except psycopg2.Error as e:
             print(f"Warning: Failed to log event {event_type}: {e}", file=sys.stderr)
 
-    def upsert_session(self, session_id, tokens_input, tokens_output, tokens_cache,
-                       cost_usd, lines_added, lines_removed, git_branch, task_desc, agent_name):
+    def upsert_session(
+        self,
+        session_id,
+        tokens_input,
+        tokens_output,
+        tokens_cache,
+        cost_usd,
+        lines_added,
+        lines_removed,
+        git_branch,
+        task_desc,
+        agent_name,
+    ):
         """
         UPSERT session metrics (called by context-monitor every 1-2 sec).
 
@@ -167,7 +190,8 @@ class ClaudeSessionManager:
         """
         try:
             cursor = self.conn.cursor()
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT INTO sessions (
                     session_id, project_name, total_tokens_input, total_tokens_output,
                     total_tokens_cache, total_cost_usd, lines_added, lines_removed,
@@ -185,8 +209,21 @@ class ClaudeSessionManager:
                     task_description = EXCLUDED.task_description,
                     agent_name = EXCLUDED.agent_name,
                     updated_at = CURRENT_TIMESTAMP
-            """, (session_id, self.project_name, tokens_input, tokens_output, tokens_cache, cost_usd,
-                  lines_added, lines_removed, git_branch, task_desc, agent_name))
+            """,
+                (
+                    session_id,
+                    self.project_name,
+                    tokens_input,
+                    tokens_output,
+                    tokens_cache,
+                    cost_usd,
+                    lines_added,
+                    lines_removed,
+                    git_branch,
+                    task_desc,
+                    agent_name,
+                ),
+            )
             self.conn.commit()
             cursor.close()
         except psycopg2.Error as e:
@@ -198,20 +235,28 @@ class ClaudeSessionManager:
             cursor = self.conn.cursor()
 
             # Query tool_usage stats
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT tool_name, COUNT(*) as count, AVG(duration_ms) as avg_duration
                 FROM tool_usage WHERE session_id = %s
                 GROUP BY tool_name
-            """, (session_id,))
-            tool_stats = [{"tool": row[0], "count": row[1], "avg_duration": float(row[2]) if row[2] else 0}
-                          for row in cursor.fetchall()]
+            """,
+                (session_id,),
+            )
+            tool_stats = [
+                {"tool": row[0], "count": row[1], "avg_duration": float(row[2]) if row[2] else 0}
+                for row in cursor.fetchall()
+            ]
 
             # Query events
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT event_type, COUNT(*) as count
                 FROM events WHERE session_id = %s
                 GROUP BY event_type
-            """, (session_id,))
+            """,
+                (session_id,),
+            )
             event_stats = {row[0]: row[1] for row in cursor.fetchall()}
 
             cursor.close()
@@ -220,7 +265,7 @@ class ClaudeSessionManager:
                 "session_id": session_id,
                 "project_name": self.project_name,
                 "tool_stats": tool_stats,
-                "event_stats": event_stats
+                "event_stats": event_stats,
             }
         except psycopg2.Error as e:
             print(f"Warning: Failed to generate summary for session {session_id}: {e}", file=sys.stderr)
@@ -229,7 +274,7 @@ class ClaudeSessionManager:
                 "project_name": self.project_name,
                 "tool_stats": [],
                 "event_stats": {},
-                "error": str(e)
+                "error": str(e),
             }
 
     def close(self):

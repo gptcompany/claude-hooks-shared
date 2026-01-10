@@ -122,9 +122,7 @@ def main():
 
     # Only process errors
     combined_output = f"{stdout}\n{stderr}"
-    if exit_code == 0 and not any(
-        p in combined_output.lower() for p in ["error", "failed", "exception"]
-    ):
+    if exit_code == 0 and not any(p in combined_output.lower() for p in ["error", "failed", "exception"]):
         print(json.dumps({}))
         sys.exit(0)
 

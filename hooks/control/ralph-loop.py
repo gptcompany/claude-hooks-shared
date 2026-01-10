@@ -169,9 +169,7 @@ def get_ralph_state() -> dict | None:
         if stored_checksum:
             calculated = calculate_state_checksum(state)
             if stored_checksum != calculated:
-                logger.warning(
-                    f"State checksum mismatch: stored={stored_checksum}, calc={calculated}"
-                )
+                logger.warning(f"State checksum mismatch: stored={stored_checksum}, calc={calculated}")
                 # Continue anyway - might be manual edit
 
         if state.get("active"):

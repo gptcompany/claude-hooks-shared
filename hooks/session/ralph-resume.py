@@ -216,10 +216,7 @@ def check_resume_commands(prompt: str) -> tuple[bool, str | None]:
     prompt_lower = prompt.lower().strip()
 
     # Resume commands
-    if any(
-        cmd in prompt_lower
-        for cmd in ["ralph resume", "resume ralph", "continue ralph", "ralph continue"]
-    ):
+    if any(cmd in prompt_lower for cmd in ["ralph resume", "resume ralph", "continue ralph", "ralph continue"]):
         return True, "resume"
 
     # Discard commands

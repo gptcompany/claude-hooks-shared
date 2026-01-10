@@ -361,7 +361,8 @@ def select_best_command(
     if best["is_baseline"]:
         rationale = f"Baseline success rate: {best['success_rate']:.0%}"
     else:
-        rationale = f"Historical success: {best['success_rate']:.0%} for {current.project}"
+        project_suffix = f" for {current.project}" if current.project else ""
+        rationale = f"Historical success: {best['success_rate']:.0%}{project_suffix}"
 
     return best["command"], best["score"], rationale
 
@@ -402,12 +403,7 @@ def calculate_confidence(
     context_match = historical.get_context_similarity(current)
 
     # Weighted combination
-    confidence = (
-        statistical_confidence * 0.35
-        + sample_factor * 0.15
-        + rule_accuracy * 0.30
-        + context_match * 0.20
-    )
+    confidence = statistical_confidence * 0.35 + sample_factor * 0.15 + rule_accuracy * 0.30 + context_match * 0.20
 
     # Apply confidence penalty from data source
     confidence *= 1 - historical.confidence_penalty
@@ -450,10 +446,7 @@ PATTERN_RULES = [
         condition=lambda curr, hist: (
             curr.error_rate > 0.15  # DORA threshold
             and curr.tool_calls >= 10  # Meaningful sample
-            and (
-                hist.stddev_error_rate == 0
-                or curr.error_rate > hist.avg_error_rate + 2 * hist.stddev_error_rate
-            )
+            and (hist.stddev_error_rate == 0 or curr.error_rate > hist.avg_error_rate + 2 * hist.stddev_error_rate)
         ),
         message_builder=lambda curr, hist: (
             f"Error rate {curr.error_rate:.0%} "
@@ -520,19 +513,16 @@ PATTERN_RULES = [
         name="low_agent_success",
         category="diagnosis",
         evidence="Low agent success rate indicates prompts may need refinement",
-        condition=lambda curr, hist: (
-            curr.agent_spawns >= 3 and curr.agent_success_rate < 0.70
-        ),
-        message_builder=lambda curr, hist: f"Low agent success: {curr.agent_success_rate:.0%} ({curr.agent_successes}/{curr.agent_spawns})",
+        condition=lambda curr, hist: (curr.agent_spawns >= 3 and curr.agent_success_rate < 0.70),
+        message_builder=lambda curr,
+        hist: f"Low agent success: {curr.agent_success_rate:.0%} ({curr.agent_successes}/{curr.agent_spawns})",
         fallback_command="/audit",
     ),
     PatternRule(
         name="low_test_pass_rate",
         category="quality",
         evidence="Focus on one test at a time for better debugging",
-        condition=lambda curr, hist: (
-            curr.test_runs >= 3 and curr.test_pass_rate < 0.60
-        ),
+        condition=lambda curr, hist: (curr.test_runs >= 3 and curr.test_pass_rate < 0.60),
         message_builder=lambda curr, hist: f"Low test pass rate: {curr.test_pass_rate:.0%}",
         fallback_command="/tdd:red",
     ),

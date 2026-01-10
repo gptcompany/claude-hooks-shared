@@ -130,9 +130,7 @@ def check_large_files():
 
     try:
         # Get staged files with sizes
-        result = subprocess.run(
-            ["git", "diff", "--cached", "--name-only"], capture_output=True, text=True, check=True
-        )
+        result = subprocess.run(["git", "diff", "--cached", "--name-only"], capture_output=True, text=True, check=True)
         staged_files = result.stdout.strip().split("\n")
 
         for file_path in staged_files:
@@ -141,9 +139,7 @@ def check_large_files():
 
             file_size = Path(file_path).stat().st_size
             if file_size > LARGE_FILE_THRESHOLD:
-                large_files.append(
-                    {"file": file_path, "size": file_size, "size_mb": file_size / 1_000_000}
-                )
+                large_files.append({"file": file_path, "size": file_size, "size_mb": file_size / 1_000_000})
 
     except (subprocess.CalledProcessError, FileNotFoundError):
         pass
@@ -177,9 +173,7 @@ def check_bad_commit_patterns(command):
     message_match = re.search(r'-m\s+["\']([^"\']+)["\']', command)
     if not message_match:
         # Try HEREDOC pattern
-        message_match = re.search(
-            r'-m\s+"\$\(cat <<[\'"]?EOF[\'"]?\n(.*?)\nEOF', command, re.DOTALL
-        )
+        message_match = re.search(r'-m\s+"\$\(cat <<[\'"]?EOF[\'"]?\n(.*?)\nEOF', command, re.DOTALL)
 
     if message_match:
         message = message_match.group(1)

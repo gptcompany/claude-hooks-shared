@@ -50,8 +50,8 @@ def estimate_context_usage(transcript_path: str) -> dict:
 
         # Count messages and tool calls
         lines = content.splitlines()
-        messages = sum(1 for l in lines if '"type":"human"' in l or '"type":"assistant"' in l)
-        tool_calls = sum(1 for l in lines if '"tool_name"' in l)
+        messages = sum(1 for line in lines if '"type":"human"' in line or '"type":"assistant"' in line)
+        tool_calls = sum(1 for line in lines if '"tool_name"' in line)
 
         return {
             "estimated_tokens": estimated_tokens,
@@ -108,11 +108,7 @@ def main():
 
         elif context_pct >= WARNING_PCT:
             # Warning: Gentle reminder
-            output = {
-                "systemMessage": (
-                    f"Context at {context_pct}%. Consider delegating complex subtasks to agents."
-                )
-            }
+            output = {"systemMessage": (f"Context at {context_pct}%. Consider delegating complex subtasks to agents.")}
             print(json.dumps(output))
             sys.exit(0)
 

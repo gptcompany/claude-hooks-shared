@@ -205,8 +205,7 @@ def convert_prompt_metrics(entries: list[dict]) -> list[str]:
             fields = {
                 "ambiguity": entry.get("ambiguity_score", 0.0),
                 "confidence": entry.get("confidence", 0.0),
-                "expansion_ratio": entry.get("suggested_length", 1)
-                / max(entry.get("original_length", 1), 1),
+                "expansion_ratio": entry.get("suggested_length", 1) / max(entry.get("original_length", 1), 1),
             }
 
         elif entry_type == "passthrough":

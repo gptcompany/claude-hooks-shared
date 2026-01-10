@@ -101,12 +101,8 @@ def analyze_token_costs(days: int = 7, project_filter: str | None = None) -> dic
                     by_model[model]["cache_creation"] += tokens.get("cache_creation", 0)
                     by_model[model]["cache_read"] += tokens.get("cache_read", 0)
                     by_model[model]["total_tokens"] += tokens.get("total", 0)
-                    by_model[model]["cost_usd"] = max(
-                        by_model[model]["cost_usd"], cost
-                    )  # Use max (cumulative in file)
-                    by_model[model]["duration_minutes"] = max(
-                        by_model[model]["duration_minutes"], duration
-                    )
+                    by_model[model]["cost_usd"] = max(by_model[model]["cost_usd"], cost)  # Use max (cumulative in file)
+                    by_model[model]["duration_minutes"] = max(by_model[model]["duration_minutes"], duration)
                     by_model[model]["requests"] += 1
 
                     # Total aggregates
@@ -255,9 +251,7 @@ def analyze_prompt_optimization(entries: list[dict]) -> dict:
     # Acceptance rate
     accepted_count = sum(1 for e in acceptances if e.get("accepted"))
     acceptance_rate = accepted_count / len(acceptances) if acceptances else 0
-    avg_similarity = (
-        sum(e.get("similarity", 0) for e in acceptances) / len(acceptances) if acceptances else 0
-    )
+    avg_similarity = sum(e.get("similarity", 0) for e in acceptances) / len(acceptances) if acceptances else 0
 
     # Average ambiguity score
     ambiguity_scores = [e.get("ambiguity_score", 0) for e in optimized if "ambiguity_score" in e]
@@ -314,9 +308,7 @@ def load_file_edits() -> dict:
         return {}
 
 
-def format_report(
-    dora: dict, tdd: dict, prompt: dict, file_edits: dict, token_costs: dict, days: int
-) -> str:
+def format_report(dora: dict, tdd: dict, prompt: dict, file_edits: dict, token_costs: dict, days: int) -> str:
     """Format human-readable report."""
     report = []
     report.append(f"\n{'=' * 60}")
@@ -394,19 +386,13 @@ def format_report(
                 report.append(f"    - {style}: {count}")
     if prompt["suggestions_shown"] > 0:
         report.append(f"  Suggestions:     {prompt['suggestions_shown']} shown")
-        report.append(
-            f"  Accepted:        {prompt['suggestions_accepted']} ({prompt['acceptance_rate']:.1%})"
-        )
+        report.append(f"  Accepted:        {prompt['suggestions_accepted']} ({prompt['acceptance_rate']:.1%})")
         report.append(f"  Avg Similarity:  {prompt['avg_similarity']:.1%}")
     report.append("")
 
     # Rework Hotspots
     if file_edits:
-        rework_files = [
-            (f, d.get("rework_count", 0))
-            for f, d in file_edits.items()
-            if d.get("rework_count", 0) > 0
-        ]
+        rework_files = [(f, d.get("rework_count", 0)) for f, d in file_edits.items() if d.get("rework_count", 0) > 0]
         rework_files.sort(key=lambda x: x[1], reverse=True)
         if rework_files:
             report.append("🔄 REWORK HOTSPOTS")
@@ -439,9 +425,7 @@ def format_report(
         # By model
         if token_costs.get("by_model"):
             report.append("  By Model:")
-            for model, stats in sorted(
-                token_costs["by_model"].items(), key=lambda x: x[1]["cost_usd"], reverse=True
-            ):
+            for model, stats in sorted(token_costs["by_model"].items(), key=lambda x: x[1]["cost_usd"], reverse=True):
                 cost = stats["cost_usd"]
                 tokens_out = stats["tokens_out"]
                 report.append(f"    - {model}: ${cost:.2f} ({fmt_tokens(tokens_out)} out)")
@@ -501,10 +485,7 @@ def analyze_weekly_trends(days: int = 14) -> dict:
     this_week = [
         e
         for e in all_entries
-        if datetime.fromisoformat(e.get("timestamp", "").replace("Z", "+00:00")).replace(
-            tzinfo=None
-        )
-        > this_week_start
+        if datetime.fromisoformat(e.get("timestamp", "").replace("Z", "+00:00")).replace(tzinfo=None) > this_week_start
     ]
     last_week = [
         e
@@ -614,18 +595,12 @@ def main():
         lw = trends["last_week"]
         ch = trends["changes"]
 
-        print(
-            f"  File Edits      {tw['file_edits']:>9}  {lw['file_edits']:>9}  {fmt_change(ch['file_edits']):>7}"
-        )
-        print(
-            f"  Test Runs       {tw['test_runs']:>9}  {lw['test_runs']:>9}  {fmt_change(ch['test_runs']):>7}"
-        )
+        print(f"  File Edits      {tw['file_edits']:>9}  {lw['file_edits']:>9}  {fmt_change(ch['file_edits']):>7}")
+        print(f"  Test Runs       {tw['test_runs']:>9}  {lw['test_runs']:>9}  {fmt_change(ch['test_runs']):>7}")
         print(
             f"  Agent Spawns    {tw['agent_spawns']:>9}  {lw['agent_spawns']:>9}  {fmt_change(ch['agent_spawns']):>7}"
         )
-        print(
-            f"  Reworks         {tw['reworks']:>9}  {lw['reworks']:>9}  {fmt_change(ch['reworks']):>7}"
-        )
+        print(f"  Reworks         {tw['reworks']:>9}  {lw['reworks']:>9}  {fmt_change(ch['reworks']):>7}")
         print(f"\n{'=' * 50}\n")
     else:
         print(format_report(dora, tdd, prompt, file_edits, token_costs, args.days))

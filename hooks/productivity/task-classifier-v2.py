@@ -287,9 +287,7 @@ Type "STOP RALPH" to exit | "RALPH STATUS" for info
     context = mode_info.get(mode, "")
     if context:
         # NOTIFY USER about classification
-        notify_user(
-            f"[Task Classifier] Mode: {mode.upper()} (confidence: {confidence:.0%}) - {context}"
-        )
+        notify_user(f"[Task Classifier] Mode: {mode.upper()} (confidence: {confidence:.0%}) - {context}")
         print(
             json.dumps(
                 {

@@ -116,9 +116,7 @@ def should_exclude_file(filepath: str) -> bool:
     for pattern in EXCLUDE_PATTERNS:
         if pattern.endswith("/"):
             dir_name = pattern.rstrip("/")
-            if f"/{dir_name}/" in f"/{filepath_lower}/" or filepath_lower.startswith(
-                f"{dir_name}/"
-            ):
+            if f"/{dir_name}/" in f"/{filepath_lower}/" or filepath_lower.startswith(f"{dir_name}/"):
                 return True
         elif fnmatch.fnmatch(filepath_lower, pattern.lower()):
             return True
@@ -174,9 +172,7 @@ def get_git_changes() -> dict:
         if result_files.returncode != 0 and result_staged.returncode != 0:
             return _empty_changes("uncommitted")
 
-        all_files = set(
-            result_files.stdout.strip().split("\n") + result_staged.stdout.strip().split("\n")
-        )
+        all_files = set(result_files.stdout.strip().split("\n") + result_staged.stdout.strip().split("\n"))
         all_files.discard("")
 
         code_files = [f for f in all_files if is_code_file(f) and not should_exclude_file(f)]
@@ -450,7 +446,7 @@ def should_trigger(changes: dict) -> tuple[bool, str]:
 
 def main():
     try:
-        input_data = json.load(sys.stdin)
+        _input_data = json.load(sys.stdin)
     except json.JSONDecodeError:
         print(json.dumps({}))
         sys.exit(0)

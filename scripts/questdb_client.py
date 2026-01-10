@@ -191,9 +191,11 @@ def find_similar_situations(
         return []
 
     columns = result.get("columns", [])
-    col_names = [c["name"] for c in columns] if columns else [
-        "session_id", "error_rate", "rework_rate", "test_pass_rate", "outcome", "distance"
-    ]
+    col_names = (
+        [c["name"] for c in columns]
+        if columns
+        else ["session_id", "error_rate", "rework_rate", "test_pass_rate", "outcome", "distance"]
+    )
 
     situations = []
     for row in result["dataset"]:
@@ -232,6 +234,7 @@ def _get_redis_client():
     """Get Redis client with lazy initialization."""
     try:
         import redis
+
         return redis.Redis(
             host=REDIS_HOST,
             port=REDIS_PORT,
@@ -300,6 +303,7 @@ def check_questdb_health() -> dict:
 
     try:
         import time
+
         start = time.time()
 
         result = query_questdb("SELECT COUNT(*) FROM claude_sessions", timeout=2.0)
@@ -331,6 +335,7 @@ def check_redis_health() -> dict:
 
     try:
         import time
+
         start = time.time()
         client.ping()
         status["latency_ms"] = (time.time() - start) * 1000

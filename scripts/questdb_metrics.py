@@ -29,6 +29,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 try:
     from project_utils import get_project_name
 except ImportError:
+
     def get_project_name():
         return os.getenv("CLAUDE_PROJECT_NAME", "unknown")
 
@@ -142,7 +143,7 @@ class QuestDBMetrics:
         tool_params: dict = None,
         duration_ms: int = 0,
         success: bool = True,
-        error: str = None
+        error: str = None,
     ) -> bool:
         """
         Log tool usage to QuestDB.
@@ -188,7 +189,7 @@ class QuestDBMetrics:
         event_type: str,
         tool_name: str = None,
         error_message: str = None,
-        severity: str = "medium"
+        severity: str = "medium",
     ) -> bool:
         """
         Log event (error, block, etc) to QuestDB.
@@ -223,7 +224,7 @@ class QuestDBMetrics:
         lines_added: int = 0,
         lines_removed: int = 0,
         git_branch: str = None,
-        task_type: str = None
+        task_type: str = None,
     ) -> bool:
         """
         Log session metrics snapshot to QuestDB.
@@ -270,7 +271,7 @@ class QuestDBMetrics:
         prompt_length: int = 0,
         result_length: int = 0,
         error: str = None,
-        parent_agent: str = None
+        parent_agent: str = None,
     ) -> bool:
         """
         Log agent spawn and execution to QuestDB.
@@ -310,7 +311,7 @@ class QuestDBMetrics:
         blocked: bool = False,
         modified: bool = False,
         tool_matcher: str = None,
-        error: str = None
+        error: str = None,
     ) -> bool:
         """
         Log hook execution to QuestDB.
@@ -346,7 +347,7 @@ class QuestDBMetrics:
         task_status: str,
         duration_min: float = 0.0,
         tool_calls: int = 0,
-        tokens_used: int = 0
+        tokens_used: int = 0,
     ) -> bool:
         """
         Log task lifecycle to QuestDB.
@@ -372,11 +373,7 @@ class QuestDBMetrics:
         return self._send(line)
 
     def log_context(
-        self,
-        session_id: str,
-        context_used: int,
-        context_max: int = 200000,
-        message_count: int = 0
+        self, session_id: str, context_used: int, context_max: int = 200000, message_count: int = 0
     ) -> bool:
         """
         Log context window utilization to QuestDB.

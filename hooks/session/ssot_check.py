@@ -63,9 +63,7 @@ def main():
                 }
             }
             # Print warning to stderr (visible to user)
-            sys.stderr.write(
-                "\n⚠️  DRIFT DETECTED - Run: python scripts/architecture_drift_detector.py --fix\n\n"
-            )
+            sys.stderr.write("\n⚠️  DRIFT DETECTED - Run: python scripts/architecture_drift_detector.py --fix\n\n")
             print(json.dumps(output))
             return 0
 

@@ -124,7 +124,7 @@ class HookHealth:
                 state["hooks"][self.hook_name] = {
                     "failures": [],
                     "last_success": datetime.now().isoformat(),
-                    "total_successes": state["hooks"].get(self.hook_name, {}).get("total_successes", 0) + 1
+                    "total_successes": state["hooks"].get(self.hook_name, {}).get("total_successes", 0) + 1,
                 }
                 _save_state(state)
 
@@ -149,17 +149,13 @@ class HookHealth:
 
             # Add this failure
             now = datetime.now()
-            hook_data["failures"].append({
-                "timestamp": now.isoformat(),
-                "error": error[:200] if error else None
-            })
+            hook_data["failures"].append({"timestamp": now.isoformat(), "error": error[:200] if error else None})
             hook_data["last_error"] = error[:200] if error else "Unknown error"
 
             # Remove failures outside the window
             cutoff = now - timedelta(seconds=FAILURE_WINDOW_SECONDS)
             hook_data["failures"] = [
-                f for f in hook_data["failures"]
-                if datetime.fromisoformat(f["timestamp"]) > cutoff
+                f for f in hook_data["failures"] if datetime.fromisoformat(f["timestamp"]) > cutoff
             ]
 
             # Check if should disable
@@ -189,7 +185,7 @@ class HookHealth:
                 event_type="hook_disabled",
                 tool_name=self.hook_name,
                 error_message=f"Auto-disabled after {MAX_FAILURES} failures: {error or 'unknown'}",
-                severity="high"
+                severity="high",
             )
         except Exception:
             pass  # Don't fail on logging
@@ -217,7 +213,7 @@ class HookHealth:
                 disabled[hook_name] = {
                     "disabled_until": until_str,
                     "remaining_minutes": round(remaining / 60, 1),
-                    "reason": state.get("hooks", {}).get(hook_name, {}).get("last_error")
+                    "reason": state.get("hooks", {}).get(hook_name, {}).get("last_error"),
                 }
 
         return disabled

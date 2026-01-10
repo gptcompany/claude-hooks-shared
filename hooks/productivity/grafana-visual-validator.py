@@ -7,8 +7,8 @@ Spawns grafana-visual-validator agent to verify dashboard renders correctly.
 """
 
 import json
-import sys
 import os
+import sys
 
 
 def main():

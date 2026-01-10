@@ -20,9 +20,10 @@ ENV VARIABLES:
 Returns:
     JSON response: {"success": True} to confirm logging completed
 """
+
 import json
-import sys
 import re
+import sys
 import tempfile
 from datetime import datetime
 from pathlib import Path
@@ -44,10 +45,10 @@ except json.JSONDecodeError as e:
     print(json.dumps({"success": False, "error": f"Invalid JSON: {e}"}))
     sys.exit(0)  # Exit 0 to not block Claude
 
-session_id = hook_data.get('session_id')
-tool_name = hook_data.get('tool_name')
-success = hook_data.get('success', True)
-error = hook_data.get('error')
+session_id = hook_data.get("session_id")
+tool_name = hook_data.get("tool_name")
+success = hook_data.get("success", True)
+error = hook_data.get("error")
 
 # Validate required fields
 if not session_id or not tool_name:
@@ -55,12 +56,12 @@ if not session_id or not tool_name:
     sys.exit(0)
 
 # Sanitize file path components
-safe_session = re.sub(r'[^a-zA-Z0-9\-_]', '_', str(session_id))
-safe_tool = re.sub(r'[^a-zA-Z0-9\-_]', '_', str(tool_name))
+safe_session = re.sub(r"[^a-zA-Z0-9\-_]", "_", str(session_id))
+safe_tool = re.sub(r"[^a-zA-Z0-9\-_]", "_", str(tool_name))
 
 # Calculate duration using cross-platform temp directory
 temp_dir = tempfile.gettempdir()
-start_file = Path(temp_dir) / f'claude_tool_start_{safe_session}_{safe_tool}'
+start_file = Path(temp_dir) / f"claude_tool_start_{safe_session}_{safe_tool}"
 
 duration_ms = 0
 if start_file.exists():
@@ -82,26 +83,23 @@ if QuestDBMetrics is not None:
             tool_name=tool_name,
             duration_ms=duration_ms,
             success=success,
-            error=error[:200] if error else None
+            error=error[:200] if error else None,
         )
 
         # Detect and log error events
         if not success and error:
             error_lower = error.lower()
-            if 'tdd' in error_lower or 'test' in error_lower:
-                event_type = 'tdd_block'
-            elif 'timeout' in error_lower:
-                event_type = 'timeout'
-            elif 'hook' in error_lower or 'blocked' in error_lower:
-                event_type = 'hook_block'
+            if "tdd" in error_lower or "test" in error_lower:
+                event_type = "tdd_block"
+            elif "timeout" in error_lower:
+                event_type = "timeout"
+            elif "hook" in error_lower or "blocked" in error_lower:
+                event_type = "hook_block"
             else:
-                event_type = 'error'
+                event_type = "error"
 
             writer.log_event(
-                session_id=session_id,
-                event_type=event_type,
-                tool_name=tool_name,
-                error_message=error[:200]
+                session_id=session_id, event_type=event_type, tool_name=tool_name, error_message=error[:200]
             )
 
         print(json.dumps({"success": True}))

@@ -32,6 +32,7 @@ try:
         generate_all_tips,
         tips_to_dict,
     )
+
     TIPS_ENGINE_AVAILABLE = True
 except ImportError:
     TIPS_ENGINE_AVAILABLE = False
@@ -333,8 +334,7 @@ def main():
                 "type": "session_end",
                 "session_id": session_id,
                 "duration_seconds": (
-                    datetime.now()
-                    - datetime.fromisoformat(session.get("start_time", datetime.now().isoformat()))
+                    datetime.now() - datetime.fromisoformat(session.get("start_time", datetime.now().isoformat()))
                 ).total_seconds()
                 if session.get("start_time")
                 else 0,
@@ -374,7 +374,16 @@ def main():
                 tips_data = tips_to_dict(tips, session_id, project, historical)
                 tips_data["timestamp"] = datetime.now().isoformat()
                 tips_data["summary"] = {
-                    "duration_min": round((datetime.now() - datetime.fromisoformat(session.get("start_time", datetime.now().isoformat()))).total_seconds() / 60, 1) if session.get("start_time") else 0,
+                    "duration_min": round(
+                        (
+                            datetime.now()
+                            - datetime.fromisoformat(session.get("start_time", datetime.now().isoformat()))
+                        ).total_seconds()
+                        / 60,
+                        1,
+                    )
+                    if session.get("start_time")
+                    else 0,
                     "tool_calls": tool_calls,
                     "errors": session.get("errors", 0),
                 }
@@ -387,10 +396,19 @@ def main():
                 "session_id": session_id,
                 "tips": [{"priority": p, "tip": t} for p, t in suggestions],
                 "summary": {
-                    "duration_min": round((datetime.now() - datetime.fromisoformat(session.get("start_time", datetime.now().isoformat()))).total_seconds() / 60, 1) if session.get("start_time") else 0,
+                    "duration_min": round(
+                        (
+                            datetime.now()
+                            - datetime.fromisoformat(session.get("start_time", datetime.now().isoformat()))
+                        ).total_seconds()
+                        / 60,
+                        1,
+                    )
+                    if session.get("start_time")
+                    else 0,
                     "tool_calls": tool_calls,
                     "errors": session.get("errors", 0),
-                }
+                },
             }
 
     # Save tips for next session (user can choose to inject with /tips)

@@ -224,11 +224,7 @@ def check_tests_passing() -> dict:
             timeout=5,
         )
         # If last commit mentions tests passing, assume good
-        if (
-            result.returncode == 0
-            and "test" in result.stdout.lower()
-            and "pass" in result.stdout.lower()
-        ):
+        if result.returncode == 0 and "test" in result.stdout.lower() and "pass" in result.stdout.lower():
             return {
                 "status": "inferred_green",
                 "score": 80,
@@ -282,9 +278,7 @@ def check_coverage() -> dict:
             timeout=5,
         )
         if result.returncode == 0:
-            cov_match = re.search(
-                r"(\d+(?:\.\d+)?)\s*%\s*(?:coverage|cov)", result.stdout, re.IGNORECASE
-            )
+            cov_match = re.search(r"(\d+(?:\.\d+)?)\s*%\s*(?:coverage|cov)", result.stdout, re.IGNORECASE)
             if cov_match:
                 coverage_pct = float(cov_match.group(1))
                 score = min(100, (coverage_pct / MIN_COVERAGE) * 100)
@@ -348,9 +342,7 @@ def check_ralph_loop() -> dict:
                 if timestamp:
                     try:
                         entry_time = datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
-                        age_hours = (
-                            datetime.now(entry_time.tzinfo) - entry_time
-                        ).total_seconds() / 3600
+                        age_hours = (datetime.now(entry_time.tzinfo) - entry_time).total_seconds() / 3600
                         if age_hours > 24:
                             return {
                                 "status": "stale",
@@ -523,9 +515,7 @@ def main():
                 "hookSpecificOutput": {
                     "hookEventName": "PreToolUse",
                     "shouldBlock": True,
-                    "blockMessage": output_message
-                    + "\n\n\u274c BLOCKED: "
-                    + ", ".join(block_reasons),
+                    "blockMessage": output_message + "\n\n\u274c BLOCKED: " + ", ".join(block_reasons),
                 }
             }
             print(json.dumps(output))

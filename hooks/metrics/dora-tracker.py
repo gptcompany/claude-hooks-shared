@@ -40,9 +40,7 @@ def get_session_state() -> dict:
 
     # Initialize new session
     return {
-        "session_id": os.environ.get(
-            "CLAUDE_SESSION_ID", f"session_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-        ),
+        "session_id": os.environ.get("CLAUDE_SESSION_ID", f"session_{datetime.now().strftime('%Y%m%d_%H%M%S')}"),
         "start_time": datetime.now().isoformat(),
         "tool_calls": 0,
         "errors": 0,
@@ -291,8 +289,7 @@ def main():
         # Detect success/failure from response
         response_text = str(tool_response).lower()
         success = not any(
-            err in response_text
-            for err in ["error", "failed", "exception", "traceback", "cannot", "unable"]
+            err in response_text for err in ["error", "failed", "exception", "traceback", "cannot", "unable"]
         )
 
         log_metric(
@@ -316,6 +313,7 @@ def main():
             {
                 "total": total,
                 "completed": completed,
+                "in_progress": len(in_progress),
                 "completion_rate": completed / total if total > 0 else 0,
             },
         )
@@ -342,8 +340,7 @@ def main():
             {
                 "tool_calls": session_state.get("tool_calls", 0),
                 "errors": session_state.get("errors", 0),
-                "error_rate": session_state.get("errors", 0)
-                / max(session_state.get("tool_calls", 1), 1),
+                "error_rate": session_state.get("errors", 0) / max(session_state.get("tool_calls", 1), 1),
                 "model": session_state.get("model", "unknown"),
                 "tasks_completed": len(session_state.get("tasks_completed", [])),
             },
@@ -356,9 +353,7 @@ def main():
 
     if alerts:
         alert_msg = "\n".join([f"  {a}" for a in alerts])
-        output = {
-            "notification": f"\n{'=' * 40}\n  METRICS ALERT\n{'=' * 40}\n{alert_msg}\n{'=' * 40}\n"
-        }
+        output = {"notification": f"\n{'=' * 40}\n  METRICS ALERT\n{'=' * 40}\n{alert_msg}\n{'=' * 40}\n"}
         print(json.dumps(output))
     else:
         # Pass through - this hook doesn't modify anything

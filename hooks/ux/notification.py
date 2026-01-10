@@ -4,11 +4,11 @@
 # ///
 
 import json
-import sys
-import subprocess
-import random
 import os
 import platform
+import random
+import subprocess
+import sys
 
 
 def send_notification(title: str, message: str, voice_message: str = None):
@@ -35,9 +35,7 @@ def send_notification(title: str, message: str, voice_message: str = None):
                 timeout=5,
             )
         elif system == "linux":  # Linux (Ubuntu, etc.)
-            subprocess.run(
-                ["notify-send", title, message], capture_output=True, timeout=5
-            )
+            subprocess.run(["notify-send", title, message], capture_output=True, timeout=5)
     except Exception:
         pass  # Fail silently
 
@@ -51,19 +49,11 @@ def send_notification(title: str, message: str, voice_message: str = None):
         voice_text = voice_message or message
 
         # Personalize with engineer name (configurable probability)
-        if (
-            engineer_name
-            and random.random() < name_chance
-            and "your" in voice_text.lower()
-        ):
-            voice_text = voice_text.replace("your", f"{engineer_name}, your").replace(
-                "Your", f"{engineer_name}, your"
-            )
+        if engineer_name and random.random() < name_chance and "your" in voice_text.lower():
+            voice_text = voice_text.replace("your", f"{engineer_name}, your").replace("Your", f"{engineer_name}, your")
 
         if system == "darwin":  # macOS
-            subprocess.run(
-                ["say", "-v", "Samantha", voice_text], capture_output=True, timeout=10
-            )
+            subprocess.run(["say", "-v", "Samantha", voice_text], capture_output=True, timeout=10)
         elif system == "linux":  # Linux (Ubuntu, etc.)
             subprocess.run(
                 ["spd-say", "-t", "female1", voice_text],
