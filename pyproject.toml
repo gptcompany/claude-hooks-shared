@@ -1,0 +1,26 @@
+[project]
+name = "claude-hooks-shared"
+version = "1.0.0"
+description = "Shared hooks and scripts for Claude Code"
+requires-python = ">=3.11"
+
+dependencies = [
+    "redis>=5.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.1.0",
+    "pytest>=7.0.0",
+]
+
+[tool.setuptools]
+py-modules = []  # No Python modules to install, just dependencies
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
+ignore = ["E501"]

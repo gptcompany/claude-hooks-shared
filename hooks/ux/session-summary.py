@@ -1,8 +1,9 @@
-#!/usr/bin/env python3
+#!/media/sam/1TB/claude-hooks-shared/.venv/bin/python3
 """
 Stop Hook: Session Summary
 
 Shows a summary of the session metrics when Claude Code stops.
+Uses Tips Engine v2 for evidence-based optimization suggestions.
 """
 
 import json
@@ -11,12 +12,29 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
+# Add scripts directory to path for tips_engine imports
+SCRIPTS_DIR = Path(__file__).resolve().parent.parent.parent / "scripts"
+sys.path.insert(0, str(SCRIPTS_DIR))
+
 METRICS_DIR = Path.home() / ".claude" / "metrics"
-# Use relative path from hook location for portability
-EXPORT_SCRIPT = Path(__file__).resolve().parent.parent.parent / "scripts" / "metrics-export-questdb.py"
+EXPORT_SCRIPT = SCRIPTS_DIR / "metrics-export-questdb.py"
 SESSION_STATE = METRICS_DIR / "session_state.json"
 DAILY_LOG = METRICS_DIR / "daily.jsonl"
 TIPS_FILE = METRICS_DIR / "last_session_tips.json"
+
+# Import tips engine v2
+try:
+    from tips_engine import (
+        SessionMetrics,
+        generate_all_tips,
+        format_tips_for_display,
+        tips_to_dict,
+        IndustryDefaults,
+    )
+    from questdb_client import get_historical_stats
+    TIPS_ENGINE_AVAILABLE = True
+except ImportError:
+    TIPS_ENGINE_AVAILABLE = False
 
 
 def get_session_stats() -> dict:
@@ -149,6 +167,48 @@ def generate_optimization_suggestions(session: dict, metrics: dict) -> list:
     return sorted(suggestions, key=lambda x: x[0])  # Sort by priority
 
 
+def build_session_metrics(session: dict, metrics: dict) -> "SessionMetrics":
+    """Convert session and metrics dicts to SessionMetrics dataclass."""
+    if not TIPS_ENGINE_AVAILABLE:
+        return None
+
+    tool_calls = session.get("tool_calls", 0)
+    errors = session.get("errors", 0)
+
+    # Calculate duration
+    duration = 0
+    start_time = session.get("start_time")
+    if start_time:
+        duration = int((datetime.now() - datetime.fromisoformat(start_time)).total_seconds())
+
+    # Get project from session or infer from cwd
+    project = session.get("project", "")
+    if not project:
+        cwd = session.get("cwd", "")
+        if cwd:
+            project = Path(cwd).name
+
+    return SessionMetrics(
+        tool_calls=tool_calls,
+        errors=errors,
+        file_edits=metrics.get("file_edits", 0),
+        reworks=metrics.get("reworks", 0),
+        test_runs=metrics.get("test_runs", 0),
+        tests_passed=metrics.get("tests_passed", 0),
+        agent_spawns=metrics.get("agent_spawns", 0),
+        agent_successes=metrics.get("agent_successes", 0),
+        duration_seconds=duration,
+        max_task_iterations=metrics.get("max_task_iterations", 0),
+        stuck_tasks=metrics.get("stuck_tasks", 0),
+        lines_changed=metrics.get("lines_changed", 0),
+        files_modified=metrics.get("files_modified", 0),
+        max_file_edits=metrics.get("max_file_edits", 0),
+        max_file_reworks=metrics.get("max_file_reworks", 0),
+        most_churned_file=metrics.get("most_churned_file", ""),
+        project=project,
+    )
+
+
 def generate_summary(session: dict, metrics: dict) -> str:
     """Generate session summary message."""
     lines = ["\n" + "=" * 50]
@@ -206,17 +266,37 @@ def generate_summary(session: dict, metrics: dict) -> str:
     else:
         lines.append("  Status: Normal session")
 
-    # Optimization suggestions (NEW)
-    suggestions = generate_optimization_suggestions(session, metrics)
-    if suggestions:
-        lines.append("\n" + "-" * 50)
-        lines.append("  OPTIMIZATION TIPS")
-        lines.append("-" * 50)
-        for priority, suggestion in suggestions[:3]:  # Max 3 suggestions
-            icon = "!" if priority == 1 else ">" if priority == 2 else "-"
-            lines.append(f"  {icon} {suggestion}")
+    # Optimization suggestions - use Tips Engine v2 if available
+    if TIPS_ENGINE_AVAILABLE:
+        session_metrics = build_session_metrics(session, metrics)
+        if session_metrics:
+            project = session_metrics.project
+            try:
+                historical = get_historical_stats(project)
+            except Exception:
+                historical = IndustryDefaults.to_historical_stats()
 
-    lines.append("=" * 50 + "\n")
+            tips = generate_all_tips(session_metrics, historical)
+            if tips:
+                # Use tips_engine format
+                cold_start = historical.data_source == "defaults"
+                tips_display = format_tips_for_display(tips, cold_start=cold_start)
+                lines.append(tips_display)
+            else:
+                lines.append("=" * 50 + "\n")
+        else:
+            lines.append("=" * 50 + "\n")
+    else:
+        # Fallback to legacy suggestions
+        suggestions = generate_optimization_suggestions(session, metrics)
+        if suggestions:
+            lines.append("\n" + "-" * 50)
+            lines.append("  OPTIMIZATION TIPS (Legacy)")
+            lines.append("-" * 50)
+            for priority, suggestion in suggestions[:3]:
+                icon = "!" if priority == 1 else ">" if priority == 2 else "-"
+                lines.append(f"  {icon} {suggestion}")
+        lines.append("=" * 50 + "\n")
 
     return "\n".join(lines)
 
@@ -277,13 +357,31 @@ def main():
         except Exception:
             pass  # Don't fail session end if export fails
 
-    # Get optimization suggestions
-    suggestions = generate_optimization_suggestions(session, metrics)
+    # Generate and save tips for next session
+    tips_data = None
 
-    # Save tips for next session (user can choose to inject)
-    if suggestions:
-        try:
-            TIPS_FILE.parent.mkdir(parents=True, exist_ok=True)
+    if TIPS_ENGINE_AVAILABLE:
+        session_metrics = build_session_metrics(session, metrics)
+        if session_metrics:
+            project = session_metrics.project
+            try:
+                historical = get_historical_stats(project)
+            except Exception:
+                historical = IndustryDefaults.to_historical_stats()
+
+            tips = generate_all_tips(session_metrics, historical)
+            if tips:
+                tips_data = tips_to_dict(tips, session_id, project, historical)
+                tips_data["timestamp"] = datetime.now().isoformat()
+                tips_data["summary"] = {
+                    "duration_min": round((datetime.now() - datetime.fromisoformat(session.get("start_time", datetime.now().isoformat()))).total_seconds() / 60, 1) if session.get("start_time") else 0,
+                    "tool_calls": tool_calls,
+                    "errors": session.get("errors", 0),
+                }
+    else:
+        # Fallback to legacy format
+        suggestions = generate_optimization_suggestions(session, metrics)
+        if suggestions:
             tips_data = {
                 "timestamp": datetime.now().isoformat(),
                 "session_id": session_id,
@@ -294,6 +392,11 @@ def main():
                     "errors": session.get("errors", 0),
                 }
             }
+
+    # Save tips for next session (user can choose to inject with /tips)
+    if tips_data:
+        try:
+            TIPS_FILE.parent.mkdir(parents=True, exist_ok=True)
             with open(TIPS_FILE, "w") as f:
                 json.dump(tips_data, f, indent=2)
         except Exception:
