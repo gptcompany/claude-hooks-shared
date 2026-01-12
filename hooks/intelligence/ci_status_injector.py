@@ -7,21 +7,46 @@ Only injects status for the current repository.
 
 Table: ci_status (in n8n database)
 Written by: N8N GitHub CI Status Notifier workflow
+
+Security: Uses parameterized queries to prevent SQL injection.
 """
 
 import json
 import os
+import re
 import subprocess
 import sys
 
-# PostgreSQL connection (same as N8N)
+# PostgreSQL connection - credentials from environment only (no defaults)
 PG_HOST = os.getenv("PG_HOST", "localhost")
 PG_PORT = os.getenv("PG_PORT", "5433")
-PG_USER = os.getenv("PG_USER", "n8n")
-PG_PASS = os.getenv("PG_PASS", "n8n")
+PG_USER = os.getenv("PG_USER")
+PG_PASS = os.getenv("PG_PASS")
 PG_DB = os.getenv("PG_DB", "n8n")
 
 MAX_AGE_HOURS = 24  # Ignore status older than this
+
+# Regex for valid GitHub repo format: owner/repo
+VALID_REPO_PATTERN = re.compile(r"^[a-zA-Z0-9_.-]+/[a-zA-Z0-9_.-]+$")
+
+
+def sanitize_repo(repo: str) -> str | None:
+    """Sanitize and validate repository name to prevent SQL injection."""
+    if not repo:
+        return None
+
+    # Strip whitespace
+    repo = repo.strip()
+
+    # Validate format: must be owner/repo with safe characters only
+    if not VALID_REPO_PATTERN.match(repo):
+        return None
+
+    # Additional safety: max length
+    if len(repo) > 200:
+        return None
+
+    return repo
 
 
 def get_current_repo() -> str | None:
@@ -46,25 +71,35 @@ def get_current_repo() -> str | None:
                     # https://github.com/owner/repo.git
                     parts = url.split("github.com/")[-1].replace(".git", "")
                     repo = parts
-                return repo
+                return sanitize_repo(repo)
     except Exception:
         pass
     return None
 
 
 def query_ci_status(repo: str) -> list[dict]:
-    """Query pending CI status for repo from PostgreSQL."""
+    """Query pending CI status for repo from PostgreSQL using parameterized query."""
+    # Credentials check
+    if not PG_USER or not PG_PASS:
+        return []
+
+    # Repo already sanitized, but double-check
+    safe_repo = sanitize_repo(repo)
+    if not safe_repo:
+        return []
+
     try:
-        # Use psql with JSON output
-        query = f"""
+        # Use psql with -v to pass variable safely (prevents SQL injection)
+        # The variable is then referenced as :'varname' in the query
+        query = """
         SELECT json_agg(row_to_json(t))
         FROM (
             SELECT id, repo, repo_name, branch, pr_number, conclusion,
                    run_url, message, pending_action, created_at
             FROM ci_status
-            WHERE repo = '{repo}'
+            WHERE repo = :'repo_param'
               AND injected = FALSE
-              AND created_at > NOW() - INTERVAL '{MAX_AGE_HOURS} hours'
+              AND created_at > NOW() - INTERVAL '24 hours'
             ORDER BY created_at DESC
             LIMIT 5
         ) t;
@@ -81,6 +116,8 @@ def query_ci_status(repo: str) -> list[dict]:
                 PG_USER,
                 "-d",
                 PG_DB,
+                "-v",
+                f"repo_param={safe_repo}",  # Safe parameter passing
                 "-t",  # Tuples only
                 "-A",  # Unaligned
                 "-c",
@@ -101,12 +138,25 @@ def query_ci_status(repo: str) -> list[dict]:
 
 
 def mark_as_injected(ids: list[int]) -> None:
-    """Mark CI status records as injected."""
+    """Mark CI status records as injected using safe integer list."""
     if not ids:
         return
 
+    # Credentials check
+    if not PG_USER or not PG_PASS:
+        return
+
+    # Validate all IDs are positive integers (prevents injection)
     try:
-        ids_str = ",".join(str(i) for i in ids)
+        safe_ids = [int(i) for i in ids if isinstance(i, (int, float)) and i > 0]
+        if not safe_ids:
+            return
+    except (ValueError, TypeError):
+        return
+
+    try:
+        # Safe: ids_str contains only validated integers
+        ids_str = ",".join(str(i) for i in safe_ids)
         query = f"UPDATE ci_status SET injected = TRUE WHERE id IN ({ids_str});"
 
         subprocess.run(
@@ -165,7 +215,7 @@ def main():
         print(json.dumps({}))
         sys.exit(0)
 
-    # Get current repo
+    # Get current repo (already sanitized)
     current_repo = get_current_repo()
     if not current_repo:
         print(json.dumps({}))
