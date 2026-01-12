@@ -144,17 +144,17 @@ class MultiWindowStats:
                 "↓" if self.error_rate_trend == "improving" else "↑" if self.error_rate_trend == "degrading" else "→"
             )
             lines.append(
-                f"[error: 100%={self.all_time.avg_error_rate:.0%}±{self.all_time.stddev_error_rate:.0%}, "
-                f"50%={self.trend.avg_error_rate:.0%}±{self.trend.stddev_error_rate:.0%} {err_arrow}]"
+                f"[error: {self.all_time.session_count}={self.all_time.avg_error_rate:.0%}±{self.all_time.stddev_error_rate:.0%}, "
+                f"{self.trend.session_count}={self.trend.avg_error_rate:.0%}±{self.trend.stddev_error_rate:.0%} {err_arrow}]"
             )
 
-            # Rework rate across windows (100% vs 50%) with stddev
+            # Rework rate across windows with session counts and stddev
             rew_arrow = (
                 "↓" if self.rework_rate_trend == "improving" else "↑" if self.rework_rate_trend == "degrading" else "→"
             )
             lines.append(
-                f"[rework: 100%={self.all_time.avg_rework_rate:.0%}±{self.all_time.stddev_rework_rate:.0%}, "
-                f"50%={self.trend.avg_rework_rate:.0%}±{self.trend.stddev_rework_rate:.0%} {rew_arrow}]"
+                f"[rework: {self.all_time.session_count}={self.all_time.avg_rework_rate:.0%}±{self.all_time.stddev_rework_rate:.0%}, "
+                f"{self.trend.session_count}={self.trend.avg_rework_rate:.0%}±{self.trend.stddev_rework_rate:.0%} {rew_arrow}]"
             )
 
         return " ".join(lines)
