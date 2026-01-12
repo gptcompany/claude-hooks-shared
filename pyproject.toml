@@ -1,26 +1,89 @@
 [project]
 name = "claude-hooks-shared"
-version = "1.0.0"
+version = "1.1.0"
 description = "Shared hooks and scripts for Claude Code"
 requires-python = ">=3.11"
 
 dependencies = [
     "redis>=5.0.0",
+    "pyyaml>=6.0.0",
 ]
 
 [project.optional-dependencies]
 dev = [
-    "ruff>=0.1.0",
-    "pytest>=7.0.0",
+    "ruff>=0.8.0",
+    "pytest>=8.0.0",
+    "pytest-cov>=4.0.0",
+    "mypy>=1.8.0",
+    "types-redis>=4.0.0",
+    "types-PyYAML>=6.0.0",
 ]
 
 [tool.setuptools]
-py-modules = []  # No Python modules to install, just dependencies
+py-modules = []
 
+# =============================================================================
+# Ruff Configuration
+# =============================================================================
 [tool.ruff]
 line-length = 120
 target-version = "py311"
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "W"]
-ignore = ["E501"]
+select = [
+    "E",      # pycodestyle errors
+    "F",      # pyflakes
+    "I",      # isort
+    "W",      # pycodestyle warnings
+    "UP",     # pyupgrade
+    "B",      # bugbear
+    "SIM",    # simplify
+    "C4",     # comprehensions
+]
+ignore = ["E501", "B008"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["hooks", "scripts"]
+
+# =============================================================================
+# Mypy Configuration
+# =============================================================================
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_ignores = true
+disallow_untyped_defs = false  # Start lenient
+check_untyped_defs = true
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "hooks.intelligence.*"
+disallow_untyped_defs = true  # Strict for new code
+
+# =============================================================================
+# Pytest Configuration
+# =============================================================================
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short"
+markers = [
+    "unit: Unit tests",
+    "integration: Integration tests",
+    "slow: Slow tests",
+]
+
+# =============================================================================
+# Coverage Configuration
+# =============================================================================
+[tool.coverage.run]
+source = ["hooks", "scripts"]
+omit = ["*/__pycache__/*", "*/tests/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == .__main__.:",
+    "raise NotImplementedError",
+]

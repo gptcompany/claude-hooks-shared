@@ -146,6 +146,8 @@ def _query_project_stats(project: Optional[str], days: int) -> Optional[Historic
         for rule_row in rule_result["dataset"]:
             rule_accuracies[rule_row[0]] = rule_row[1]
 
+    # Query returns all 7 columns (indices 0-6)
+    # NULL values use industry defaults
     return HistoricalStats(
         session_count=int(row[0]) if row[0] else 0,
         data_source="project" if project else "cross_project",

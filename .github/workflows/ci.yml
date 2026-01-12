@@ -1,0 +1,124 @@
+# CI Pipeline for claude-hooks-shared
+# Uses our own reusable workflows (dog-fooding)
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ==========================================================================
+  # Security Scan
+  # ==========================================================================
+  security:
+    name: Security
+    uses: ./.github/workflows/_reusable-security.yml
+    with:
+      bandit-paths: 'hooks/ scripts/'
+      fail-on-high-severity: true
+
+  # ==========================================================================
+  # Linting
+  # ==========================================================================
+  lint:
+    name: Lint
+    uses: ./.github/workflows/_reusable-lint.yml
+    with:
+      python-version: '3.12'
+      mypy-paths: 'hooks/ scripts/'
+      ruff-args: '--select=E,F,W,I,UP,B,SIM'
+      fail-on-type-errors: false  # Start lenient, tighten later
+
+  # ==========================================================================
+  # Unit Tests
+  # ==========================================================================
+  test:
+    name: Tests
+    needs: [security, lint]
+    uses: ./.github/workflows/_reusable-tests.yml
+    with:
+      python-version: '3.12'
+      test-paths: 'tests/'
+      coverage-paths: 'hooks/ scripts/'
+      coverage-threshold: 60  # Start at 60%, increase to 80% over time
+      pytest-args: '-x --ignore=tests/integration'
+
+  # ==========================================================================
+  # Integration Tests (hooks with simulated input)
+  # ==========================================================================
+  integration:
+    name: Integration Tests
+    needs: [test]
+    runs-on: [self-hosted, shared]
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Install dependencies
+        run: uv sync --all-extras
+
+      - name: Test hooks with simulated input
+        run: |
+          echo "Testing session-start-tracker..."
+          echo '{}' | python3 hooks/intelligence/session-start-tracker.py
+
+          echo "Testing session-analyzer..."
+          echo '{"session": {"tool_calls": 50, "errors": 5}}' | python3 hooks/intelligence/session-analyzer.py
+
+          echo "Testing context-preservation..."
+          echo '{"transcript_path": "/tmp/test"}' | python3 hooks/core/context-preservation.py
+
+          echo "All integration tests passed!"
+
+  # ==========================================================================
+  # Summary
+  # ==========================================================================
+  summary:
+    name: Pipeline Summary
+    needs: [security, lint, test, integration]
+    runs-on: [self-hosted, shared]
+    if: always()
+
+    steps:
+      - name: Generate Summary
+        run: |
+          echo "## CI Pipeline Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Job | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Security | ${{ needs.security.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Lint | ${{ needs.lint.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Tests | ${{ needs.test.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Integration | ${{ needs.integration.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ needs.test.result }}" == "success" ]; then
+            echo "Coverage: ${{ needs.test.outputs.coverage }}%" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Emit metrics to QuestDB
+        if: always()
+        continue-on-error: true
+        run: |
+          # Send CI metrics to QuestDB for tracking
+          TIMESTAMP=$(date +%s)000000000
+          curl -s -X POST "http://localhost:9009" \
+            --data-binary "ci_runs,repo=claude-hooks-shared,branch=${{ github.ref_name }},result=${{ job.status }} security_ok=${{ needs.security.result == 'success' && 1 || 0 }},lint_ok=${{ needs.lint.result == 'success' && 1 || 0 }},test_ok=${{ needs.test.result == 'success' && 1 || 0 }} ${TIMESTAMP}" \
+            || true
