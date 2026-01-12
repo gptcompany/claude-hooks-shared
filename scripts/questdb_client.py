@@ -168,78 +168,111 @@ def _query_project_stats(project: str | None, days: int) -> HistoricalStats | No
     )
 
 
+def _calculate_trend_window_pct(stddev: float, mean: float) -> float:
+    """
+    Calculate trend window percentage based on coefficient of variation.
+
+    High variance → smaller window (recent data more relevant)
+    Low variance → larger window (stable, can use more history)
+    """
+    if mean == 0:
+        return 0.50  # Default to 50%
+
+    # Coefficient of variation (CV) = stddev / mean
+    cv = stddev / mean
+
+    # Map CV to window percentage:
+    # CV > 0.5 (high variance) → 30% window
+    # CV 0.2-0.5 (medium) → 50% window
+    # CV < 0.2 (low variance) → 70% window
+    if cv > 0.5:
+        return 0.30
+    elif cv > 0.2:
+        return 0.50
+    else:
+        return 0.70
+
+
 def get_multi_window_stats(project: str) -> MultiWindowStats:
     """
     Analyze distribution across multiple session windows for trend analysis.
 
-    Windows are calculated dynamically as percentages of total sessions:
-    - all_time: 100% of sessions (baseline)
-    - recent: 80% of sessions
-    - trend: 50% of sessions
+    Window size is calculated dynamically based on stddev:
+    - High variance → smaller recent window (30%)
+    - Medium variance → medium window (50%)
+    - Low variance → larger window (70%)
 
-    This allows trend detection to scale with data size.
     Returns MultiWindowStats with computed trends.
     """
     project_filter = f"WHERE project = '{project}'" if project else ""
 
-    # Query total session count first
-    count_sql = f"""
-    SELECT COUNT(*) FROM claude_sessions {project_filter}
+    # Query all_time stats first to get stddev for window calculation
+    all_time_sql = f"""
+    SELECT
+        COUNT(*) as session_count,
+        AVG(error_rate) as avg_error_rate,
+        STDDEV(error_rate) as stddev_error_rate,
+        AVG(rework_rate) as avg_rework_rate,
+        STDDEV(rework_rate) as stddev_rework_rate
+    FROM claude_sessions
+    {project_filter}
     """
-    count_result = query_questdb(count_sql)
-    total_sessions = 0
-    if count_result and count_result.get("dataset"):
-        total_sessions = int(count_result["dataset"][0][0] or 0)
+    all_time_result = query_questdb(all_time_sql)
+
+    if not all_time_result or not all_time_result.get("dataset"):
+        return MultiWindowStats(total_sessions=0, data_source="none")
+
+    row = all_time_result["dataset"][0]
+    total_sessions = int(row[0]) if row[0] else 0
 
     if total_sessions == 0:
         return MultiWindowStats(total_sessions=0, data_source="none")
 
-    # Query stats for each window - dynamic percentages based on total
-    windows = {
-        "all_time": total_sessions,  # 100% of sessions
-        "recent": max(1, int(total_sessions * 0.80)),  # 80% of sessions
-        "trend": max(1, int(total_sessions * 0.50)),  # 50% of sessions
-    }
+    # Parse all_time stats
+    all_time = WindowStats(
+        session_count=total_sessions,
+        avg_error_rate=float(row[1]) if row[1] else 0.0,
+        stddev_error_rate=float(row[2]) if row[2] else 0.0,
+        avg_rework_rate=float(row[3]) if row[3] else 0.0,
+        stddev_rework_rate=float(row[4]) if row[4] else 0.0,
+    )
+
+    # Calculate trend window size based on variance
+    trend_pct = _calculate_trend_window_pct(all_time.stddev_error_rate, all_time.avg_error_rate)
+    trend_limit = max(1, int(total_sessions * trend_pct))
 
     result = MultiWindowStats(
         total_sessions=total_sessions,
         data_source="project" if project else "cross_project",
+        all_time=all_time,
     )
 
-    for window_name, limit in windows.items():
-        sql = f"""
-        SELECT
-            COUNT(*) as session_count,
-            AVG(error_rate) as avg_error_rate,
-            STDDEV(error_rate) as stddev_error_rate,
-            AVG(rework_rate) as avg_rework_rate,
-            STDDEV(rework_rate) as stddev_rework_rate
-        FROM (
-            SELECT error_rate, rework_rate
-            FROM claude_sessions
-            {project_filter}
-            ORDER BY timestamp DESC
-            LIMIT {limit}
+    # Query trend window (most recent X% based on variance)
+    trend_sql = f"""
+    SELECT
+        COUNT(*) as session_count,
+        AVG(error_rate) as avg_error_rate,
+        STDDEV(error_rate) as stddev_error_rate,
+        AVG(rework_rate) as avg_rework_rate,
+        STDDEV(rework_rate) as stddev_rework_rate
+    FROM (
+        SELECT error_rate, rework_rate
+        FROM claude_sessions
+        {project_filter}
+        ORDER BY timestamp DESC
+        LIMIT {trend_limit}
+    )
+    """
+    trend_result = query_questdb(trend_sql)
+    if trend_result and trend_result.get("dataset"):
+        trow = trend_result["dataset"][0]
+        result.trend = WindowStats(
+            session_count=int(trow[0]) if trow[0] else 0,
+            avg_error_rate=float(trow[1]) if trow[1] else 0.0,
+            stddev_error_rate=float(trow[2]) if trow[2] else 0.0,
+            avg_rework_rate=float(trow[3]) if trow[3] else 0.0,
+            stddev_rework_rate=float(trow[4]) if trow[4] else 0.0,
         )
-        """
-
-        query_result = query_questdb(sql)
-        if query_result and query_result.get("dataset"):
-            row = query_result["dataset"][0]
-            window_stats = WindowStats(
-                session_count=int(row[0]) if row[0] else 0,
-                avg_error_rate=float(row[1]) if row[1] else 0.0,
-                stddev_error_rate=float(row[2]) if row[2] else 0.0,
-                avg_rework_rate=float(row[3]) if row[3] else 0.0,
-                stddev_rework_rate=float(row[4]) if row[4] else 0.0,
-            )
-
-            if window_name == "all_time":
-                result.all_time = window_stats
-            elif window_name == "recent":
-                result.recent = window_stats
-            elif window_name == "trend":
-                result.trend = window_stats
 
     # Compute trends
     result.compute_trends()
