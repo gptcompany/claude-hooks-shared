@@ -85,19 +85,21 @@ class MultiWindowStats:
     """
     Statistics across multiple session windows for trend analysis.
 
-    Windows:
-    - all: All available sessions (baseline)
-    - recent: Last 50 sessions
-    - trend: Last 20 sessions
+    Windows are dynamic percentages of total sessions:
+    - all_time: 100% of sessions (baseline)
+    - recent: 80% of sessions
+    - trend: 50% of sessions
+
+    This allows trend detection to scale with data size.
     """
 
     total_sessions: int = 0
     data_source: str = "defaults"
 
-    # Window stats
-    all_time: WindowStats = field(default_factory=WindowStats)
-    recent: WindowStats = field(default_factory=WindowStats)  # Last 50
-    trend: WindowStats = field(default_factory=WindowStats)  # Last 20
+    # Window stats - dynamic percentages
+    all_time: WindowStats = field(default_factory=WindowStats)  # 100%
+    recent: WindowStats = field(default_factory=WindowStats)  # 80%
+    trend: WindowStats = field(default_factory=WindowStats)  # 50%
 
     # Computed trends
     error_rate_trend: str = "stable"  # "improving", "stable", "degrading"
@@ -137,21 +139,22 @@ class MultiWindowStats:
         lines.append(f"[{self.total_sessions} sessions analyzed]")
 
         if self.total_sessions >= 20:
-            # Error rate across windows
+            # Error rate across windows (100% vs 50%)
             err_arrow = (
                 "↓" if self.error_rate_trend == "improving" else "↑" if self.error_rate_trend == "degrading" else "→"
             )
             lines.append(
-                f"[error: all={self.all_time.avg_error_rate:.0%}, last20={self.trend.avg_error_rate:.0%} {err_arrow}]"
+                f"[error: 100%={self.all_time.avg_error_rate:.0%}±{self.all_time.stddev_error_rate:.0%}, "
+                f"50%={self.trend.avg_error_rate:.0%}±{self.trend.stddev_error_rate:.0%} {err_arrow}]"
             )
 
-            # Rework rate across windows
+            # Rework rate across windows (100% vs 50%) with stddev
             rew_arrow = (
                 "↓" if self.rework_rate_trend == "improving" else "↑" if self.rework_rate_trend == "degrading" else "→"
             )
             lines.append(
-                f"[rework: all={self.all_time.avg_rework_rate:.0%}, "
-                f"last20={self.trend.avg_rework_rate:.0%} {rew_arrow}]"
+                f"[rework: 100%={self.all_time.avg_rework_rate:.0%}±{self.all_time.stddev_rework_rate:.0%}, "
+                f"50%={self.trend.avg_rework_rate:.0%}±{self.trend.stddev_rework_rate:.0%} {rew_arrow}]"
             )
 
         return " ".join(lines)

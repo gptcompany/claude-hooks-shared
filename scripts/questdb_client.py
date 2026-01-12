@@ -172,11 +172,12 @@ def get_multi_window_stats(project: str) -> MultiWindowStats:
     """
     Analyze distribution across multiple session windows for trend analysis.
 
-    Windows:
-    - all_time: All available sessions (baseline)
-    - recent: Last 50 sessions
-    - trend: Last 20 sessions
+    Windows are calculated dynamically as percentages of total sessions:
+    - all_time: 100% of sessions (baseline)
+    - recent: 80% of sessions
+    - trend: 50% of sessions
 
+    This allows trend detection to scale with data size.
     Returns MultiWindowStats with computed trends.
     """
     project_filter = f"WHERE project = '{project}'" if project else ""
@@ -193,11 +194,11 @@ def get_multi_window_stats(project: str) -> MultiWindowStats:
     if total_sessions == 0:
         return MultiWindowStats(total_sessions=0, data_source="none")
 
-    # Query stats for each window
+    # Query stats for each window - dynamic percentages based on total
     windows = {
-        "all_time": total_sessions,  # All sessions
-        "recent": min(50, total_sessions),  # Last 50
-        "trend": min(20, total_sessions),  # Last 20
+        "all_time": total_sessions,  # 100% of sessions
+        "recent": max(1, int(total_sessions * 0.80)),  # 80% of sessions
+        "trend": max(1, int(total_sessions * 0.50)),  # 50% of sessions
     }
 
     result = MultiWindowStats(
