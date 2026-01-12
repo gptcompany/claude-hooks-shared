@@ -13,10 +13,15 @@ import json
 import os
 import urllib.parse
 import urllib.request
-from typing import Optional
 
 # Import from tips_engine
-from tips_engine import HistoricalStats, IndustryDefaults, SessionMetrics
+from tips_engine import (
+    HistoricalStats,
+    IndustryDefaults,
+    MultiWindowStats,
+    SessionMetrics,
+    WindowStats,
+)
 
 # QuestDB configuration (from canonical.yaml)
 QUESTDB_HOST = os.getenv("QUESTDB_HOST", "localhost")
@@ -31,7 +36,7 @@ REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
 CACHE_TTL_SECONDS = 3600  # 1 hour cache for historical stats
 
 
-def query_questdb(sql: str, timeout: float = 5.0) -> Optional[dict]:
+def query_questdb(sql: str, timeout: float = 5.0) -> dict | None:
     """
     Execute SQL query against QuestDB REST API.
 
@@ -82,7 +87,7 @@ def get_historical_stats(project: str, days: int = 30) -> HistoricalStats:
     return defaults
 
 
-def _query_project_stats(project: Optional[str], days: int) -> Optional[HistoricalStats]:
+def _query_project_stats(project: str | None, days: int) -> HistoricalStats | None:
     """Query QuestDB for project statistics."""
     project_filter = f"AND project = '{project}'" if project else ""
 
@@ -161,6 +166,84 @@ def _query_project_stats(project: Optional[str], days: int) -> Optional[Historic
         rule_accuracies=rule_accuracies,
         confidence_penalty=0.0,
     )
+
+
+def get_multi_window_stats(project: str) -> MultiWindowStats:
+    """
+    Analyze distribution across multiple session windows for trend analysis.
+
+    Windows:
+    - all_time: All available sessions (baseline)
+    - recent: Last 50 sessions
+    - trend: Last 20 sessions
+
+    Returns MultiWindowStats with computed trends.
+    """
+    project_filter = f"WHERE project = '{project}'" if project else ""
+
+    # Query total session count first
+    count_sql = f"""
+    SELECT COUNT(*) FROM claude_sessions {project_filter}
+    """
+    count_result = query_questdb(count_sql)
+    total_sessions = 0
+    if count_result and count_result.get("dataset"):
+        total_sessions = int(count_result["dataset"][0][0] or 0)
+
+    if total_sessions == 0:
+        return MultiWindowStats(total_sessions=0, data_source="none")
+
+    # Query stats for each window
+    windows = {
+        "all_time": total_sessions,  # All sessions
+        "recent": min(50, total_sessions),  # Last 50
+        "trend": min(20, total_sessions),  # Last 20
+    }
+
+    result = MultiWindowStats(
+        total_sessions=total_sessions,
+        data_source="project" if project else "cross_project",
+    )
+
+    for window_name, limit in windows.items():
+        sql = f"""
+        SELECT
+            COUNT(*) as session_count,
+            AVG(error_rate) as avg_error_rate,
+            STDDEV(error_rate) as stddev_error_rate,
+            AVG(rework_rate) as avg_rework_rate,
+            STDDEV(rework_rate) as stddev_rework_rate
+        FROM (
+            SELECT error_rate, rework_rate
+            FROM claude_sessions
+            {project_filter}
+            ORDER BY timestamp DESC
+            LIMIT {limit}
+        )
+        """
+
+        query_result = query_questdb(sql)
+        if query_result and query_result.get("dataset"):
+            row = query_result["dataset"][0]
+            window_stats = WindowStats(
+                session_count=int(row[0]) if row[0] else 0,
+                avg_error_rate=float(row[1]) if row[1] else 0.0,
+                stddev_error_rate=float(row[2]) if row[2] else 0.0,
+                avg_rework_rate=float(row[3]) if row[3] else 0.0,
+                stddev_rework_rate=float(row[4]) if row[4] else 0.0,
+            )
+
+            if window_name == "all_time":
+                result.all_time = window_stats
+            elif window_name == "recent":
+                result.recent = window_stats
+            elif window_name == "trend":
+                result.trend = window_stats
+
+    # Compute trends
+    result.compute_trends()
+
+    return result
 
 
 def find_similar_situations(
@@ -249,7 +332,7 @@ def _get_redis_client():
         return None
 
 
-def _get_from_redis(key: str) -> Optional[dict]:
+def _get_from_redis(key: str) -> dict | None:
     """Get cached value from Redis."""
     client = _get_redis_client()
     if not client:

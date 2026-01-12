@@ -9,8 +9,8 @@ Generates optimization tips based on:
 - Similar situation lookup
 """
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Callable, Optional
 
 
 @dataclass
@@ -70,6 +70,94 @@ class SessionMetrics:
 
 
 @dataclass
+class WindowStats:
+    """Statistics for a single analysis window."""
+
+    session_count: int = 0
+    avg_error_rate: float = 0.0
+    stddev_error_rate: float = 0.0
+    avg_rework_rate: float = 0.0
+    stddev_rework_rate: float = 0.0
+
+
+@dataclass
+class MultiWindowStats:
+    """
+    Statistics across multiple session windows for trend analysis.
+
+    Windows:
+    - all: All available sessions (baseline)
+    - recent: Last 50 sessions
+    - trend: Last 20 sessions
+    """
+
+    total_sessions: int = 0
+    data_source: str = "defaults"
+
+    # Window stats
+    all_time: WindowStats = field(default_factory=WindowStats)
+    recent: WindowStats = field(default_factory=WindowStats)  # Last 50
+    trend: WindowStats = field(default_factory=WindowStats)  # Last 20
+
+    # Computed trends
+    error_rate_trend: str = "stable"  # "improving", "stable", "degrading"
+    error_rate_delta: float = 0.0  # Change from all_time to trend
+    rework_rate_trend: str = "stable"
+    rework_rate_delta: float = 0.0
+
+    def compute_trends(self) -> None:
+        """Calculate trend direction and delta based on window comparisons."""
+        if self.all_time.session_count < 20:
+            return  # Not enough data
+
+        # Error rate trend (trend vs all_time)
+        self.error_rate_delta = self.trend.avg_error_rate - self.all_time.avg_error_rate
+        if self.error_rate_delta < -0.03:  # >3% improvement
+            self.error_rate_trend = "improving"
+        elif self.error_rate_delta > 0.03:  # >3% degradation
+            self.error_rate_trend = "degrading"
+        else:
+            self.error_rate_trend = "stable"
+
+        # Rework rate trend
+        self.rework_rate_delta = self.trend.avg_rework_rate - self.all_time.avg_rework_rate
+        if self.rework_rate_delta < -0.03:
+            self.rework_rate_trend = "improving"
+        elif self.rework_rate_delta > 0.03:
+            self.rework_rate_trend = "degrading"
+        else:
+            self.rework_rate_trend = "stable"
+
+    def format_summary(self) -> str:
+        """Format multi-window stats for display."""
+        if self.total_sessions == 0:
+            return "[No historical data]"
+
+        lines = []
+        lines.append(f"[{self.total_sessions} sessions analyzed]")
+
+        if self.total_sessions >= 20:
+            # Error rate across windows
+            err_arrow = (
+                "↓" if self.error_rate_trend == "improving" else "↑" if self.error_rate_trend == "degrading" else "→"
+            )
+            lines.append(
+                f"[error: all={self.all_time.avg_error_rate:.0%}, last20={self.trend.avg_error_rate:.0%} {err_arrow}]"
+            )
+
+            # Rework rate across windows
+            rew_arrow = (
+                "↓" if self.rework_rate_trend == "improving" else "↑" if self.rework_rate_trend == "degrading" else "→"
+            )
+            lines.append(
+                f"[rework: all={self.all_time.avg_rework_rate:.0%}, "
+                f"last20={self.trend.avg_rework_rate:.0%} {rew_arrow}]"
+            )
+
+        return " ".join(lines)
+
+
+@dataclass
 class HistoricalStats:
     """Historical statistics from QuestDB or defaults."""
 
@@ -98,7 +186,7 @@ class HistoricalStats:
     # Confidence penalty for less reliable data
     confidence_penalty: float = 0.0
 
-    def get_command_success_rate(self, command: str) -> Optional[float]:
+    def get_command_success_rate(self, command: str) -> float | None:
         """Get historical success rate for a command."""
         return self.command_success_rates.get(command)
 
@@ -371,7 +459,7 @@ def calculate_confidence(
     rule_name: str,
     current: SessionMetrics,
     historical: HistoricalStats,
-    z_score: Optional[float] = None,
+    z_score: float | None = None,
 ) -> float:
     """
     Calculate confidence based on:
