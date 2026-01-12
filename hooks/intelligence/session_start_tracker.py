@@ -17,6 +17,7 @@ from pathlib import Path
 METRICS_DIR = Path.home() / ".claude" / "metrics"
 SESSION_STATE_FILE = METRICS_DIR / "session_state.json"
 LAST_SESSION_STATS_FILE = METRICS_DIR / "last_session_stats.json"
+INSIGHTS_FILE = METRICS_DIR / "session_insights.json"  # SSOT
 SESSION_TIMEOUT_MINUTES = 30  # New session if > 30 min since last activity
 MAX_STATS_AGE_HOURS = 24  # Ignore stats older than this
 
@@ -170,6 +171,75 @@ def clear_previous_session_stats() -> None:
         pass
 
 
+def get_previous_insights() -> str | None:
+    """Load SSOT insights from previous session and format compactly."""
+    if not INSIGHTS_FILE.exists():
+        return None
+
+    try:
+        data = json.loads(INSIGHTS_FILE.read_text())
+        timestamp = data.get("ended_at")
+
+        # Check age
+        if timestamp:
+            ended_dt = datetime.fromisoformat(timestamp)
+            age_hours = (datetime.now() - ended_dt).total_seconds() / 3600
+            if age_hours > MAX_STATS_AGE_HOURS:
+                return None
+
+        # Format compact output
+        parts = []
+
+        # Context percentage
+        if ctx := data.get("context"):
+            pct = ctx.get("percentage", 0)
+            status = ctx.get("status", "normal")
+            if status == "critical":
+                parts.append(f"{pct}% ctx!")
+            elif status == "warning":
+                parts.append(f"{pct}% ctx")
+
+        # Summary stats
+        if summary := data.get("summary"):
+            calls = summary.get("tool_calls", 0)
+            errors = summary.get("errors", 0)
+            if calls:
+                parts.append(f"{calls} calls")
+            if errors:
+                parts.append(f"{errors} err")
+
+        # Git status
+        if git := data.get("git"):
+            if git.get("uncommitted"):
+                added = git.get("lines_added", 0)
+                removed = git.get("lines_removed", 0)
+                parts.append(f"uncommitted +{added}/-{removed}")
+
+        # Delegation recommendation
+        if data.get("delegation", {}).get("recommended"):
+            parts.append("DELEGATE!")
+
+        # High-confidence tips count
+        tips = data.get("tips", [])
+        high_conf_tips = [t for t in tips if t.get("confidence", 0) >= 0.7]
+        if high_conf_tips:
+            parts.append(f"{len(high_conf_tips)} tips")
+
+        return ", ".join(parts) if parts else None
+
+    except (json.JSONDecodeError, ValueError, OSError):
+        return None
+
+
+def clear_previous_insights() -> None:
+    """Clear SSOT after injecting (prevent repeated injection)."""
+    try:
+        if INSIGHTS_FILE.exists():
+            INSIGHTS_FILE.unlink()
+    except OSError:
+        pass
+
+
 def main():
     try:
         _input_data = json.load(sys.stdin)
@@ -186,12 +256,19 @@ def main():
     # Build output
     context_parts = []
 
-    # For new sessions, inject previous session stats
+    # For new sessions, inject previous session insights
     if is_new:
-        prev_stats = get_previous_session_stats()
-        if prev_stats and prev_stats.get("formatted"):
-            context_parts.append(f"[prev session: {prev_stats['formatted']}]")
-            clear_previous_session_stats()  # One-time injection
+        # Try SSOT first
+        insights_summary = get_previous_insights()
+        if insights_summary:
+            context_parts.append(f"[prev: {insights_summary}]")
+            clear_previous_insights()  # One-time injection
+        else:
+            # Fallback to legacy format
+            prev_stats = get_previous_session_stats()
+            if prev_stats and prev_stats.get("formatted"):
+                context_parts.append(f"[prev session: {prev_stats['formatted']}]")
+                clear_previous_session_stats()  # One-time injection
 
         if state.get("start_commit"):
             context_parts.append(f"[tracking: {state['start_branch']}@{state['start_commit'][:8]}]")

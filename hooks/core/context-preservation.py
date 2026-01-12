@@ -77,6 +77,39 @@ def format_agent_suggestions() -> str:
     return "\n".join(lines)
 
 
+def save_context_stats(estimated_tokens: int, context_pct: int, metrics: dict) -> None:
+    """Save context stats to file for SSOT aggregation."""
+    try:
+        # Determine status
+        if context_pct >= 80:
+            status = "critical"
+            suggested_agents = list(AGENT_SUGGESTIONS.keys())
+        elif context_pct >= 60:
+            status = "warning"
+            suggested_agents = []
+        else:
+            status = "normal"
+            suggested_agents = []
+
+        context_data = {
+            "tokens_used": estimated_tokens,
+            "percentage": context_pct,
+            "status": status,
+            "suggested_agents": suggested_agents,
+            "messages": metrics.get("messages", 0),
+            "tool_calls": metrics.get("tool_calls", 0),
+            "file_size_kb": metrics.get("file_size_kb", 0),
+        }
+
+        # Ensure metrics directory exists
+        context_stats_file = Path.home() / ".claude" / "metrics" / "context_stats.json"
+        context_stats_file.parent.mkdir(parents=True, exist_ok=True)
+        context_stats_file.write_text(json.dumps(context_data, indent=2))
+    except Exception:
+        # Don't fail if we can't save stats
+        pass
+
+
 def main():
     try:
         input_data = json.load(sys.stdin)
@@ -88,6 +121,9 @@ def main():
         metrics = estimate_context_usage(transcript_path)
         estimated_tokens = metrics.get("estimated_tokens", 0)
         context_pct = get_context_percentage(estimated_tokens)
+
+        # Always save context stats for SSOT aggregation
+        save_context_stats(estimated_tokens, context_pct, metrics)
 
         # Thresholds
         WARNING_PCT = 60  # Show warning
