@@ -131,33 +131,23 @@ class MultiWindowStats:
             self.rework_rate_trend = "stable"
 
     def format_summary(self) -> str:
-        """Format multi-window stats for display."""
+        """Format multi-window stats for display (KISS version)."""
         if self.total_sessions == 0:
             return "[No historical data]"
 
-        lines = []
-        lines.append(f"[{self.total_sessions} sessions analyzed]")
+        parts = []
+        parts.append(f"[{self.total_sessions} sess]")
 
+        # Show overall stats
+        parts.append(f"[error: {self.all_time.avg_error_rate:.0%}±{self.all_time.stddev_error_rate:.0%}]")
+
+        # Show trend only if significant (not stable)
         if self.total_sessions >= 20:
-            # Error rate across windows (100% vs 50%)
-            err_arrow = (
-                "↓" if self.error_rate_trend == "improving" else "↑" if self.error_rate_trend == "degrading" else "→"
-            )
-            lines.append(
-                f"[error: {self.all_time.session_count}={self.all_time.avg_error_rate:.0%}±{self.all_time.stddev_error_rate:.0%}, "
-                f"{self.trend.session_count}={self.trend.avg_error_rate:.0%}±{self.trend.stddev_error_rate:.0%} {err_arrow}]"
-            )
+            if self.error_rate_trend != "stable":
+                arrow = "↓" if self.error_rate_trend == "improving" else "↑"
+                parts.append(f"[trend: {self.error_rate_trend} {arrow}]")
 
-            # Rework rate across windows with session counts and stddev
-            rew_arrow = (
-                "↓" if self.rework_rate_trend == "improving" else "↑" if self.rework_rate_trend == "degrading" else "→"
-            )
-            lines.append(
-                f"[rework: {self.all_time.session_count}={self.all_time.avg_rework_rate:.0%}±{self.all_time.stddev_rework_rate:.0%}, "
-                f"{self.trend.session_count}={self.trend.avg_rework_rate:.0%}±{self.trend.stddev_rework_rate:.0%} {rew_arrow}]"
-            )
-
-        return " ".join(lines)
+        return " ".join(parts)
 
 
 @dataclass
