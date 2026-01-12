@@ -131,21 +131,25 @@ class MultiWindowStats:
             self.rework_rate_trend = "stable"
 
     def format_summary(self) -> str:
-        """Format multi-window stats for display (KISS version)."""
+        """Format multi-window stats for display (2-window robust version)."""
         if self.total_sessions == 0:
             return "[No historical data]"
 
         parts = []
         parts.append(f"[{self.total_sessions} sess]")
 
-        # Show overall stats
-        parts.append(f"[error: {self.all_time.avg_error_rate:.0%}±{self.all_time.stddev_error_rate:.0%}]")
-
-        # Show trend only if significant (not stable)
+        # Show all vs recent (trend window = 50% of sessions)
         if self.total_sessions >= 20:
-            if self.error_rate_trend != "stable":
-                arrow = "↓" if self.error_rate_trend == "improving" else "↑"
-                parts.append(f"[trend: {self.error_rate_trend} {arrow}]")
+            arrow = (
+                "↓" if self.error_rate_trend == "improving" else "↑" if self.error_rate_trend == "degrading" else "→"
+            )
+            parts.append(
+                f"[error: {self.all_time.avg_error_rate:.0%}±{self.all_time.stddev_error_rate:.0%} | "
+                f"recent: {self.trend.avg_error_rate:.0%}±{self.trend.stddev_error_rate:.0%} {arrow}]"
+            )
+        else:
+            # Not enough data for trend, just show overall
+            parts.append(f"[error: {self.all_time.avg_error_rate:.0%}±{self.all_time.stddev_error_rate:.0%}]")
 
         return " ".join(parts)
 
