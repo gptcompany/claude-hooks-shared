@@ -52,6 +52,26 @@ CODE_EXTENSIONS: frozenset[str] = frozenset(
 CONFIG_EXTENSIONS: frozenset[str] = frozenset({".json", ".yaml", ".yml", ".toml", ".ini", ".env"})
 TEST_PATTERNS: tuple[str, ...] = ("test_", "_test.", "tests/", "spec.", ".spec.")
 
+# =============================================================================
+# Suggestion Thresholds (based on distribution analysis)
+# =============================================================================
+
+# Error rate: elite <15%, typical 15-25%, concerning >25%
+THRESHOLD_ERROR_RATE: float = 0.25
+THRESHOLD_MIN_ERRORS: int = 5  # Prevent false positives on small sessions
+
+# Lines changed: significant changes warrant review
+THRESHOLD_LINES_CHANGED: int = 50
+
+# Config files: multiple config changes need verification
+THRESHOLD_CONFIG_FILES: int = 2
+
+# Long session: context management needed
+THRESHOLD_LONG_SESSION: int = 60
+
+# Minimum session size for suggestions
+THRESHOLD_MIN_TOOL_CALLS: int = 5
+
 
 # =============================================================================
 # Data Classes
@@ -81,6 +101,15 @@ class SessionMetrics:
     @property
     def error_rate(self) -> float:
         return self.errors / self.tool_calls if self.tool_calls > 0 else 0.0
+
+
+@dataclass
+class Suggestion:
+    """Represents a contextual suggestion for the next session."""
+
+    command: str  # The suggested command (e.g., "/review", "/undo:checkpoint")
+    trigger: str  # What triggered this suggestion (e.g., "errors", "config")
+    priority: int  # 1 = highest priority (safety), 4 = lowest (convenience)
 
 
 # =============================================================================
@@ -222,12 +251,93 @@ def parse_session_metrics(input_data: dict[str, Any]) -> SessionMetrics:
 
 
 # =============================================================================
+# Contextual Suggestions
+# =============================================================================
+
+
+def get_suggestions(changes: GitChanges, metrics: SessionMetrics) -> list[Suggestion]:
+    """
+    Generate contextual suggestions based on session state.
+
+    Suggestions are prioritized by severity:
+    - Priority 1: Safety (errors, instability)
+    - Priority 2: Safety (config changes)
+    - Priority 3: Quality (code review)
+    - Priority 4: Convenience (context management)
+
+    Returns max 2 suggestions, sorted by priority.
+    """
+    suggestions: list[Suggestion] = []
+
+    # Skip if session too short (avoid false positives)
+    if metrics.tool_calls < THRESHOLD_MIN_TOOL_CALLS:
+        return []
+
+    # Priority 1: High error rate → checkpoint before continuing
+    if metrics.error_rate > THRESHOLD_ERROR_RATE and metrics.errors >= THRESHOLD_MIN_ERRORS:
+        suggestions.append(
+            Suggestion(
+                command="/undo:checkpoint",
+                trigger="errors",
+                priority=1,
+            )
+        )
+
+    # Priority 2: Multiple config changes → verify consistency
+    if len(changes.config_files) >= THRESHOLD_CONFIG_FILES:
+        suggestions.append(
+            Suggestion(
+                command="/health",
+                trigger="config",
+                priority=2,
+            )
+        )
+
+    # Priority 3: Significant uncommitted changes → review before continuing
+    if changes.has_changes and changes.lines_added >= THRESHOLD_LINES_CHANGED:
+        suggestions.append(
+            Suggestion(
+                command="/review",
+                trigger="uncommitted",
+                priority=3,
+            )
+        )
+
+    # Priority 4: Long session → check context if resuming
+    if metrics.tool_calls >= THRESHOLD_LONG_SESSION:
+        suggestions.append(
+            Suggestion(
+                command="/context",
+                trigger="long",
+                priority=4,
+            )
+        )
+
+    # Sort by priority and limit to top 2
+    suggestions.sort(key=lambda s: s.priority)
+    return suggestions[:2]
+
+
+def format_suggestions(suggestions: list[Suggestion]) -> str:
+    """Format suggestions for output."""
+    if not suggestions:
+        return ""
+    commands = [s.command for s in suggestions]
+    return f"[suggest: {', '.join(commands)}]"
+
+
+# =============================================================================
 # Output Formatting
 # =============================================================================
 
 
-def format_session_stats(changes: GitChanges, metrics: SessionMetrics, commits: list[dict[str, str]]) -> str:
-    """Format session stats - raw data only, Claude decides what to do."""
+def format_session_stats(
+    changes: GitChanges,
+    metrics: SessionMetrics,
+    commits: list[dict[str, str]],
+    suggestions: list[Suggestion] | None = None,
+) -> str:
+    """Format session stats with optional suggestions."""
     parts: list[str] = []
 
     # Git changes - compact format
@@ -249,6 +359,10 @@ def format_session_stats(changes: GitChanges, metrics: SessionMetrics, commits: 
     if commits:
         parts.append(f"[commits: {len(commits)}]")
 
+    # Contextual suggestions
+    if suggestions:
+        parts.append(format_suggestions(suggestions))
+
     return " ".join(parts) if parts else ""
 
 
@@ -261,8 +375,9 @@ def save_stats_for_next_session(
     changes: GitChanges,
     metrics: SessionMetrics,
     commits: list[dict[str, str]],
+    suggestions: list[Suggestion],
 ) -> None:
-    """Save session stats for injection into next session."""
+    """Save session stats and suggestions for injection into next session."""
     from datetime import datetime
 
     stats = {
@@ -281,7 +396,8 @@ def save_stats_for_next_session(
             "error_rate": round(metrics.error_rate, 2),
         },
         "commits": len(commits),
-        "formatted": format_session_stats(changes, metrics, commits),
+        "suggestions": [{"command": s.command, "trigger": s.trigger, "priority": s.priority} for s in suggestions],
+        "formatted": format_session_stats(changes, metrics, commits, suggestions),
     }
 
     try:
@@ -310,17 +426,20 @@ def main() -> None:
     metrics = parse_session_metrics(input_data)
     commits = get_session_commits()
 
+    # Generate contextual suggestions
+    suggestions = get_suggestions(changes, metrics)
+
     # Always save stats for next session (even if minimal)
-    save_stats_for_next_session(changes, metrics, commits)
+    save_stats_for_next_session(changes, metrics, commits, suggestions)
 
     # Skip output if nothing interesting (but stats are saved)
-    if not changes.has_changes and metrics.tool_calls < 5:
+    if not changes.has_changes and metrics.tool_calls < THRESHOLD_MIN_TOOL_CALLS:
         logger.info("No significant activity, skipping output")
         print(json.dumps({}))
         sys.exit(0)
 
-    # Format stats (shown at stop, but also saved for next session start)
-    formatted = format_session_stats(changes, metrics, commits)
+    # Format stats with suggestions (shown at stop, also saved for next session start)
+    formatted = format_session_stats(changes, metrics, commits, suggestions)
 
     if formatted:
         output = {"systemMessage": formatted}

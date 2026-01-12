@@ -1,7 +1,7 @@
 # Hook Inventory & Usage Guide
 
-**Last Updated**: 2025-11-22
-**Total Hooks**: 12 files (9 Python, 1 Bash, 2 SQL)
+**Last Updated**: 2026-01-12
+**Total Hooks**: 14 files (11 Python, 1 Bash, 2 SQL)
 
 ---
 
@@ -15,6 +15,30 @@
 | `notification.py` | UserPromptSubmit | Voice "Agent needs input" | `spd-say` (Linux) / `say` (macOS) |
 | `git-safety-check.py` | PreToolUse (Bash) | Block force push, secrets | None |
 | `smart-safety-check.py` | PreToolUse (Bash) | CCundo checkpoint + confirm | `ccundo` |
+
+### Tier 1.5: Intelligent Session Context ⭐⭐⭐ (NEW)
+
+| Hook | Event | Purpose | Output |
+|------|-------|---------|--------|
+| `session_analyzer.py` | Stop | Analyze session + save stats | `[uncommitted: +100/-20] [session: 45 calls, 8 errors] [suggest: /review]` |
+| `session_start_tracker.py` | UserPromptSubmit | Inject previous session stats | `[prev session: ...] [tracking: main@abc123]` |
+
+**Flow**:
+1. Session N ends → `session_analyzer.py` saves stats to `~/.claude/metrics/last_session_stats.json`
+2. Session N+1 starts → `session_start_tracker.py` injects stats into `additionalContext`
+3. Stats file cleared after injection (one-time use)
+
+**Contextual Suggestions** (rule-based):
+| Condition | Suggestion | Priority |
+|-----------|------------|----------|
+| Error rate > 25% AND errors >= 5 | `/undo:checkpoint` | 1 (safety) |
+| Config files >= 2 | `/health` | 2 (safety) |
+| Lines added >= 50 | `/review` | 3 (quality) |
+| Tool calls >= 60 | `/context` | 4 (convenience) |
+
+**vs /tips command**:
+- Hook = automatic, single session, rule-based
+- /tips = manual, multi-session QuestDB analysis, statistical (z-scores)
 
 ### Tier 2: Core Session Tracking ⭐⭐
 
