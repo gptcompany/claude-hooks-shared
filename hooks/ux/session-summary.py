@@ -154,7 +154,7 @@ def generate_optimization_suggestions(session: dict, metrics: dict) -> list:
         suggestions.append((1, f"Low test pass rate ({pass_rate:.0f}%): Focus on one test at a time"))
 
     # 7. Long session without checkpoints
-    start_time = session.get("start_time")
+    start_time = session.get("session_start") or session.get("start_time")
     if start_time:
         duration = (datetime.now() - datetime.fromisoformat(start_time)).total_seconds()
         if duration > 1800 and tool_calls > 30:  # 30min+ with many tool calls
@@ -178,7 +178,7 @@ def build_session_metrics(session: dict, metrics: dict) -> "SessionMetrics":
 
     # Calculate duration
     duration = 0
-    start_time = session.get("start_time")
+    start_time = session.get("session_start") or session.get("start_time")
     if start_time:
         duration = int((datetime.now() - datetime.fromisoformat(start_time)).total_seconds())
 
@@ -217,7 +217,7 @@ def generate_summary(session: dict, metrics: dict) -> str:
     lines.append("=" * 50)
 
     # Duration
-    start_time = session.get("start_time")
+    start_time = session.get("session_start") or session.get("start_time")
     if start_time:
         start = datetime.fromisoformat(start_time)
         duration = (datetime.now() - start).total_seconds()
@@ -334,9 +334,12 @@ def main():
                 "type": "session_end",
                 "session_id": session_id,
                 "duration_seconds": (
-                    datetime.now() - datetime.fromisoformat(session.get("start_time", datetime.now().isoformat()))
+                    datetime.now()
+                    - datetime.fromisoformat(
+                        session.get("session_start") or session.get("start_time", datetime.now().isoformat())
+                    )
                 ).total_seconds()
-                if session.get("start_time")
+                if session.get("session_start") or session.get("start_time")
                 else 0,
                 "tool_calls": tool_calls,
                 "errors": session.get("errors", 0),
@@ -377,12 +380,14 @@ def main():
                     "duration_min": round(
                         (
                             datetime.now()
-                            - datetime.fromisoformat(session.get("start_time", datetime.now().isoformat()))
+                            - datetime.fromisoformat(
+                                session.get("session_start") or session.get("start_time", datetime.now().isoformat())
+                            )
                         ).total_seconds()
                         / 60,
                         1,
                     )
-                    if session.get("start_time")
+                    if session.get("session_start") or session.get("start_time")
                     else 0,
                     "tool_calls": tool_calls,
                     "errors": session.get("errors", 0),
@@ -399,12 +404,14 @@ def main():
                     "duration_min": round(
                         (
                             datetime.now()
-                            - datetime.fromisoformat(session.get("start_time", datetime.now().isoformat()))
+                            - datetime.fromisoformat(
+                                session.get("session_start") or session.get("start_time", datetime.now().isoformat())
+                            )
                         ).total_seconds()
                         / 60,
                         1,
                     )
-                    if session.get("start_time")
+                    if session.get("session_start") or session.get("start_time")
                     else 0,
                     "tool_calls": tool_calls,
                     "errors": session.get("errors", 0),

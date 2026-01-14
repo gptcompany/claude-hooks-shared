@@ -219,11 +219,22 @@ def get_previous_insights() -> str | None:
         if data.get("delegation", {}).get("recommended"):
             parts.append("DELEGATE!")
 
-        # High-confidence tips count
+        # High-confidence tips with category breakdown + top command
         tips = data.get("tips", [])
         high_conf_tips = [t for t in tips if t.get("confidence", 0) >= 0.7]
         if high_conf_tips:
-            parts.append(f"{len(high_conf_tips)} tips")
+            # Compact format: category counts + top command suggestion
+            categories: dict[str, int] = {}
+            for t in high_conf_tips:
+                cat = t.get("category", "general")
+                categories[cat] = categories.get(cat, 0) + 1
+
+            cat_summary = "/".join(f"{c}:{n}" for c, n in sorted(categories.items()))
+            top_cmd = high_conf_tips[0].get("command", "")
+
+            parts.append(f"{len(high_conf_tips)} tips ({cat_summary})")
+            if top_cmd:
+                parts.append(f"try: {top_cmd}")
 
         return ", ".join(parts) if parts else None
 

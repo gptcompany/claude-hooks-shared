@@ -92,9 +92,10 @@ def _query_project_stats(project: str | None, days: int) -> HistoricalStats | No
     project_filter = f"AND project = '{project}'" if project else ""
 
     # Query session statistics
+    # Use DISTINCT session_id to count real sessions, not duplicate entries
     session_sql = f"""
     SELECT
-        COUNT(*) as session_count,
+        COUNT(DISTINCT session_id) as session_count,
         AVG(error_rate) as avg_error_rate,
         STDDEV(error_rate) as stddev_error_rate,
         AVG(rework_rate) as avg_rework_rate,
@@ -103,6 +104,7 @@ def _query_project_stats(project: str | None, days: int) -> HistoricalStats | No
         STDDEV(test_pass_rate) as stddev_test_pass_rate
     FROM claude_sessions
     WHERE timestamp > dateadd('d', -{days}, now())
+      AND session_id != 'unknown'
     {project_filter}
     """
 
@@ -207,15 +209,17 @@ def get_multi_window_stats(project: str) -> MultiWindowStats:
     project_filter = f"WHERE project = '{project}'" if project else ""
 
     # Query all_time stats first to get stddev for window calculation
+    # Exclude 'unknown' session_id entries (data quality issue)
+    where_clause = "WHERE session_id != 'unknown'" + (f" AND project = '{project}'" if project else "")
     all_time_sql = f"""
     SELECT
-        COUNT(*) as session_count,
+        COUNT(DISTINCT session_id) as session_count,
         AVG(error_rate) as avg_error_rate,
         STDDEV(error_rate) as stddev_error_rate,
         AVG(rework_rate) as avg_rework_rate,
         STDDEV(rework_rate) as stddev_rework_rate
     FROM claude_sessions
-    {project_filter}
+    {where_clause}
     """
     all_time_result = query_questdb(all_time_sql)
 
@@ -248,17 +252,18 @@ def get_multi_window_stats(project: str) -> MultiWindowStats:
     )
 
     # Query trend window (most recent X% based on variance)
+    # Exclude 'unknown' session_id entries
     trend_sql = f"""
     SELECT
-        COUNT(*) as session_count,
+        COUNT(DISTINCT session_id) as session_count,
         AVG(error_rate) as avg_error_rate,
         STDDEV(error_rate) as stddev_error_rate,
         AVG(rework_rate) as avg_rework_rate,
         STDDEV(rework_rate) as stddev_rework_rate
     FROM (
-        SELECT error_rate, rework_rate
+        SELECT session_id, error_rate, rework_rate
         FROM claude_sessions
-        {project_filter}
+        {where_clause}
         ORDER BY timestamp DESC
         LIMIT {trend_limit}
     )
