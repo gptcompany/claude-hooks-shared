@@ -18,6 +18,15 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
+# Add scripts to path for QuestDB import
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "scripts"))
+try:
+    from questdb_metrics import QuestDBMetrics
+
+    _questdb = QuestDBMetrics()
+except ImportError:
+    _questdb = None
+
 # Metrics storage
 METRICS_DIR = Path.home() / ".claude" / "metrics"
 DAILY_LOG = METRICS_DIR / "daily.jsonl"
@@ -114,6 +123,12 @@ def track_task_cycle(task_id: str, status: str):
                         "iterations": iterations,
                     },
                 )
+
+                # Log to QuestDB for Grafana dashboards
+                if _questdb:
+                    session_id = state.get("session_id", "unknown")
+                    _questdb.log_dora(session_id, "cycle_time", cycle_time_seconds, task_id, iterations)
+                    _questdb.log_dora(session_id, "task_completed", 1.0, task_id, iterations)
 
                 # Clean up iteration counter
                 state.get("task_iterations", {}).pop(task_id, None)
@@ -264,6 +279,10 @@ def main():
         if file_path:
             rework = calculate_rework_rate(file_path)
             log_metric("file_edit", {"file": file_path, "tool": tool_name, "is_rework": rework > 0})
+            # Log rework to QuestDB
+            if _questdb and rework > 0:
+                session_id = os.environ.get("CLAUDE_SESSION_ID", "unknown")
+                _questdb.log_dora(session_id, "rework", 1.0, rework=True)
 
     # Track test runs
     elif tool_name == "Bash":
@@ -335,16 +354,21 @@ def main():
 
     # Log session summary periodically (every 10 calls)
     if session_state.get("tool_calls", 0) % 10 == 0:
+        error_rate = session_state.get("errors", 0) / max(session_state.get("tool_calls", 1), 1)
         log_metric(
             "session_stats",
             {
                 "tool_calls": session_state.get("tool_calls", 0),
                 "errors": session_state.get("errors", 0),
-                "error_rate": session_state.get("errors", 0) / max(session_state.get("tool_calls", 1), 1),
+                "error_rate": error_rate,
                 "model": session_state.get("model", "unknown"),
                 "tasks_completed": len(session_state.get("tasks_completed", [])),
             },
         )
+        # Log error_rate to QuestDB
+        if _questdb:
+            session_id = session_state.get("session_id", "unknown")
+            _questdb.log_dora(session_id, "error_rate", error_rate * 100)  # percentage
 
     # Check for threshold alerts (every 20 calls)
     alerts = []

@@ -22,7 +22,6 @@ import sys
 import threading
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
 
 # Import project auto-detect
 sys.path.insert(0, str(Path(__file__).parent))
@@ -43,7 +42,7 @@ QUESTDB_HOST = os.environ.get("QUESTDB_HOST", "localhost")
 QUESTDB_ILP_PORT = int(os.environ.get("QUESTDB_ILP_PORT", "9009"))
 
 
-def _get_socket() -> Optional[socket.socket]:
+def _get_socket() -> socket.socket | None:
     """Get or create reusable socket connection."""
     global _socket
     if _socket is None:
@@ -53,7 +52,7 @@ def _get_socket() -> Optional[socket.socket]:
                     _socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                     _socket.connect((QUESTDB_HOST, QUESTDB_ILP_PORT))
                     _socket.settimeout(2.0)  # 2s timeout
-                except (socket.error, OSError):
+                except OSError:
                     _socket = None
     return _socket
 
@@ -132,7 +131,7 @@ class QuestDBMetrics:
         try:
             sock.sendall((line + "\n").encode())
             return True
-        except (socket.error, OSError):
+        except OSError:
             _reset_socket()
             return False
 
@@ -396,6 +395,46 @@ class QuestDBMetrics:
 
         timestamp_ns = int(datetime.now().timestamp() * 1e9)
         line = _to_ilp("claude_context", tags, fields, timestamp_ns)
+
+        return self._send(line)
+
+    def log_dora(
+        self,
+        session_id: str,
+        metric_type: str,
+        value: float,
+        task_id: str = None,
+        iterations: int = 0,
+        rework: bool = False,
+    ) -> bool:
+        """
+        Log DORA-inspired metrics to QuestDB.
+
+        Table: dora_metrics
+
+        metric_type:
+        - cycle_time: seconds from task start to complete
+        - task_completed: 1 for each completed task
+        - error_rate: % of failed tool calls in session
+        - rework: edit to same file within 24h
+        - deploy: git push event
+        """
+        tags = {
+            "project": self.project_name,
+            "session_id": session_id[:50] if session_id else "unknown",
+            "metric_type": metric_type,
+        }
+        if task_id:
+            tags["task_id"] = task_id[:50]
+
+        fields = {
+            "value": value,
+            "iterations": iterations,
+            "rework": rework,
+        }
+
+        timestamp_ns = int(datetime.now().timestamp() * 1e9)
+        line = _to_ilp("dora_metrics", tags, fields, timestamp_ns)
 
         return self._send(line)
 
