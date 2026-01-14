@@ -8,10 +8,16 @@ Hook type: UserPromptSubmit (runs once at session start)
 """
 
 import json
+import os
 from pathlib import Path
 
 # Only run once per session (check marker file)
 MARKER_FILE = Path("/tmp/claude-repo-health-checked")
+
+# Config from environment or defaults
+PYCACHE_THRESHOLD = int(os.environ.get("REPO_HEALTH_PYCACHE_THRESHOLD", 100))
+OBSOLETE_THRESHOLD = int(os.environ.get("REPO_HEALTH_OBSOLETE_THRESHOLD", 2))
+
 MAIN_REPOS = [
     Path("/media/sam/1TB/N8N_dev"),
     Path("/media/sam/1TB/UTXOracle"),
@@ -19,24 +25,57 @@ MAIN_REPOS = [
     Path("/media/sam/1TB/nautilus_dev"),
 ]
 
-
-def count_pycache(repo: Path) -> int:
-    """Count __pycache__ directories."""
-    try:
-        return len(list(repo.rglob("__pycache__")))
-    except Exception:
-        return 0
+# Skip these directories for speed
+SKIP_DIRS = {".git", "node_modules", ".venv", "venv", "data", ".worktrees"}
 
 
-def count_obsolete(repo: Path) -> int:
-    """Count obsolete files."""
+def count_pycache_fast(repo: Path) -> int:
+    """Count __pycache__ directories (fast, skips heavy dirs)."""
     count = 0
-    for pattern in ["*.bak", "*.old", "*~", "*.orig"]:
+    try:
+        for root, dirs, _ in os.walk(repo):
+            # Skip heavy directories
+            dirs[:] = [d for d in dirs if d not in SKIP_DIRS]
+            if "__pycache__" in dirs:
+                count += 1
+                dirs.remove("__pycache__")  # Don't recurse into it
+    except Exception:
+        pass
+    return count
+
+
+def count_obsolete_fast(repo: Path) -> int:
+    """Count obsolete files (fast, top-level only + .claude/)."""
+    count = 0
+    patterns = [".bak", ".old", ".orig", "~"]
+
+    # Check top-level
+    try:
+        for f in repo.iterdir():
+            if f.is_file() and any(f.name.endswith(p) for p in patterns):
+                count += 1
+    except Exception:
+        pass
+
+    # Check .claude/ specifically
+    claude_dir = repo / ".claude"
+    if claude_dir.exists():
         try:
-            count += len(list(repo.rglob(pattern)))
+            for f in claude_dir.rglob("*"):
+                if f.is_file() and any(f.name.endswith(p) for p in patterns):
+                    count += 1
         except Exception:
             pass
+
     return count
+
+
+def get_worst_repo(repos_with_issues: list) -> str:
+    """Get the repo with most issues for prioritized action."""
+    if not repos_with_issues:
+        return ""
+    worst = max(repos_with_issues, key=lambda x: x["pycache"] + x["obsolete"] * 10)
+    return worst["name"]
 
 
 def main():
@@ -56,8 +95,8 @@ def main():
         if not repo.exists():
             continue
 
-        pycache = count_pycache(repo)
-        obsolete = count_obsolete(repo)
+        pycache = count_pycache_fast(repo)
+        obsolete = count_obsolete_fast(repo)
 
         total_pycache += pycache
         total_obsolete += obsolete
@@ -72,15 +111,26 @@ def main():
             )
 
     # Only notify if significant issues
-    if total_pycache > 200 or total_obsolete > 5:
+    if total_pycache > PYCACHE_THRESHOLD or total_obsolete > OBSOLETE_THRESHOLD:
+        worst = get_worst_repo(repos_with_issues)
+
+        # Prioritized action suggestion
+        if total_obsolete > 0:
+            action = f"python ~/.claude/scripts/repo-cleanup.py /media/sam/1TB/{worst} --clean --force"
+            priority = "obsolete files first"
+        else:
+            action = "python ~/.claude/scripts/repo-cleanup.py --all --clean --force"
+            priority = "__pycache__ cleanup"
+
         print(
             json.dumps(
                 {
                     "hook": "repo-health-notify",
                     "status": "warning",
-                    "message": f"Repo cleanup recommended: {total_pycache} __pycache__, {total_obsolete} obsolete files",
-                    "details": repos_with_issues,
-                    "action": "Run: python ~/.claude/scripts/repo-cleanup.py --all --clean",
+                    "message": f"Cleanup: {total_pycache} __pycache__, {total_obsolete} obsolete",
+                    "priority": priority,
+                    "worst_repo": worst,
+                    "action": action,
                 }
             )
         )
