@@ -156,13 +156,98 @@ def backup_state():
             logger.warning(f"Failed to backup state: {e}")
 
 
+# Plugin state file (markdown with YAML frontmatter)
+PLUGIN_STATE_FILE = Path.cwd() / ".claude" / "ralph-loop.local.md"
+
+
+def parse_plugin_state_file() -> dict | None:
+    """
+    Parse the official Ralph plugin's state file format.
+
+    Format: Markdown with YAML frontmatter
+    ---
+    active: true
+    iteration: 1
+    max_iterations: 20
+    completion_promise: "DONE"
+    started_at: "2026-01-13T..."
+    ---
+
+    The actual prompt text
+    """
+    if not PLUGIN_STATE_FILE.exists():
+        return None
+
+    try:
+        content = PLUGIN_STATE_FILE.read_text()
+
+        # Parse YAML frontmatter (between --- markers)
+        if not content.startswith("---"):
+            return None
+
+        parts = content.split("---", 2)
+        if len(parts) < 3:
+            return None
+
+        frontmatter = parts[1].strip()
+        prompt_text = parts[2].strip()
+
+        # Parse YAML manually (avoid PyYAML dependency)
+        state = {"source": "plugin"}
+        for line in frontmatter.split("\n"):
+            if ":" in line:
+                key, value = line.split(":", 1)
+                key = key.strip()
+                value = value.strip().strip('"').strip("'")
+
+                # Type conversion
+                if value == "true":
+                    value = True
+                elif value == "false":
+                    value = False
+                elif value == "null":
+                    value = None
+                elif value.isdigit():
+                    value = int(value)
+
+                state[key] = value
+
+        # Map plugin fields to our format
+        state["original_prompt"] = prompt_text
+        state["active"] = state.get("active", False)
+
+        if state.get("active"):
+            logger.info(f"Loaded state from plugin file: iteration={state.get('iteration', 0)}")
+            return state
+
+    except Exception as e:
+        logger.warning(f"Failed to parse plugin state file: {e}")
+
+    return None
+
+
 def get_ralph_state() -> dict | None:
-    """Get current Ralph state with validation."""
+    """
+    Get current Ralph state with validation.
+
+    Checks BOTH:
+    1. Plugin state file (.claude/ralph-loop.local.md) - from /ralph-loop command
+    2. Our state file (~/.claude/ralph/state.json) - from auto-ralph
+
+    Plugin state takes priority if both exist.
+    """
+    # Check plugin state file FIRST (from /ralph-loop command)
+    plugin_state = parse_plugin_state_file()
+    if plugin_state:
+        return plugin_state
+
+    # Fallback to our state file (from auto-ralph)
     if not RALPH_STATE.exists():
         return None
 
     try:
         state = json.loads(RALPH_STATE.read_text())
+        state["source"] = "auto-ralph"
 
         # Validate checksum if present
         stored_checksum = state.get("_checksum")
@@ -205,7 +290,21 @@ def update_ralph_state(updates: dict) -> dict:
 def deactivate_ralph(reason: str):
     """Deactivate Ralph mode with reason."""
     state = get_ralph_state()
-    if state:
+    if not state:
+        return
+
+    source = state.get("source", "auto-ralph")
+
+    if source == "plugin":
+        # Deactivate plugin state file (delete it, as plugin expects)
+        try:
+            if PLUGIN_STATE_FILE.exists():
+                PLUGIN_STATE_FILE.unlink()
+                logger.info(f"Plugin state file removed: {reason}")
+        except OSError as e:
+            logger.error(f"Failed to remove plugin state file: {e}")
+    else:
+        # Deactivate our JSON state file
         state["active"] = False
         state["exit_reason"] = reason
         state["ended_at"] = datetime.now().isoformat()
@@ -222,6 +321,7 @@ def deactivate_ralph(reason: str):
         {
             "type": "ralph_exit",
             "reason": reason,
+            "source": source,
             "iterations": state.get("iteration", 0) if state else 0,
         }
     )
@@ -632,13 +732,17 @@ def main():
     # Check budget status
     _, budget_status, estimated_cost = check_token_budget(state)
 
-    # Log iteration
+    # Check circuit breaker BEFORE logging (to avoid rate limit self-trigger)
+    should_trip, trip_msg = check_circuit_breaker(state, transcript)
+
+    # Log iteration (AFTER circuit breaker check)
     log_iteration(
         {
             "type": "iteration",
             "iteration": iteration,
             "stop_reason": stop_reason[:100],
             "estimated_cost_usd": estimated_cost,
+            "circuit_breaker_tripped": should_trip,
         }
     )
 
@@ -649,31 +753,24 @@ def main():
         update_progress(iteration, f"✅ COMPLETED: {exit_msg}")
         git_commit_progress(iteration)
 
+        # Allow exit - Ralph complete
         output = {
-            "notification": f"""
-🏁 **Ralph Loop Complete** (iteration {iteration})
-{exit_msg}
-
-Progress saved to: ~/.claude/ralph/progress.md
-""",
+            "decision": "approve",
+            "stopReason": f"🏁 Ralph Loop Complete (iteration {iteration}): {exit_msg}",
         }
         print(json.dumps(output))
         sys.exit(0)
 
-    # Check circuit breaker
-    should_trip, trip_msg = check_circuit_breaker(state, transcript)
+    # Handle circuit breaker (now checked above)
     if should_trip:
         deactivate_ralph(trip_msg)
         update_progress(iteration, f"⚠️ CIRCUIT BREAKER: {trip_msg}")
         git_commit_progress(iteration)
 
+        # Allow exit - circuit breaker tripped
         output = {
-            "notification": f"""
-⚠️ **Ralph Loop Stopped** (circuit breaker)
-{trip_msg}
-
-Review progress at: ~/.claude/ralph/progress.md
-""",
+            "decision": "approve",
+            "stopReason": f"⚠️ Ralph Loop Stopped (circuit breaker): {trip_msg}",
         }
         print(json.dumps(output))
         sys.exit(0)
@@ -701,14 +798,10 @@ Review progress at: ~/.claude/ralph/progress.md
             )
             git_commit_progress(iteration)
 
+            # Allow exit - CI failures exceeded
             output = {
-                "notification": f"""
-⚠️ **Ralph Loop Stopped** (CI failures)
-{ci_msg}
-
-Fix the failing tests/lint before resuming.
-Details: {json.dumps(ci_details, indent=2)}
-""",
+                "decision": "approve",
+                "stopReason": f"⚠️ Ralph Loop Stopped (CI failures): {ci_msg}",
             }
             print(json.dumps(output))
             sys.exit(0)
@@ -725,63 +818,37 @@ Details: {json.dumps(ci_details, indent=2)}
     update_progress(iteration, f"Iteration {iteration} - continuing...")
     git_commit_progress(iteration)
 
-    # Build CI status section
+    # Build CI status section (compact)
     if ci_passed:
-        ci_status = "✅ CI PASSED - Tests and lint OK"
+        ci_status = "✅ CI OK"
     else:
         ci_failures = state.get("consecutive_ci_failures", 1)
-        ci_status = f"""⚠️ CI FAILED ({ci_failures}/{MAX_CI_FAILURES})
-{ci_msg}
+        ci_status = f"""⚠️ CI FAILED ({ci_failures}/{MAX_CI_FAILURES}) - Fix first!
+{ci_msg}"""
 
-**FIX THESE ISSUES FIRST** before continuing with the task!
+    # Build continuation message (compact for Max subscription)
+    continuation_prompt = f"""## Ralph Loop [{iteration}/{MAX_ITERATIONS}]
 
-💡 **Sentry Tip**: Query for related production issues:
-```
-mcp__sentry__search_issues(organizationSlug="gptprojectmanager", naturalLanguageQuery="<error pattern>", regionUrl="https://de.sentry.io")
-```"""
-
-    # Build continuation message
-    continuation_prompt = f"""
-## Ralph Loop - Iteration {iteration}/{MAX_ITERATIONS}
-
-Continue working on the original task. Previous iteration ended.
-
-### CI Status:
 {ci_status}
 
-### Original Task:
-{original_prompt}
+**Task:** {original_prompt}
 
-### Progress:
-Check ~/.claude/ralph/progress.md for history.
-
-### Budget:
-{budget_status}
-
-### Commands:
-- Tests: `uv run pytest tests/ -x --tb=short`
-- Lint: `uv run ruff check . --fix`
-
-Continue until ALL exit criteria are met or explicitly state "DONE".
+Continue until CI passes or state "DONE".
 """
 
+    # Stop hook output format (per Claude Code schema):
+    # - decision: "block" to prevent exit and continue
+    # - reason: The prompt to re-inject
+    # - systemMessage: Status shown to user
+    ci_status_short = "✅" if ci_passed else "⚠️"
     output = {
-        "hookSpecificOutput": {
-            "hookEventName": "Stop",
-            "forceStop": False,  # Don't stop, continue
-        },
-        "notification": f"""
-🔄 **Ralph Loop** - Iteration {iteration}/{MAX_ITERATIONS}
-{budget_status}
-CI: {"✅ Passed" if ci_passed else "⚠️ Failed"}
-""",
-        # Re-inject prompt
-        "continueWithPrompt": continuation_prompt,
+        "decision": "block",
+        "reason": continuation_prompt,
+        "systemMessage": f"🔄 Ralph [{iteration}/{MAX_ITERATIONS}] CI: {ci_status_short}",
     }
 
-    # Exit code 2 = block stop, continue execution
     print(json.dumps(output))
-    sys.exit(2)
+    sys.exit(0)  # Exit 0 with decision=block
 
 
 if __name__ == "__main__":
