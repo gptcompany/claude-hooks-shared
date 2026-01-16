@@ -14,6 +14,7 @@ Detection Rules:
 Outputs context suggestion for Claude to use appropriate commands.
 """
 
+import contextlib
 import json
 import os
 import sys

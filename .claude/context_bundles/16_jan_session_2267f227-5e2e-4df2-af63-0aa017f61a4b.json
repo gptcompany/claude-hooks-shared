@@ -6,7 +6,48 @@
       "operation": "read",
       "timestamp": "2026-01-16T23:41:28.855802",
       "file_path": "/media/sam/1TB/claude-hooks-shared/services/ai_validation_service.py"
+    },
+    {
+      "operation": "bash",
+      "timestamp": "2026-01-16T23:41:46.744526",
+      "command": "ruff check services/ai_validation_service.py 2>&1 | head -50",
+      "description": "Check ruff lint errors on the new service file"
+    },
+    {
+      "operation": "bash",
+      "timestamp": "2026-01-16T23:41:50.788233",
+      "command": "ruff check . 2>&1 | head -100",
+      "description": "Check all lint errors in the repo"
+    },
+    {
+      "operation": "read",
+      "timestamp": "2026-01-16T23:41:56.031419",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/hooks/intelligence/framework-detector.py"
+    },
+    {
+      "operation": "edit",
+      "timestamp": "2026-01-16T23:42:00.403014",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/hooks/intelligence/framework-detector.py",
+      "old_string": "import json\nimport os\nimport sys\nfrom pathlib import Path"
+    },
+    {
+      "operation": "bash",
+      "timestamp": "2026-01-16T23:42:05.242070",
+      "command": "ruff check . 2>&1 | grep -E \"^(F821|E999|F401)\" | head -20",
+      "description": "Check for critical lint errors (undefined names, syntax errors, unused imports)"
+    },
+    {
+      "operation": "bash",
+      "timestamp": "2026-01-16T23:42:09.042330",
+      "command": "ruff check . 2>&1 | wc -l",
+      "description": "Count remaining lint errors"
+    },
+    {
+      "operation": "bash",
+      "timestamp": "2026-01-16T23:42:14.988469",
+      "command": "ruff check hooks/intelligence/framework-detector.py services/ai_validation_service.py 2>&1",
+      "description": "Check lint on the files in this PR"
     }
   ],
-  "last_updated": "2026-01-16T23:41:28.855809"
+  "last_updated": "2026-01-16T23:42:14.988490"
 }
