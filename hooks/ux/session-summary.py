@@ -6,6 +6,7 @@ Shows a summary of the session metrics when Claude Code stops.
 Uses Tips Engine v2 for evidence-based optimization suggestions.
 """
 
+import contextlib
 import json
 import subprocess
 import sys
@@ -351,14 +352,12 @@ def main():
     # Uses --days 1 for recent metrics
     # QuestDB dedup handles duplicates (same timestamp = overwrite)
     if EXPORT_SCRIPT.exists():
-        try:
+        with contextlib.suppress(Exception):
             subprocess.Popen(
                 ["python3", str(EXPORT_SCRIPT), "--days", "1", "--quiet"],
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
             )
-        except Exception:
-            pass  # Don't fail session end if export fails
 
     # Generate and save tips for next session
     tips_data = None
