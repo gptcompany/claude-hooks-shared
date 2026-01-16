@@ -263,6 +263,43 @@ Credentials: ~/.cloudflared/*.json
 
 ---
 
+## 9. Key Rotation
+
+### Automatic Rotation Schedule
+- **Interval**: Every 90 days
+- **Check**: Weekly (Monday 9 AM via cron)
+- **Notification**: Discord alert when rotation is due
+
+### Manual Rotation
+```bash
+# Check rotation status
+python3 /media/sam/1TB/claude-hooks-shared/scripts/secret_rotation.py --check
+
+# Perform rotation (interactive, with confirmation)
+python3 /media/sam/1TB/claude-hooks-shared/scripts/secret_rotation.py
+
+# Force rotation (no prompts - use with caution)
+python3 /media/sam/1TB/claude-hooks-shared/scripts/secret_rotation.py --force
+```
+
+### What Rotation Does
+1. Creates pre-rotation backup
+2. Generates new age keypair
+3. Decrypts all .env.enc with old key
+4. Re-encrypts all with new key
+5. Verifies all new encryptions
+6. Commits changes atomically
+7. Updates .sops.yaml config
+8. Archives old key
+
+### Rotation State
+```
+Location: ~/.config/sops/age/rotation_state.json
+Contains: last_rotation, rotation_count, previous_key_archive
+```
+
+---
+
 ## Appendix: Emergency Commands
 
 ```bash
