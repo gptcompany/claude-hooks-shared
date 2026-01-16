@@ -1,0 +1,22 @@
+{
+  "session_id": "ef5315b2-f42c-4516-a46e-a6211f2131d9",
+  "created_at": "2026-01-16T23:30:31.156119",
+  "operations": [
+    {
+      "operation": "read",
+      "timestamp": "2026-01-16T23:30:31.156153",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/hooks/intelligence/framework-detector.py"
+    },
+    {
+      "operation": "read",
+      "timestamp": "2026-01-16T23:30:31.156459",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/hooks/metrics/claudeflow-sync.py"
+    },
+    {
+      "operation": "read",
+      "timestamp": "2026-01-16T23:30:31.160407",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/hooks/metrics/quality-score-tracker.py"
+    }
+  ],
+  "last_updated": "2026-01-16T23:30:31.160432"
+}
