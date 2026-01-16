@@ -353,12 +353,67 @@ def check_rotation_status():
     print()
 
 
+def send_discord_notification(message: str) -> bool:
+    """Send notification to Discord webhook."""
+    import urllib.error
+    import urllib.request
+
+    # Try to load webhook URL from environment or SOPS
+    webhook_url = os.environ.get("DISCORD_WEBHOOK_URL")
+
+    if not webhook_url:
+        # Try to load from SOPS
+        env_enc = Path("/media/sam/1TB/claude-hooks-shared/.env.enc")
+        if env_enc.exists():
+            try:
+                result = subprocess.run(
+                    ["sops", "-d", "--output-type", "dotenv", str(env_enc)],
+                    capture_output=True,
+                    text=True,
+                )
+                for line in result.stdout.split("\n"):
+                    if line.startswith("DISCORD_WEBHOOK_URL="):
+                        webhook_url = line.split("=", 1)[1].strip().strip("\"'")
+                        break
+            except Exception:
+                pass
+
+    if not webhook_url:
+        log("Discord webhook URL not found, skipping notification", "WARN")
+        return False
+
+    try:
+        data = json.dumps({"content": message}).encode("utf-8")
+        req = urllib.request.Request(
+            webhook_url,
+            data=data,
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        urllib.request.urlopen(req, timeout=10)
+        log("Discord notification sent", "OK")
+        return True
+    except urllib.error.URLError as e:
+        log(f"Failed to send Discord notification: {e}", "WARN")
+        return False
+
+
 def main():
     import argparse
 
     parser = argparse.ArgumentParser(description="Enterprise Secret Rotation")
     parser.add_argument("--check", action="store_true", help="Check rotation status")
     parser.add_argument("--force", action="store_true", help="Force rotation without prompts")
+    parser.add_argument(
+        "--unattended",
+        action="store_true",
+        help="Run in unattended mode (same as --force, for cron jobs)",
+    )
+    parser.add_argument(
+        "--notify-discord",
+        action="store_true",
+        help="Send Discord notification on completion",
+    )
     args = parser.parse_args()
 
     if args.check:
@@ -368,7 +423,10 @@ def main():
     # Interactive rotation
     check_rotation_status()
 
-    if not args.force:
+    # --unattended is an alias for --force
+    force_mode = args.force or args.unattended
+
+    if not force_mode:
         print("⚠️  This will rotate all secret encryption keys.")
         print("   All .env.enc files will be re-encrypted with new keys.")
         print("   A backup will be created before any changes.\n")
@@ -378,7 +436,20 @@ def main():
             print("Rotation cancelled.")
             sys.exit(0)
 
-    success = rotate_secrets(force=args.force)
+    success = rotate_secrets(force=force_mode)
+
+    if args.notify_discord:
+        if success:
+            send_discord_notification(
+                f"✅ **Secret Rotation Completed**\n"
+                f"• {len(REPOS)} repositories re-encrypted\n"
+                f"• Next rotation due in {ROTATION_INTERVAL_DAYS} days"
+            )
+        else:
+            send_discord_notification(
+                "❌ **Secret Rotation FAILED**\nCheck logs for details. Manual intervention may be required."
+            )
+
     sys.exit(0 if success else 1)
 
 

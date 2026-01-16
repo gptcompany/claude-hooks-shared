@@ -17,6 +17,13 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROTATION_SCRIPT="$SCRIPT_DIR/secret_rotation.py"
+SOPS_ENV_FILE="/media/sam/1TB/claude-hooks-shared/.env.enc"
+
+# Load secrets from SOPS (not from environment/crontab!)
+if [[ -f "$SOPS_ENV_FILE" ]]; then
+    eval "$(SOPS_AGE_KEY_FILE="$HOME/.config/sops/age/keys.txt" sops -d --input-type dotenv --output-type dotenv "$SOPS_ENV_FILE" 2>/dev/null | grep -E '^[A-Z_]+=')"
+fi
+
 DISCORD_WEBHOOK_URL="${DISCORD_WEBHOOK_URL:-}"
 
 # Run rotation check
