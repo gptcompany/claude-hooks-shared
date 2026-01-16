@@ -1,5 +1,5 @@
 # Reusable Test Workflow
-# Call from any repo: uses: gptprojectmanager/claude-hooks-shared/.github/workflows/_reusable-tests.yml@main
+# Call from any repo: uses: gptcompany/claude-hooks-shared/.github/workflows/_reusable-tests.yml@main
 
 name: Tests
 

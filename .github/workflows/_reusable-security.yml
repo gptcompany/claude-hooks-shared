@@ -1,5 +1,5 @@
 # Reusable Security Scan Workflow
-# Call from any repo: uses: gptprojectmanager/claude-hooks-shared/.github/workflows/_reusable-security.yml@main
+# Call from any repo: uses: gptcompany/claude-hooks-shared/.github/workflows/_reusable-security.yml@main
 
 name: Security Scan
 

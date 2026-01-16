@@ -1,5 +1,5 @@
 # Reusable Lint & Type Check Workflow
-# Call from any repo: uses: gptprojectmanager/claude-hooks-shared/.github/workflows/_reusable-lint.yml@main
+# Call from any repo: uses: gptcompany/claude-hooks-shared/.github/workflows/_reusable-lint.yml@main
 
 name: Lint & Types
 
