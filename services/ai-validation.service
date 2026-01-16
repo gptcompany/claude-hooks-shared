@@ -1,0 +1,31 @@
+[Unit]
+Description=AI Validation Service (Claude Agent SDK)
+Documentation=https://backstage.princyx.xyz/docs/default/component/claude-hooks-shared/ai-validation
+After=network.target questdb.service
+
+[Service]
+Type=simple
+User=sam
+Group=sam
+WorkingDirectory=/media/sam/1TB/claude-hooks-shared/services
+ExecStart=/usr/bin/python3 ai_validation_service.py
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+# Environment
+Environment="PORT=3848"
+Environment="QUESTDB_HOST=localhost"
+Environment="QUESTDB_PORT=9009"
+Environment="PATH=/home/sam/.npm-global/bin:/usr/local/bin:/usr/bin:/bin"
+Environment="HOME=/home/sam"
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/media/sam/1TB/claude-hooks-shared
+
+[Install]
+WantedBy=multi-user.target
