@@ -9,11 +9,11 @@ Environment Variables:
     DATABASE_URL - PostgreSQL connection string (overrides --db-url)
 """
 
-import psycopg2
 import argparse
 import os
 import sys
-from pathlib import Path
+
+import psycopg2
 
 # PostgreSQL schema with all 3 tables and indexes
 SCHEMA_SQL = """
@@ -94,6 +94,7 @@ CREATE INDEX IF NOT EXISTS idx_events_tool_name ON events(tool_name);
 CREATE INDEX IF NOT EXISTS idx_events_context_gin ON events USING GIN(context_data);
 """
 
+
 def init_database(db_url: str):
     """Initialize PostgreSQL database with schema."""
     conn = None
@@ -117,7 +118,7 @@ def init_database(db_url: str):
 
         print(f"✅ Database initialized: {db_url.split('@')[1] if '@' in db_url else db_url}")
         print(f"📊 Tables created: {', '.join(tables)}")
-        print(f"🔒 Features: JSONB, TIMESTAMPTZ, GIN indexes, CASCADE DELETE")
+        print("🔒 Features: JSONB, TIMESTAMPTZ, GIN indexes, CASCADE DELETE")
 
         cursor.close()
     except psycopg2.Error as e:
@@ -127,12 +128,13 @@ def init_database(db_url: str):
         if conn:
             conn.close()
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Initialize session analysis database (PostgreSQL)")
     parser.add_argument(
         "--db-url",
         default=os.getenv("DATABASE_URL", "postgresql://localhost:5432/claude_sessions"),
-        help="PostgreSQL connection string (default: $DATABASE_URL or postgresql://localhost:5432/claude_sessions)"
+        help="PostgreSQL connection string (default: $DATABASE_URL or postgresql://localhost:5432/claude_sessions)",
     )
     args = parser.parse_args()
 

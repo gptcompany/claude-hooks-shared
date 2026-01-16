@@ -103,10 +103,8 @@ def detect_framework(cwd: str) -> dict:
 
 def main():
     """Main hook function - called as UserPromptSubmit hook."""
-    try:
-        input_data = json.load(sys.stdin)
-    except Exception:
-        input_data = {}
+    with contextlib.suppress(Exception):
+        json.load(sys.stdin)  # Consume stdin for hook protocol
 
     # Get current working directory
     cwd = os.getcwd()

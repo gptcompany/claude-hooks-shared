@@ -16,7 +16,273 @@
       "operation": "read",
       "timestamp": "2026-01-16T23:30:31.160407",
       "file_path": "/media/sam/1TB/claude-hooks-shared/hooks/metrics/quality-score-tracker.py"
+    },
+    {
+      "operation": "bash",
+      "timestamp": "2026-01-16T23:30:50.695591",
+      "command": "pytest tests/ -v 2>&1 | head -60",
+      "description": "Run tests to see failure details"
+    },
+    {
+      "operation": "bash",
+      "timestamp": "2026-01-16T23:30:52.569179",
+      "command": "ruff check . 2>&1 | head -40",
+      "description": "Check lint errors"
+    },
+    {
+      "operation": "bash",
+      "timestamp": "2026-01-16T23:30:57.806265",
+      "command": "pytest tests/hooks/test_ralph_loop.py -v 2>&1",
+      "description": "Run ralph_loop tests to see failure details"
+    },
+    {
+      "operation": "read",
+      "timestamp": "2026-01-16T23:31:00.235326",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/tests/hooks/test_ralph_loop.py"
+    },
+    {
+      "operation": "bash",
+      "timestamp": "2026-01-16T23:31:05.275550",
+      "command": "ls -la hooks/control/ hooks/session/ 2>/dev/null || echo \"Directory not found\"",
+      "description": "List hooks directories to see what modules exist"
+    },
+    {
+      "operation": "todowrite",
+      "timestamp": "2026-01-16T23:31:10.078634",
+      "todo_count": 2
+    },
+    {
+      "operation": "read",
+      "timestamp": "2026-01-16T23:31:15.496566",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/hooks/control/ralph-loop.py"
+    },
+    {
+      "operation": "edit",
+      "timestamp": "2026-01-16T23:31:26.200909",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/tests/hooks/test_ralph_loop.py",
+      "old_string": "#!/usr/bin/env python3\n\"\"\"\nMock Tests for Ralph Loop Enterprise Features\n\nTests cover:\n- State check..."
+    },
+    {
+      "operation": "edit",
+      "timestamp": "2026-01-16T23:31:37.098725",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/tests/hooks/test_ralph_loop.py",
+      "old_string": "class TestStateChecksum:\n    \"\"\"Test state checksum calculation and validation.\"\"\"\n\n    def test_che..."
+    },
+    {
+      "operation": "edit",
+      "timestamp": "2026-01-16T23:31:45.603355",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/tests/hooks/test_ralph_loop.py",
+      "old_string": "class TestStateBackup:\n    \"\"\"Test state backup functionality.\"\"\"\n\n    def test_backup_creates_file(..."
+    },
+    {
+      "operation": "edit",
+      "timestamp": "2026-01-16T23:31:58.924393",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/tests/hooks/test_ralph_loop.py",
+      "old_string": "class TestResumeDetection:\n    \"\"\"Test Ralph resume detection logic.\"\"\"\n\n    def test_detect_orphane..."
+    },
+    {
+      "operation": "edit",
+      "timestamp": "2026-01-16T23:32:09.894365",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/tests/hooks/test_ralph_loop.py",
+      "old_string": "class TestCircuitBreakers:\n    \"\"\"Test circuit breaker logic.\"\"\"\n\n    def test_max_iterations_breake..."
+    },
+    {
+      "operation": "edit",
+      "timestamp": "2026-01-16T23:32:17.779733",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/tests/hooks/test_ralph_loop.py",
+      "old_string": "class TestRateLimiting:\n    \"\"\"Test rate limiting functionality.\"\"\"\n\n    def test_rate_limit_under_t..."
+    },
+    {
+      "operation": "edit",
+      "timestamp": "2026-01-16T23:32:28.466612",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/tests/hooks/test_ralph_loop.py",
+      "old_string": "class TestSSOTConfig:\n    \"\"\"Test SSOT configuration loading.\"\"\"\n\n    def test_default_config_values..."
+    },
+    {
+      "operation": "edit",
+      "timestamp": "2026-01-16T23:32:39.874072",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/tests/hooks/test_ralph_loop.py",
+      "old_string": "class TestIntegration:\n    \"\"\"Integration tests for full Ralph workflow.\"\"\"\n\n    def test_full_state..."
+    },
+    {
+      "operation": "bash",
+      "timestamp": "2026-01-16T23:32:44.936621",
+      "command": "pytest tests/hooks/test_ralph_loop.py -v 2>&1 | head -80",
+      "description": "Run tests to check if imports work now"
+    },
+    {
+      "operation": "read",
+      "timestamp": "2026-01-16T23:32:51.829591",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/hooks/control/ralph-loop.py"
+    },
+    {
+      "operation": "grep",
+      "timestamp": "2026-01-16T23:32:56.076337",
+      "pattern": "def check_circuit_breaker",
+      "path": "/media/sam/1TB/claude-hooks-shared/hooks/control/ralph-loop.py",
+      "output_mode": "content"
+    },
+    {
+      "operation": "edit",
+      "timestamp": "2026-01-16T23:33:03.727902",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/tests/hooks/test_ralph_loop.py",
+      "old_string": "    def test_max_iterations_breaker(self):\n        \"\"\"Test max iterations circuit breaker.\"\"\"\n      ..."
+    },
+    {
+      "operation": "grep",
+      "timestamp": "2026-01-16T23:33:08.010570",
+      "pattern": "def check_rate_limit",
+      "path": "/media/sam/1TB/claude-hooks-shared/hooks/control/ralph-loop.py",
+      "output_mode": "content"
+    },
+    {
+      "operation": "read",
+      "timestamp": "2026-01-16T23:33:12.256529",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/tests/hooks/test_ralph_loop.py"
+    },
+    {
+      "operation": "bash",
+      "timestamp": "2026-01-16T23:33:17.931842",
+      "command": "pytest tests/hooks/test_ralph_loop.py::TestRateLimiting::test_rate_limit_under_threshold -v --tb=long 2>&1",
+      "description": "Run rate limit test with full traceback"
+    },
+    {
+      "operation": "grep",
+      "timestamp": "2026-01-16T23:33:23.977750",
+      "pattern": "MAX_ITERATIONS_PER_HOUR",
+      "path": "/media/sam/1TB/claude-hooks-shared/hooks/control/ralph-loop.py",
+      "output_mode": "content"
+    },
+    {
+      "operation": "grep",
+      "timestamp": "2026-01-16T23:33:27.902671",
+      "pattern": "MIN_ITERATION_INTERVAL",
+      "path": "/media/sam/1TB/claude-hooks-shared/hooks/control/ralph-loop.py",
+      "output_mode": "content"
+    },
+    {
+      "operation": "grep",
+      "timestamp": "2026-01-16T23:33:33.181604",
+      "pattern": "min_iteration_interval_secs",
+      "path": "/media/sam/1TB/claude-hooks-shared/hooks/control/ralph-loop.py",
+      "output_mode": "content"
+    },
+    {
+      "operation": "edit",
+      "timestamp": "2026-01-16T23:33:41.881873",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/tests/hooks/test_ralph_loop.py",
+      "old_string": "class TestRateLimiting:\n    \"\"\"Test rate limiting functionality.\"\"\"\n\n    def test_rate_limit_under_t..."
+    },
+    {
+      "operation": "bash",
+      "timestamp": "2026-01-16T23:33:46.477166",
+      "command": "pytest tests/hooks/test_ralph_loop.py -v 2>&1",
+      "description": "Run ralph loop tests"
+    },
+    {
+      "operation": "todowrite",
+      "timestamp": "2026-01-16T23:33:53.015466",
+      "todo_count": 2
+    },
+    {
+      "operation": "read",
+      "timestamp": "2026-01-16T23:33:57.031767",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/database/init_db.py"
+    },
+    {
+      "operation": "edit",
+      "timestamp": "2026-01-16T23:34:01.141927",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/database/init_db.py",
+      "old_string": "import psycopg2\nimport argparse\nimport os\nimport sys\nfrom pathlib import Path"
+    },
+    {
+      "operation": "read",
+      "timestamp": "2026-01-16T23:34:05.707726",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/database/init_db.py"
+    },
+    {
+      "operation": "bash",
+      "timestamp": "2026-01-16T23:34:10.438033",
+      "command": "ruff check database/init_db.py 2>&1",
+      "description": "Check ruff errors in init_db.py"
+    },
+    {
+      "operation": "bash",
+      "timestamp": "2026-01-16T23:34:15.353491",
+      "command": "pytest tests/ -v 2>&1 | tail -30",
+      "description": "Run full test suite"
+    },
+    {
+      "operation": "bash",
+      "timestamp": "2026-01-16T23:34:17.372907",
+      "command": "ruff check . 2>&1 | head -50",
+      "description": "Check all lint errors"
+    },
+    {
+      "operation": "edit",
+      "timestamp": "2026-01-16T23:34:23.666415",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/hooks/intelligence/framework-detector.py",
+      "old_string": "def main():\n    \"\"\"Main hook function - called as UserPromptSubmit hook.\"\"\"\n    try:\n        input_d..."
+    },
+    {
+      "operation": "bash",
+      "timestamp": "2026-01-16T23:34:28.499741",
+      "command": "ruff check hooks/intelligence/framework-detector.py hooks/metrics/claudeflow-sync.py hooks/metrics/quality-score-tracker.py 2>&1",
+      "description": "Check lint in new files"
+    },
+    {
+      "operation": "bash",
+      "timestamp": "2026-01-16T23:34:33.066385",
+      "command": "ruff check hooks/intelligence/framework-detector.py hooks/metrics/claudeflow-sync.py hooks/metrics/quality-score-tracker.py --select E,F,W 2>&1",
+      "description": "Check only error/warning level lint issues"
+    },
+    {
+      "operation": "bash",
+      "timestamp": "2026-01-16T23:34:36.885396",
+      "command": "ruff check . --select E,F,W 2>&1 | head -30",
+      "description": "Check all error/warning level lint issues"
+    },
+    {
+      "operation": "todowrite",
+      "timestamp": "2026-01-16T23:34:42.604219",
+      "todo_count": 3
+    },
+    {
+      "operation": "bash",
+      "timestamp": "2026-01-16T23:34:46.320390",
+      "command": "pytest tests/ -v 2>&1 | tail -15 && echo \"---\" && ruff check . 2>&1 | wc -l",
+      "description": "Run full CI validation"
+    },
+    {
+      "operation": "bash",
+      "timestamp": "2026-01-16T23:34:53.132523",
+      "command": "ruff check . 2>&1 | head -10",
+      "description": "Check lint summary"
+    },
+    {
+      "operation": "bash",
+      "timestamp": "2026-01-16T23:34:58.203482",
+      "command": "ruff check hooks/intelligence/framework-detector.py hooks/metrics/claudeflow-sync.py hooks/metrics/quality-score-tracker.py 2>&1 | grep -c \"error\\|Error\" || echo \"0 errors\"",
+      "description": "Count critical errors in new files"
+    },
+    {
+      "operation": "bash",
+      "timestamp": "2026-01-16T23:35:01.914115",
+      "command": "ruff check hooks/intelligence/framework-detector.py hooks/metrics/claudeflow-sync.py hooks/metrics/quality-score-tracker.py 2>&1",
+      "description": "Show lint issues in new files"
+    },
+    {
+      "operation": "edit",
+      "timestamp": "2026-01-16T23:35:06.550045",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/hooks/intelligence/framework-detector.py",
+      "old_string": "import json\nimport os\nimport sys\nfrom pathlib import Path"
+    },
+    {
+      "operation": "edit",
+      "timestamp": "2026-01-16T23:35:11.018553",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/hooks/intelligence/framework-detector.py",
+      "old_string": "def main():\n    \"\"\"Main hook function - called as UserPromptSubmit hook.\"\"\"\n    try:\n        json.lo..."
     }
   ],
-  "last_updated": "2026-01-16T23:30:31.160432"
+  "last_updated": "2026-01-16T23:35:11.018581"
 }
