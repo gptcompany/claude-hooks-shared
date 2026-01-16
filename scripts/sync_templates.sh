@@ -132,6 +132,17 @@ EOF
   else
     echo "  [=] validation/config.json exists (skipped)"
   fi
+
+  # ARCHITECTURE.md
+  if [[ ! -f "$repo/ARCHITECTURE.md" ]] || [[ "$FORCE" == "--force" ]]; then
+    if [[ -f "$GLOBAL_TEMPLATES/ARCHITECTURE.md" ]]; then
+      backup_if_exists "$repo/ARCHITECTURE.md"
+      sed "s/\${PROJECT_NAME}/$name/g" "$GLOBAL_TEMPLATES/ARCHITECTURE.md" > "$repo/ARCHITECTURE.md"
+      echo "  [+] Created ARCHITECTURE.md"
+    fi
+  else
+    echo "  [=] ARCHITECTURE.md exists (skipped)"
+  fi
 done
 
 echo ""
