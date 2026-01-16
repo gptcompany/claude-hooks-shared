@@ -23,7 +23,7 @@ def load_push_history() -> list:
         try:
             with open(PUSH_HISTORY_FILE) as f:
                 return json.load(f)
-        except (json.JSONDecodeError, IOError):
+        except (OSError, json.JSONDecodeError):
             return []
     return []
 

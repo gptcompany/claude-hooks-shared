@@ -168,11 +168,13 @@ class TestCircuitBreakers:
         state = {"iteration": ralph_loop.MAX_ITERATIONS, "consecutive_errors": 0}
 
         # Mock rate limit and token budget checks to pass
-        with patch.object(ralph_loop, "check_rate_limit", return_value=(False, "OK")):
-            with patch.object(ralph_loop, "check_token_budget", return_value=(False, "OK", 0)):
-                should_trip, msg = ralph_loop.check_circuit_breaker(state, "")
-                assert should_trip is True
-                assert "Max iterations" in msg
+        with (
+            patch.object(ralph_loop, "check_rate_limit", return_value=(False, "OK")),
+            patch.object(ralph_loop, "check_token_budget", return_value=(False, "OK", 0)),
+        ):
+            should_trip, msg = ralph_loop.check_circuit_breaker(state, "")
+            assert should_trip is True
+            assert "Max iterations" in msg
 
     def test_consecutive_errors_breaker(self):
         """Test consecutive errors circuit breaker."""
@@ -183,10 +185,12 @@ class TestCircuitBreakers:
 
         transcript_with_error = "error: something failed"
 
-        with patch.object(ralph_loop, "update_ralph_state"):
-            with patch.object(ralph_loop, "check_rate_limit", return_value=(False, "OK")):
-                with patch.object(ralph_loop, "check_token_budget", return_value=(False, "OK", 0)):
-                    should_trip, msg = ralph_loop.check_circuit_breaker(state, transcript_with_error)
+        with (
+            patch.object(ralph_loop, "update_ralph_state"),
+            patch.object(ralph_loop, "check_rate_limit", return_value=(False, "OK")),
+            patch.object(ralph_loop, "check_token_budget", return_value=(False, "OK", 0)),
+        ):
+            should_trip, msg = ralph_loop.check_circuit_breaker(state, transcript_with_error)
 
         # Should trip because this would be 3rd error
         assert should_trip is True
@@ -246,37 +250,39 @@ class TestIntegration:
         """Test complete state create/update/deactivate cycle."""
         state_file = tmp_path / "state.json"
 
-        with patch.object(ralph_loop, "RALPH_STATE", state_file):
-            with patch.object(ralph_loop, "METRICS_DIR", tmp_path):
-                with patch.object(ralph_loop, "RALPH_LOG", tmp_path / "ralph.jsonl"):
-                    # Create initial state
-                    state = ralph_loop.update_ralph_state(
-                        {
-                            "active": True,
-                            "original_prompt": "Test task",
-                            "iteration": 0,
-                            "started_at": datetime.now().isoformat(),
-                        }
-                    )
+        with (
+            patch.object(ralph_loop, "RALPH_STATE", state_file),
+            patch.object(ralph_loop, "METRICS_DIR", tmp_path),
+            patch.object(ralph_loop, "RALPH_LOG", tmp_path / "ralph.jsonl"),
+        ):
+            # Create initial state
+            state = ralph_loop.update_ralph_state(
+                {
+                    "active": True,
+                    "original_prompt": "Test task",
+                    "iteration": 0,
+                    "started_at": datetime.now().isoformat(),
+                }
+            )
 
-                    assert state["active"] is True
-                    assert "_checksum" in state
+            assert state["active"] is True
+            assert "_checksum" in state
 
-                    # Update iteration
-                    state = ralph_loop.update_ralph_state({"iteration": 1})
-                    assert state["iteration"] == 1
+            # Update iteration
+            state = ralph_loop.update_ralph_state({"iteration": 1})
+            assert state["iteration"] == 1
 
-                    # Verify backup was created
-                    backup_file = state_file.with_suffix(".json.bak")
-                    assert backup_file.exists()
+            # Verify backup was created
+            backup_file = state_file.with_suffix(".json.bak")
+            assert backup_file.exists()
 
-                    # Deactivate
-                    ralph_loop.deactivate_ralph("Test complete")
+            # Deactivate
+            ralph_loop.deactivate_ralph("Test complete")
 
-                    # Verify state shows inactive
-                    final_state = json.loads(state_file.read_text())
-                    assert final_state["active"] is False
-                    assert final_state["exit_reason"] == "Test complete"
+            # Verify state shows inactive
+            final_state = json.loads(state_file.read_text())
+            assert final_state["active"] is False
+            assert final_state["exit_reason"] == "Test complete"
 
 
 # =============================================================================
@@ -291,7 +297,7 @@ class TestVerificationScenarios:
         """Mock: Verify Opus review triggers on PR."""
         # This would be integration tested via actual PR
         # Mock version just verifies the workflow exists
-        workflow_path = Path("/media/sam/1TB/nautilus_dev/.github/workflows/code-review.yml")
+        Path("/media/sam/1TB/nautilus_dev/.github/workflows/code-review.yml")
         # In real test, verify file exists and has correct structure
         assert True  # Placeholder
 
@@ -303,13 +309,13 @@ class TestVerificationScenarios:
 
     def test_scenario_rollback_execution(self):
         """Mock: Verify rollback script works."""
-        rollback_script = Path("/media/sam/1TB/nautilus_dev/scripts/rollback.sh")
+        Path("/media/sam/1TB/nautilus_dev/scripts/rollback.sh")
         # In real test, verify script is executable and has correct logic
         assert True  # Placeholder
 
     def test_scenario_staging_deploy(self):
         """Mock: Verify staging deployment works."""
-        staging_compose = Path("/media/sam/1TB/nautilus_dev/config/staging/docker-compose.staging.yml")
+        Path("/media/sam/1TB/nautilus_dev/config/staging/docker-compose.staging.yml")
         # In real test, verify compose file is valid
         assert True  # Placeholder
 

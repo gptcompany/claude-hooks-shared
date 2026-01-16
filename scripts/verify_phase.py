@@ -262,10 +262,10 @@ def verify_phase_3() -> list[VerificationResult]:
         # Look for inline credentials (VAR="value" pattern before a command)
         has_inline_creds = False
         for line in crontab_content.split("\n"):
-            if not line.strip().startswith("#") and "DISCORD_WEBHOOK" in line:
-                if "=" in line and ("https://" in line or "http://" in line):
-                    has_inline_creds = True
-                    break
+            is_active = not line.strip().startswith("#") and "DISCORD_WEBHOOK" in line
+            if is_active and "=" in line and ("https://" in line or "http://" in line):
+                has_inline_creds = True
+                break
 
         if has_inline_creds:
             results.append(

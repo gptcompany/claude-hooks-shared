@@ -91,10 +91,7 @@ def is_new_session() -> bool:
 
         # Same repo?
         current_repo = get_repo_root()
-        if current_repo and state.get("repo_root") != current_repo:
-            return True
-
-        return False
+        return bool(current_repo and state.get("repo_root") != current_repo)
 
     except (json.JSONDecodeError, ValueError, OSError):
         return True
@@ -209,11 +206,10 @@ def get_previous_insights() -> str | None:
                 parts.append(f"{errors} err")
 
         # Git status
-        if git := data.get("git"):
-            if git.get("uncommitted"):
-                added = git.get("lines_added", 0)
-                removed = git.get("lines_removed", 0)
-                parts.append(f"uncommitted +{added}/-{removed}")
+        if (git := data.get("git")) and git.get("uncommitted"):
+            added = git.get("lines_added", 0)
+            removed = git.get("lines_removed", 0)
+            parts.append(f"uncommitted +{added}/-{removed}")
 
         # Delegation recommendation
         if data.get("delegation", {}).get("recommended"):

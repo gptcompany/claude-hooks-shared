@@ -29,11 +29,7 @@ def should_format(file_path):
         ".git/",
     ]
 
-    for skip_dir in skip_dirs:
-        if skip_dir in file_path:
-            return False
-
-    return True
+    return all(skip_dir not in file_path for skip_dir in skip_dirs)
 
 
 def format_file(file_path):

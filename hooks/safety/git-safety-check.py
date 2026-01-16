@@ -76,10 +76,7 @@ def is_protected_branch(branch):
 
 def check_force_push(command):
     """Detect force push attempts"""
-    if "--force" in command or "-f" in command:
-        if "push" in command:
-            return True
-    return False
+    return bool(("--force" in command or "-f" in command) and "push" in command)
 
 
 def check_branch_deletion(command):

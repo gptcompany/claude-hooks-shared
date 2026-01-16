@@ -10,6 +10,7 @@ After Bash commands with errors (exit code != 0), this hook:
 Enterprise integration for automated error correlation.
 """
 
+import contextlib
 import json
 import os
 import re
@@ -75,10 +76,8 @@ def update_cooldown(error_pattern: str) -> None:
 
         data = {}
         if COOLDOWN_FILE.exists():
-            try:
+            with contextlib.suppress(json.JSONDecodeError):
                 data = json.loads(COOLDOWN_FILE.read_text())
-            except json.JSONDecodeError:
-                pass
 
         # Keep only recent entries (last hour)
         now = datetime.now().timestamp()

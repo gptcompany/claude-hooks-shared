@@ -206,7 +206,6 @@ def get_multi_window_stats(project: str) -> MultiWindowStats:
 
     Returns MultiWindowStats with computed trends.
     """
-    project_filter = f"WHERE project = '{project}'" if project else ""
 
     # Query all_time stats first to get stddev for window calculation
     # Exclude 'unknown' session_id entries (data quality issue)
@@ -323,7 +322,7 @@ def find_similar_situations(
 
     situations = []
     for row in result["dataset"]:
-        situations.append(dict(zip(col_names, row)))
+        situations.append(dict(zip(col_names, row, strict=False)))
 
     return situations
 

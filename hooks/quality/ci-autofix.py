@@ -93,18 +93,12 @@ def get_test_key(command: str) -> str:
 
 def is_ci_command(command: str) -> bool:
     """Check if command is a CI/test command."""
-    for pattern in CI_COMMAND_PATTERNS:
-        if re.search(pattern, command, re.IGNORECASE):
-            return True
-    return False
+    return any(re.search(pattern, command, re.IGNORECASE) for pattern in CI_COMMAND_PATTERNS)
 
 
 def has_failure(output: str) -> bool:
     """Check if output contains failure indicators."""
-    for pattern in FAILURE_PATTERNS:
-        if re.search(pattern, output, re.IGNORECASE):
-            return True
-    return False
+    return any(re.search(pattern, output, re.IGNORECASE) for pattern in FAILURE_PATTERNS)
 
 
 def extract_error_context(output: str, command: str) -> dict:
@@ -271,11 +265,8 @@ def main():
         )
 
         # Output message for Claude to see
-        result = {
-            "continue": True,
-            "message": f"CI failure detected (attempt {retry_count}/{MAX_RETRIES}). Auto-retry in {delay}s recommended.\n"
-            f"Run the command again: {command}",
-        }
+        msg = f"CI failure detected (attempt {retry_count}/{MAX_RETRIES}). Auto-retry in {delay}s recommended."
+        result = {"continue": True, "message": f"{msg}\nRun the command again: {command}"}
         print(json.dumps(result))
 
     else:

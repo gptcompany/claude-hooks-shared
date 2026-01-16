@@ -13,6 +13,7 @@ Checks:
 - All checks green
 """
 
+import contextlib
 import json
 import re
 import subprocess
@@ -59,10 +60,8 @@ def update_cooldown(pr_number: int) -> None:
         COOLDOWN_FILE.parent.mkdir(parents=True, exist_ok=True)
         data = {}
         if COOLDOWN_FILE.exists():
-            try:
+            with contextlib.suppress(json.JSONDecodeError):
                 data = json.loads(COOLDOWN_FILE.read_text())
-            except json.JSONDecodeError:
-                pass
         # Clean old entries
         now = datetime.now().timestamp()
         data = {k: v for k, v in data.items() if now - v < 3600}

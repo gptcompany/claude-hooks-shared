@@ -12,6 +12,7 @@ Produces unified: session_insights.json
 The SSOT is then read by session_start_tracker.py on next session start.
 """
 
+import contextlib
 import json
 import sys
 from datetime import datetime
@@ -61,10 +62,8 @@ def main():
                     "agents": context_data["suggested_agents"],
                 }
             # Cleanup temp file
-            try:
+            with contextlib.suppress(Exception):
                 CONTEXT_STATS_FILE.unlink()
-            except Exception:
-                pass
 
         # 2. Read tips (from session-summary.py)
         if tips_data := load_json_safe(TIPS_FILE):

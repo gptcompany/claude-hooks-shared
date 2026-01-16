@@ -47,7 +47,253 @@
       "timestamp": "2026-01-16T23:42:14.988469",
       "command": "ruff check hooks/intelligence/framework-detector.py services/ai_validation_service.py 2>&1",
       "description": "Check lint on the files in this PR"
+    },
+    {
+      "operation": "bash",
+      "timestamp": "2026-01-16T23:42:29.844067",
+      "command": "git diff --name-only HEAD~1 2>/dev/null || git diff --name-only",
+      "description": "Check which files are actually changed"
+    },
+    {
+      "operation": "bash",
+      "timestamp": "2026-01-16T23:42:33.386251",
+      "command": "git status --short",
+      "description": "Check current git status"
+    },
+    {
+      "operation": "bash",
+      "timestamp": "2026-01-16T23:42:37.184692",
+      "command": "git diff hooks/intelligence/framework-detector.py",
+      "description": "Check diff of framework-detector.py"
+    },
+    {
+      "operation": "bash",
+      "timestamp": "2026-01-16T23:42:40.425247",
+      "command": "git diff HEAD hooks/intelligence/framework-detector.py",
+      "description": "Check diff against HEAD"
+    },
+    {
+      "operation": "bash",
+      "timestamp": "2026-01-16T23:42:44.004592",
+      "command": "head -25 hooks/intelligence/framework-detector.py",
+      "description": "Check file contents"
+    },
+    {
+      "operation": "glob",
+      "timestamp": "2026-01-16T23:42:48.264143",
+      "pattern": "**/*ci*.{yml,yaml,json}"
+    },
+    {
+      "operation": "read",
+      "timestamp": "2026-01-16T23:42:51.501447",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/.github/workflows/ci.yml"
+    },
+    {
+      "operation": "read",
+      "timestamp": "2026-01-16T23:42:54.656977",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/.github/workflows/_reusable-lint.yml"
+    },
+    {
+      "operation": "bash",
+      "timestamp": "2026-01-16T23:43:00.498285",
+      "command": "ruff check . --fix --select=E,F,W,I,UP,B,SIM 2>&1 | tail -20",
+      "description": "Auto-fix lint errors with ruff"
+    },
+    {
+      "operation": "bash",
+      "timestamp": "2026-01-16T23:43:09.225887",
+      "command": "ruff check . --select=E,F,W,I,UP,B,SIM 2>&1 | wc -l",
+      "description": "Count remaining lint errors"
+    },
+    {
+      "operation": "bash",
+      "timestamp": "2026-01-16T23:43:13.142382",
+      "command": "ruff check . --select=E,F,W,I,UP,B,SIM 2>&1 | grep -E \"^[A-Z]\" | sort | uniq -c | sort -rn | head -20",
+      "description": "Count by error type"
+    },
+    {
+      "operation": "bash",
+      "timestamp": "2026-01-16T23:43:17.507291",
+      "command": "ruff check . --fix --unsafe-fixes --select=E,F,W,I,UP,B,SIM 2>&1 | tail -30",
+      "description": "Apply unsafe fixes to lint errors"
+    },
+    {
+      "operation": "bash",
+      "timestamp": "2026-01-16T23:43:20.858489",
+      "command": "ruff check . --select=E,F,W,I,UP,B,SIM 2>&1",
+      "description": "Check remaining lint errors"
+    },
+    {
+      "operation": "read",
+      "timestamp": "2026-01-16T23:43:25.880149",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/hooks/ux/session-summary.py"
+    },
+    {
+      "operation": "read",
+      "timestamp": "2026-01-16T23:43:29.426276",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/hooks/ux/session-summary.py"
+    },
+    {
+      "operation": "edit",
+      "timestamp": "2026-01-16T23:43:33.389118",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/hooks/ux/session-summary.py",
+      "old_string": "import json\nimport subprocess\nimport sys\nfrom datetime import datetime\nfrom pathlib import Path"
+    },
+    {
+      "operation": "edit",
+      "timestamp": "2026-01-16T23:43:38.472229",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/hooks/ux/session-summary.py",
+      "old_string": "    if EXPORT_SCRIPT.exists():\n        try:\n            subprocess.Popen(\n                [\"python3\"..."
+    },
+    {
+      "operation": "read",
+      "timestamp": "2026-01-16T23:43:42.474764",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/scripts/context-monitor.py"
+    },
+    {
+      "operation": "edit",
+      "timestamp": "2026-01-16T23:43:47.158412",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/scripts/context-monitor.py",
+      "old_string": "            # Color based on context usage\n            percent = context_info.get(\"percent\", 0)\n    ..."
+    },
+    {
+      "operation": "edit",
+      "timestamp": "2026-01-16T23:43:52.155481",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/scripts/context-monitor.py",
+      "old_string": "        if duration_ms > 0:\n            minutes = duration_ms / 60000\n            if minutes >= 30:\n..."
+    },
+    {
+      "operation": "read",
+      "timestamp": "2026-01-16T23:43:56.218554",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/scripts/context-monitor.py"
+    },
+    {
+      "operation": "read",
+      "timestamp": "2026-01-16T23:43:59.719991",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/scripts/context-monitor.py"
+    },
+    {
+      "operation": "edit",
+      "timestamp": "2026-01-16T23:44:04.458430",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/scripts/context-monitor.py",
+      "old_string": "    except Exception as e:\n        # Fallback display on any error\n        print(\n            f\"\\033..."
+    },
+    {
+      "operation": "read",
+      "timestamp": "2026-01-16T23:44:08.145237",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/database/init_db.py"
+    },
+    {
+      "operation": "edit",
+      "timestamp": "2026-01-16T23:44:12.446513",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/database/init_db.py",
+      "old_string": "CREATE INDEX IF NOT EXISTS idx_sessions_flags ON sessions(needs_manual_review, high_cost_alert, patt..."
+    },
+    {
+      "operation": "read",
+      "timestamp": "2026-01-16T23:44:16.199607",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/hooks/productivity/architecture-validator.py"
+    },
+    {
+      "operation": "edit",
+      "timestamp": "2026-01-16T23:44:20.573526",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/hooks/productivity/architecture-validator.py",
+      "old_string": "3. {\"Update ARCHITECTURE.md if new patterns/components detected\" if mode == \"VALIDATE\" else \"Create ..."
+    },
+    {
+      "operation": "read",
+      "timestamp": "2026-01-16T23:44:24.380192",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/hooks/productivity/task-classifier-v2.py"
+    },
+    {
+      "operation": "edit",
+      "timestamp": "2026-01-16T23:44:29.337961",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/hooks/productivity/task-classifier-v2.py",
+      "old_string": "        # NOTIFY USER about Ralph activation\n        notify_user(\n            f\"[Task Classifier] Ra..."
+    },
+    {
+      "operation": "edit",
+      "timestamp": "2026-01-16T23:44:34.863878",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/hooks/productivity/task-classifier-v2.py",
+      "old_string": "    # For lower confidence or other modes - add context (not block)\n    mode_info = {\n        \"ralph..."
+    },
+    {
+      "operation": "read",
+      "timestamp": "2026-01-16T23:44:38.701683",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/hooks/quality/ci-autofix.py"
+    },
+    {
+      "operation": "edit",
+      "timestamp": "2026-01-16T23:44:43.616634",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/hooks/quality/ci-autofix.py",
+      "old_string": "        # Output message for Claude to see\n        result = {\n            \"continue\": True,\n        ..."
+    },
+    {
+      "operation": "read",
+      "timestamp": "2026-01-16T23:44:47.872298",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/scripts/session_manager.py"
+    },
+    {
+      "operation": "edit",
+      "timestamp": "2026-01-16T23:44:52.975726",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/scripts/session_manager.py",
+      "old_string": "        except psycopg2.Error as e:\n            raise ConnectionError(\n                f\"Failed to c..."
+    },
+    {
+      "operation": "read",
+      "timestamp": "2026-01-16T23:44:56.935837",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/scripts/session_manager.py"
+    },
+    {
+      "operation": "edit",
+      "timestamp": "2026-01-16T23:45:01.785062",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/scripts/session_manager.py",
+      "old_string": "            cursor.execute(\n                \"\"\"\n                INSERT INTO tool_usage (session_id, ..."
+    },
+    {
+      "operation": "read",
+      "timestamp": "2026-01-16T23:45:06.145966",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/scripts/verify_phase.py"
+    },
+    {
+      "operation": "edit",
+      "timestamp": "2026-01-16T23:45:10.913001",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/scripts/verify_phase.py",
+      "old_string": "        for line in crontab_content.split(\"\\n\"):\n            if not line.strip().startswith(\"#\") and..."
+    },
+    {
+      "operation": "read",
+      "timestamp": "2026-01-16T23:45:15.396255",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/tests/hooks/test_ralph_loop.py"
+    },
+    {
+      "operation": "edit",
+      "timestamp": "2026-01-16T23:45:20.651439",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/tests/hooks/test_ralph_loop.py",
+      "old_string": "        # Mock rate limit and token budget checks to pass\n        with patch.object(ralph_loop, \"che..."
+    },
+    {
+      "operation": "edit",
+      "timestamp": "2026-01-16T23:45:26.685685",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/tests/hooks/test_ralph_loop.py",
+      "old_string": "        with patch.object(ralph_loop, \"update_ralph_state\"):\n            with patch.object(ralph_loo..."
+    },
+    {
+      "operation": "read",
+      "timestamp": "2026-01-16T23:45:30.621994",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/tests/hooks/test_ralph_loop.py"
+    },
+    {
+      "operation": "read",
+      "timestamp": "2026-01-16T23:45:34.111545",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/tests/hooks/test_ralph_loop.py"
+    },
+    {
+      "operation": "edit",
+      "timestamp": "2026-01-16T23:45:41.886747",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/tests/hooks/test_ralph_loop.py",
+      "old_string": "        with patch.object(ralph_loop, \"RALPH_STATE\", state_file):\n            with patch.object(ralp..."
     }
   ],
-  "last_updated": "2026-01-16T23:42:14.988490"
+  "last_updated": "2026-01-16T23:45:41.886765"
 }

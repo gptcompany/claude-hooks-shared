@@ -33,7 +33,6 @@ import sys
 import threading
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Optional
 
 # Configuration
 MAX_FAILURES = 3
@@ -55,7 +54,7 @@ def _load_state() -> dict:
     if not STATE_FILE.exists():
         return {"hooks": {}, "disabled_until": {}}
     try:
-        with open(STATE_FILE, "r") as f:
+        with open(STATE_FILE) as f:
             return json.load(f)
     except (json.JSONDecodeError, OSError):
         return {"hooks": {}, "disabled_until": {}}
@@ -109,7 +108,7 @@ class HookHealth:
 
         return False
 
-    def get_disable_reason(self) -> Optional[str]:
+    def get_disable_reason(self) -> str | None:
         """Get reason for disable if disabled."""
         state = self._get_state()
         hook_data = state.get("hooks", {}).get(self.hook_name, {})

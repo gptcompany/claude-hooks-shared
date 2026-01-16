@@ -11,7 +11,6 @@ Provides:
 
 import math
 from dataclasses import dataclass
-from typing import Optional
 
 
 @dataclass
@@ -123,14 +122,14 @@ def calculate_trend(values: list[float]) -> dict:
     y_mean = sum(values) / n
 
     # Calculate slope (linear regression)
-    numerator = sum((x - x_mean) * (y - y_mean) for x, y in zip(x_values, values))
+    numerator = sum((x - x_mean) * (y - y_mean) for x, y in zip(x_values, values, strict=False))
     denominator = sum((x - x_mean) ** 2 for x in x_values)
 
     slope = numerator / denominator if denominator != 0 else 0
 
     # Calculate R-squared for confidence
     y_pred = [slope * x + (y_mean - slope * x_mean) for x in x_values]
-    ss_res = sum((y - yp) ** 2 for y, yp in zip(values, y_pred))
+    ss_res = sum((y - yp) ** 2 for y, yp in zip(values, y_pred, strict=False))
     ss_tot = sum((y - y_mean) ** 2 for y in values)
     r_squared = 1 - (ss_res / ss_tot) if ss_tot != 0 else 0
 
@@ -178,7 +177,7 @@ def z_score_to_confidence(z: float, base_confidence: float = 0.5) -> float:
 def compare_to_benchmark(
     value: float,
     elite_threshold: float,
-    good_threshold: Optional[float] = None,
+    good_threshold: float | None = None,
     higher_is_better: bool = False,
 ) -> dict:
     """

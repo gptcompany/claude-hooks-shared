@@ -89,11 +89,7 @@ def should_check_file(file_path: str) -> bool:
             return False
 
     # Check if in production path
-    for prod_path in PRODUCTION_PATHS:
-        if prod_path in path_str:
-            return True
-
-    return False
+    return any(prod_path in path_str for prod_path in PRODUCTION_PATHS)
 
 
 def find_test_file(file_path: str) -> Path | None:

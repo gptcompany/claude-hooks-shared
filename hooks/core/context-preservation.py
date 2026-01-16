@@ -72,7 +72,7 @@ def get_context_percentage(estimated_tokens: int) -> int:
 def format_agent_suggestions() -> str:
     """Format agent suggestions as readable list."""
     lines = ["Suggested agents for delegation:"]
-    for key, (agent, desc) in AGENT_SUGGESTIONS.items():
+    for _key, (agent, desc) in AGENT_SUGGESTIONS.items():
         lines.append(f"  - {agent}: {desc}")
     return "\n".join(lines)
 

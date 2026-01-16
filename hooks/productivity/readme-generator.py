@@ -113,20 +113,14 @@ def get_commit_count_since_readme_change() -> int:
 
 def should_exclude_file(file: str) -> bool:
     """Check if file should be excluded from triggering."""
-    for pattern in EXCLUDE_PATTERNS:
-        if re.search(pattern, file):
-            return True
-    return False
+    return any(re.search(pattern, file) for pattern in EXCLUDE_PATTERNS)
 
 
 def is_readme_relevant(file: str) -> bool:
     """Check if file is README-relevant."""
     if should_exclude_file(file):
         return False
-    for pattern in README_TRIGGER_PATTERNS:
-        if re.search(pattern, file):
-            return True
-    return False
+    return any(re.search(pattern, file) for pattern in README_TRIGGER_PATTERNS)
 
 
 def has_readme_relevant_changes(files: list[str]) -> bool:

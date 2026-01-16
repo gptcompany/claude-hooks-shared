@@ -96,7 +96,7 @@ class ClaudeSessionManager:
                 f"Connection string: {self.db_url}\n"
                 f"Error: {e}\n"
                 f"Hint: Run 'python3 .claude/scripts/init_db.py' to create database schema."
-            )
+            ) from e
 
     def create_session(self, session_id, git_branch=None, task=None):
         """Initialize new session record."""
@@ -128,7 +128,8 @@ class ClaudeSessionManager:
 
             cursor.execute(
                 """
-                INSERT INTO tool_usage (session_id, project_name, tool_name, tool_params, timestamp, duration_ms, success, error)
+                INSERT INTO tool_usage
+                    (session_id, project_name, tool_name, tool_params, timestamp, duration_ms, success, error)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             """,
                 (

@@ -17,6 +17,7 @@ Tables written:
 - claude_swarm_metrics: Swarm performance from SQLite
 """
 
+import contextlib
 import json
 import socket
 import sqlite3
@@ -271,10 +272,8 @@ def sync_agent_models(repo_path: Path, repo_name: str) -> list[str]:
 def main():
     """Main sync function - called as Stop hook."""
     # Read hook input (not used for sync, but required for hook protocol)
-    try:
+    with contextlib.suppress(Exception):
         json.load(sys.stdin)
-    except Exception:
-        pass
 
     all_lines = []
     synced_sources = []

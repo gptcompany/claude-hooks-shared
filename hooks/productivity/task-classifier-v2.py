@@ -247,9 +247,8 @@ def main():
         )
 
         # NOTIFY USER about Ralph activation
-        notify_user(
-            f"[Task Classifier] Ralph mode AUTO-ACTIVATED (confidence: {confidence:.0%}, keywords: {', '.join(keywords[:3])})"
-        )
+        kw_str = ", ".join(keywords[:3])
+        notify_user(f"[Task Classifier] Ralph mode AUTO-ACTIVATED (confidence: {confidence:.0%}, keywords: {kw_str})")
 
         enhanced = f"""{prompt}
 
@@ -278,10 +277,11 @@ Type "STOP RALPH" to exit | "RALPH STATUS" for info
         sys.exit(0)
 
     # For lower confidence or other modes - add context (not block)
+    kw_display = ", ".join(keywords[:3])
     mode_info = {
-        "ralph": f"Task appears mechanical (Ralph candidate). Keywords: {', '.join(keywords[:3])}. Say 'use ralph mode' to activate.",
-        "specialist": f"Specialist task detected. Keywords: {', '.join(keywords[:3])}",
-        "alpha-evolve": f"Design task detected. Consider multiple approaches. Keywords: {', '.join(keywords[:3])}",
+        "ralph": f"Task appears mechanical (Ralph candidate). Keywords: {kw_display}. Say 'use ralph mode' to activate.",
+        "specialist": f"Specialist task detected. Keywords: {kw_display}",
+        "alpha-evolve": f"Design task detected. Consider multiple approaches. Keywords: {kw_display}",
     }
 
     context = mode_info.get(mode, "")

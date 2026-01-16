@@ -16,6 +16,7 @@ ENV VARIABLES:
     QUESTDB_ILP_PORT: QuestDB ILP port (default: 9009)
 """
 
+import contextlib
 import os
 import socket
 import sys
@@ -62,10 +63,8 @@ def _reset_socket():
     global _socket
     with _socket_lock:
         if _socket:
-            try:
+            with contextlib.suppress(Exception):
                 _socket.close()
-            except Exception:
-                pass
             _socket = None
 
 

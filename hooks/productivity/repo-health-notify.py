@@ -33,7 +33,7 @@ def count_pycache_fast(repo: Path) -> int:
     """Count __pycache__ directories (fast, skips heavy dirs)."""
     count = 0
     try:
-        for root, dirs, _ in os.walk(repo):
+        for _root, dirs, _ in os.walk(repo):
             # Skip heavy directories
             dirs[:] = [d for d in dirs if d not in SKIP_DIRS]
             if "__pycache__" in dirs:

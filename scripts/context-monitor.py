@@ -46,7 +46,7 @@ def parse_context_from_transcript(transcript_path):
         return None
 
     try:
-        with open(transcript_path, "r", encoding="utf-8", errors="replace") as f:
+        with open(transcript_path, encoding="utf-8", errors="replace") as f:
             lines = f.readlines()
 
         # Track totals for persistence (PRIMARY GOAL)
@@ -433,10 +433,7 @@ def get_session_metrics(cost_data, context_info=None):
             token_str = format_token_count(total_tokens)
             # Color based on context usage
             percent = context_info.get("percent", 0)
-            if percent >= 75:
-                token_color = "\033[33m"  # Yellow for high usage
-            else:
-                token_color = "\033[36m"  # Cyan for normal
+            token_color = "\033[33m" if percent >= 75 else "\033[36m"  # Yellow/Cyan
             metrics.append(f"{token_color}📊 {token_str}\033[0m")
 
     # Cost
@@ -457,15 +454,8 @@ def get_session_metrics(cost_data, context_info=None):
         duration_ms = cost_data.get("total_duration_ms", 0)
         if duration_ms > 0:
             minutes = duration_ms / 60000
-            if minutes >= 30:
-                duration_color = "\033[33m"  # Yellow for long sessions
-            else:
-                duration_color = "\033[32m"  # Green
-
-            if minutes < 1:
-                duration_str = f"{duration_ms // 1000}s"
-            else:
-                duration_str = f"{minutes:.0f}m"
+            duration_color = "\033[33m" if minutes >= 30 else "\033[32m"  # Yellow/Green
+            duration_str = f"{duration_ms // 1000}s" if minutes < 1 else f"{minutes:.0f}m"
 
             metrics.append(f"{duration_color}⏱ {duration_str}\033[0m")
 
@@ -533,9 +523,8 @@ def main():
 
     except Exception as e:
         # Fallback display on any error
-        print(
-            f"\033[94m[Claude]\033[0m \033[93m📁 {os.path.basename(os.getcwd())}\033[0m 🧠 \033[31m[Error: {str(e)[:20]}]\033[0m"
-        )
+        cwd = os.path.basename(os.getcwd())
+        print(f"\033[94m[Claude]\033[0m \033[93m📁 {cwd}\033[0m 🧠 \033[31m[Error: {str(e)[:20]}]\033[0m")
 
 
 if __name__ == "__main__":

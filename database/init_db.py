@@ -46,7 +46,8 @@ CREATE TABLE IF NOT EXISTS sessions (
 CREATE INDEX IF NOT EXISTS idx_sessions_started_at ON sessions(started_at DESC);
 CREATE INDEX IF NOT EXISTS idx_sessions_outcome ON sessions(outcome);
 CREATE INDEX IF NOT EXISTS idx_sessions_git_branch ON sessions(git_branch);
-CREATE INDEX IF NOT EXISTS idx_sessions_flags ON sessions(needs_manual_review, high_cost_alert, pattern_alert) WHERE (needs_manual_review OR high_cost_alert OR pattern_alert);
+CREATE INDEX IF NOT EXISTS idx_sessions_flags ON sessions(needs_manual_review, high_cost_alert, pattern_alert)
+    WHERE (needs_manual_review OR high_cost_alert OR pattern_alert);
 CREATE INDEX IF NOT EXISTS idx_sessions_summary_gin ON sessions USING GIN(summary);
 
 -- tool_usage table

@@ -303,10 +303,7 @@ def main():
 
     # Calculate weighted total
     total_weight = sum(WEIGHTS[k] for k in active_scores)
-    if total_weight > 0:
-        total_score = sum(scores[k] * WEIGHTS[k] for k in active_scores) / total_weight
-    else:
-        total_score = 0
+    total_score = sum(scores[k] * WEIGHTS[k] for k in active_scores) / total_weight if total_weight > 0 else 0
 
     # Get project and git info
     project = detect_project()

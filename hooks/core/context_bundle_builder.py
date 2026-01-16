@@ -69,7 +69,7 @@ def load_or_create_bundle(input_data):
 
     if bundle_path.exists():
         try:
-            with open(bundle_path, "r", encoding="utf-8") as f:
+            with open(bundle_path, encoding="utf-8") as f:
                 return json.load(f), bundle_path
         except Exception:
             pass

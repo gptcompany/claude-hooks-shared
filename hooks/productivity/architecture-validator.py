@@ -91,20 +91,14 @@ def get_last_commit_files() -> list[str]:
 
 def should_exclude_file(file: str) -> bool:
     """Check if file should be excluded from triggering."""
-    for pattern in EXCLUDE_PATTERNS:
-        if re.search(pattern, file):
-            return True
-    return False
+    return any(re.search(pattern, file) for pattern in EXCLUDE_PATTERNS)
 
 
 def is_architecture_relevant(file: str) -> bool:
     """Check if file is architecture-relevant."""
     if should_exclude_file(file):
         return False
-    for pattern in ARCHITECTURE_TRIGGER_PATTERNS:
-        if re.search(pattern, file):
-            return True
-    return False
+    return any(re.search(pattern, file) for pattern in ARCHITECTURE_TRIGGER_PATTERNS)
 
 
 def has_architecture_relevant_changes(files: list[str]) -> bool:
@@ -225,7 +219,7 @@ subagent with subagent_type='architecture-validator'.
 The agent will:
 1. {"Read and parse existing " + arch_path if mode == "VALIDATE" else "Analyze codebase to generate ARCHITECTURE.md"}
 2. Analyze commit changes for architectural impact
-3. {"Update ARCHITECTURE.md if new patterns/components detected" if mode == "VALIDATE" else "Create comprehensive ARCHITECTURE.md with ASCII diagrams"}
+3. {"Update ARCHITECTURE.md if new patterns detected" if mode == "VALIDATE" else "Create comprehensive ARCHITECTURE.md"}
 4. Produce validation report (PASS/WARN/FAIL)
 
 Provide this context to the agent:
