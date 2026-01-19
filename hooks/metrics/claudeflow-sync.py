@@ -22,7 +22,7 @@ import json
 import socket
 import sqlite3
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 QUESTDB_HOST = "localhost"
@@ -269,6 +269,109 @@ def sync_agent_models(repo_path: Path, repo_name: str) -> list[str]:
     return lines
 
 
+# MCP data directory (where MCP tools actually save)
+MCP_DATA_DIR = Path.home() / ".claude-flow"
+
+
+def sync_mcp_data() -> list[str]:
+    """Sync data from MCP tools stored in ~/.claude-flow/."""
+    lines = []
+    ts_now = int(datetime.now(tz=timezone.utc).timestamp() * 1e9)
+
+    # 1. Sync agents
+    agents_file = MCP_DATA_DIR / "agents" / "store.json"
+    if agents_file.exists():
+        try:
+            data = json.loads(agents_file.read_text())
+            for agent_id, agent in data.get("agents", {}).items():
+                agent_type = escape_tag(agent.get("agentType", "unknown"))
+                status = escape_tag(agent.get("status", "unknown"))
+                model = escape_tag(agent.get("model", "unknown"))
+                health = agent.get("health", 0)
+                task_count = agent.get("taskCount", 0)
+
+                lines.append(
+                    f"claude_mcp_agents,"
+                    f"agent_type={agent_type},"
+                    f"status={status},"
+                    f"model={model} "
+                    f"health={health},"
+                    f"task_count={task_count}i "
+                    f"{ts_now}"
+                )
+        except Exception:
+            pass
+
+    # 2. Sync tasks
+    tasks_file = MCP_DATA_DIR / "tasks" / "store.json"
+    if tasks_file.exists():
+        try:
+            data = json.loads(tasks_file.read_text())
+            for task_id, task in data.get("tasks", {}).items():
+                task_type = escape_tag(task.get("type", "unknown"))
+                status = escape_tag(task.get("status", "unknown"))
+                priority = escape_tag(task.get("priority", "normal"))
+                progress = task.get("progress", 0)
+
+                lines.append(
+                    f"claude_mcp_tasks,"
+                    f"task_type={task_type},"
+                    f"status={status},"
+                    f"priority={priority} "
+                    f"progress={progress}i "
+                    f"{ts_now}"
+                )
+        except Exception:
+            pass
+
+    # 3. Sync system metrics
+    system_file = MCP_DATA_DIR / "system" / "metrics.json"
+    if system_file.exists():
+        try:
+            data = json.loads(system_file.read_text())
+            health = data.get("health", 0)
+            cpu = data.get("cpu", 0)
+            mem = data.get("memory", {})
+            mem_used = mem.get("used", 0)
+            mem_total = mem.get("total", 1)
+            mem_pct = (mem_used / mem_total * 100) if mem_total > 0 else 0
+
+            agents_active = data.get("agents", {}).get("active", 0)
+            agents_total = data.get("agents", {}).get("total", 0)
+            tasks_pending = data.get("tasks", {}).get("pending", 0)
+            tasks_completed = data.get("tasks", {}).get("completed", 0)
+            tasks_failed = data.get("tasks", {}).get("failed", 0)
+
+            lines.append(
+                f"claude_mcp_system "
+                f"health={health},"
+                f"cpu={cpu},"
+                f"memory_pct={mem_pct},"
+                f"agents_active={agents_active}i,"
+                f"agents_total={agents_total}i,"
+                f"tasks_pending={tasks_pending}i,"
+                f"tasks_completed={tasks_completed}i,"
+                f"tasks_failed={tasks_failed}i "
+                f"{ts_now}"
+            )
+        except Exception:
+            pass
+
+    # 4. Sync memory entries count
+    memory_file = MCP_DATA_DIR / "memory" / "store.json"
+    if memory_file.exists():
+        try:
+            data = json.loads(memory_file.read_text())
+            entries = data.get("entries", {})
+            entry_count = len(entries)
+
+            lines.append(f"claude_mcp_memory entry_count={entry_count}i {ts_now}")
+        except Exception:
+            pass
+
+    return lines
+
+
 def main():
     """Main sync function - called as Stop hook."""
     # Read hook input (not used for sync, but required for hook protocol)
@@ -284,7 +387,13 @@ def main():
         all_lines.extend(sqlite_lines)
         synced_sources.append("sqlite:global")
 
-    # 2. Sync from per-repo JSON (fallback/additional)
+    # 2. Sync from MCP data directory (~/.claude-flow/)
+    mcp_lines = sync_mcp_data()
+    if mcp_lines:
+        all_lines.extend(mcp_lines)
+        synced_sources.append("mcp:global")
+
+    # 3. Sync from per-repo JSON (fallback/additional)
     for repo_path_str, repo_name in REPOS.items():
         repo_path = Path(repo_path_str)
         cf_dir = repo_path / ".claude-flow"
@@ -308,7 +417,8 @@ def main():
         "synced_sources": synced_sources,
         "lines_sent": sent,
         "sqlite_db": str(GLOBAL_DB) if GLOBAL_DB.exists() else None,
-        "timestamp": datetime.utcnow().isoformat(),
+        "mcp_dir": str(MCP_DATA_DIR) if MCP_DATA_DIR.exists() else None,
+        "timestamp": datetime.now(tz=timezone.utc).isoformat(),
     }
 
     print(json.dumps(result))
