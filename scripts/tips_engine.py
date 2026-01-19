@@ -247,6 +247,7 @@ class IndustryDefaults:
         "/speckit.specify": 0.70,
         "/speckit.clarify": 0.80,
         "/speckit.tasks": 0.70,
+        "/code-simplifier": 0.85,
     }
 
     @classmethod
@@ -378,6 +379,18 @@ COMMAND_REGISTRY = {
             },
         ],
         "selection_priority": ["cost", "success_rate"],
+    },
+    "simplification": {
+        "commands": [
+            {
+                "name": "/code-simplifier",
+                "risk": "low",
+                "cost": "medium-high",  # Uses Opus
+                "success_baseline": 0.85,
+                "when": "high rework, long session, code churn",
+            },
+        ],
+        "selection_priority": ["success_rate", "risk"],
     },
 }
 
@@ -610,6 +623,25 @@ PATTERN_RULES = [
         condition=lambda curr, hist: (curr.test_runs >= 3 and curr.test_pass_rate < 0.60),
         message_builder=lambda curr, hist: f"Low test pass rate: {curr.test_pass_rate:.0%}",
         fallback_command="/tdd:red",
+    ),
+    PatternRule(
+        name="code_needs_simplification",
+        category="simplification",
+        evidence="Cyclomatic complexity spike detected. Refactor before technical debt compounds.",
+        condition=lambda curr, hist: (
+            # High rework suggests confusing code
+            (curr.rework_rate > 0.25 and curr.file_edits >= 5)
+            # Or long session with many edits
+            or (curr.duration_seconds > 1200 and curr.file_edits > 10)
+            # Or many lines changed (complex changes)
+            or (curr.lines_changed > 300 and curr.rework_rate > 0.15)
+        ),
+        message_builder=lambda curr, hist: (
+            f"Entropy rising: {curr.rework_rate:.0%} churn across {curr.file_edits} files"
+            if curr.rework_rate > 0.25
+            else f"Deep session ({curr.duration_seconds // 60}min) - {curr.file_edits} mutations detected"
+        ),
+        fallback_command="/code-simplifier",
     ),
 ]
 
