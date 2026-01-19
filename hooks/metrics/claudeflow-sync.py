@@ -22,8 +22,11 @@ import json
 import socket
 import sqlite3
 import sys
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
+
+# Python 3.10 compatibility (datetime.UTC added in 3.11)
+UTC = timezone.utc
 
 QUESTDB_HOST = "localhost"
 QUESTDB_PORT = 9009
