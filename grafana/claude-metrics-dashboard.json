@@ -1,0 +1,531 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "links": [],
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 0},
+      "id": 100,
+      "panels": [],
+      "title": "📊 Overview",
+      "type": "row"
+    },
+    {
+      "datasource": {"type": "questdb-questdb-datasource", "uid": "P2596F1C8E12435D2"},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+          "unit": "short"
+        }
+      },
+      "gridPos": {"h": 4, "w": 4, "x": 0, "y": 1},
+      "id": 1,
+      "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "targets": [{"rawSql": "SELECT count() as total FROM claude_sessions WHERE timestamp > dateadd('d', -7, now())", "refId": "A", "format": "table"}],
+      "title": "Sessions (7d)",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "questdb-questdb-datasource", "uid": "P2596F1C8E12435D2"},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 0.05}, {"color": "red", "value": 0.1}]},
+          "unit": "percentunit"
+        }
+      },
+      "gridPos": {"h": 4, "w": 4, "x": 4, "y": 1},
+      "id": 2,
+      "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["mean"], "fields": "", "values": false}, "textMode": "auto"},
+      "targets": [{"rawSql": "SELECT avg(error_rate) FROM claude_sessions WHERE timestamp > dateadd('d', -7, now())", "refId": "A", "format": "table"}],
+      "title": "Avg Error Rate (7d)",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "questdb-questdb-datasource", "uid": "P2596F1C8E12435D2"},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 5}, {"color": "red", "value": 20}]},
+          "unit": "currencyUSD"
+        }
+      },
+      "gridPos": {"h": 4, "w": 4, "x": 8, "y": 1},
+      "id": 3,
+      "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["sum"], "fields": "", "values": false}, "textMode": "auto"},
+      "targets": [{"rawSql": "SELECT sum(cost_usd) FROM claude_sessions WHERE timestamp > dateadd('d', -7, now())", "refId": "A", "format": "table"}],
+      "title": "Total Cost (7d)",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "questdb-questdb-datasource", "uid": "P2596F1C8E12435D2"},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+          "unit": "short"
+        }
+      },
+      "gridPos": {"h": 4, "w": 4, "x": 12, "y": 1},
+      "id": 4,
+      "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["sum"], "fields": "", "values": false}, "textMode": "auto"},
+      "targets": [{"rawSql": "SELECT sum(tool_calls) FROM claude_sessions WHERE timestamp > dateadd('d', -7, now())", "refId": "A", "format": "table"}],
+      "title": "Tool Calls (7d)",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "questdb-questdb-datasource", "uid": "P2596F1C8E12435D2"},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 0.15}, {"color": "red", "value": 0.25}]},
+          "unit": "percentunit"
+        }
+      },
+      "gridPos": {"h": 4, "w": 4, "x": 16, "y": 1},
+      "id": 5,
+      "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["mean"], "fields": "", "values": false}, "textMode": "auto"},
+      "targets": [{"rawSql": "SELECT avg(rework_rate) FROM claude_sessions WHERE timestamp > dateadd('d', -7, now()) AND rework_rate > 0", "refId": "A", "format": "table"}],
+      "title": "Avg Rework Rate (7d)",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "questdb-questdb-datasource", "uid": "P2596F1C8E12435D2"},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "yellow", "value": 0.7}, {"color": "green", "value": 0.9}]},
+          "unit": "percentunit"
+        }
+      },
+      "gridPos": {"h": 4, "w": 4, "x": 20, "y": 1},
+      "id": 6,
+      "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["mean"], "fields": "", "values": false}, "textMode": "auto"},
+      "targets": [{"rawSql": "SELECT avg(test_pass_rate) FROM claude_sessions WHERE timestamp > dateadd('d', -7, now()) AND test_pass_rate > 0", "refId": "A", "format": "table"}],
+      "title": "Test Pass Rate (7d)",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "questdb-questdb-datasource", "uid": "P2596F1C8E12435D2"},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "custom": {"axisBorderShow": false, "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 10, "gradientMode": "none", "hideFrom": {"legend": false, "tooltip": false, "viz": false}, "insertNulls": false, "lineInterpolation": "smooth", "lineWidth": 2, "pointSize": 5, "scaleDistribution": {"type": "linear"}, "showPoints": "never", "spanNulls": false, "stacking": {"group": "A", "mode": "none"}, "thresholdsStyle": {"mode": "off"}},
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+          "unit": "short"
+        }
+      },
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 5},
+      "id": 7,
+      "options": {"legend": {"calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "desc"}},
+      "targets": [{"rawSql": "SELECT timestamp, sum(tool_calls) as tool_calls, sum(errors) as errors FROM claude_sessions WHERE timestamp > dateadd('d', -30, now()) SAMPLE BY 1d ALIGN TO CALENDAR", "refId": "A", "format": "time_series"}],
+      "title": "Daily Activity (30d)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "questdb-questdb-datasource", "uid": "P2596F1C8E12435D2"},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "custom": {"axisBorderShow": false, "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 10, "gradientMode": "none", "hideFrom": {"legend": false, "tooltip": false, "viz": false}, "insertNulls": false, "lineInterpolation": "smooth", "lineWidth": 2, "pointSize": 5, "scaleDistribution": {"type": "linear"}, "showPoints": "never", "spanNulls": false, "stacking": {"group": "A", "mode": "none"}, "thresholdsStyle": {"mode": "off"}},
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+          "unit": "currencyUSD"
+        }
+      },
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 5},
+      "id": 8,
+      "options": {"legend": {"calcs": ["sum"], "displayMode": "table", "placement": "bottom", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "desc"}},
+      "targets": [{"rawSql": "SELECT timestamp, sum(cost_usd) as cost FROM claude_sessions WHERE timestamp > dateadd('d', -30, now()) SAMPLE BY 1d ALIGN TO CALENDAR", "refId": "A", "format": "time_series"}],
+      "title": "Daily Cost (30d)",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 13},
+      "id": 101,
+      "panels": [],
+      "title": "🔧 Code Quality & TDD",
+      "type": "row"
+    },
+    {
+      "datasource": {"type": "questdb-questdb-datasource", "uid": "P2596F1C8E12435D2"},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "custom": {"axisBorderShow": false, "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 10, "gradientMode": "none", "hideFrom": {"legend": false, "tooltip": false, "viz": false}, "insertNulls": false, "lineInterpolation": "smooth", "lineWidth": 2, "pointSize": 5, "scaleDistribution": {"type": "linear"}, "showPoints": "never", "spanNulls": false, "stacking": {"group": "A", "mode": "none"}, "thresholdsStyle": {"mode": "off"}},
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+          "unit": "percentunit"
+        }
+      },
+      "gridPos": {"h": 8, "w": 8, "x": 0, "y": 14},
+      "id": 10,
+      "options": {"legend": {"calcs": ["mean"], "displayMode": "table", "placement": "bottom", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "desc"}},
+      "targets": [{"rawSql": "SELECT timestamp, avg(rework_rate) as rework_rate FROM claude_sessions WHERE timestamp > dateadd('d', -30, now()) AND rework_rate > 0 SAMPLE BY 1d ALIGN TO CALENDAR", "refId": "A", "format": "time_series"}],
+      "title": "Rework Rate Trend",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "questdb-questdb-datasource", "uid": "P2596F1C8E12435D2"},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "custom": {"hideFrom": {"legend": false, "tooltip": false, "viz": false}},
+          "mappings": []
+        }
+      },
+      "gridPos": {"h": 8, "w": 8, "x": 8, "y": 14},
+      "id": 11,
+      "options": {"displayLabels": ["percent"], "legend": {"displayMode": "table", "placement": "right", "showLegend": true, "values": ["value", "percent"]}, "pieType": "pie", "reduceOptions": {"calcs": ["sum"], "fields": "", "values": false}, "tooltip": {"mode": "single", "sort": "none"}},
+      "targets": [{"rawSql": "SELECT event_type, sum(count) as total FROM claude_tdd WHERE timestamp > dateadd('d', -7, now()) GROUP BY event_type", "refId": "A", "format": "table"}],
+      "title": "TDD Events Distribution (7d)",
+      "type": "piechart"
+    },
+    {
+      "datasource": {"type": "questdb-questdb-datasource", "uid": "P2596F1C8E12435D2"},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "custom": {"axisBorderShow": false, "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "bars", "fillOpacity": 80, "gradientMode": "none", "hideFrom": {"legend": false, "tooltip": false, "viz": false}, "insertNulls": false, "lineInterpolation": "linear", "lineWidth": 1, "pointSize": 5, "scaleDistribution": {"type": "linear"}, "showPoints": "never", "spanNulls": false, "stacking": {"group": "A", "mode": "normal"}, "thresholdsStyle": {"mode": "off"}},
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+          "unit": "short"
+        }
+      },
+      "gridPos": {"h": 8, "w": 8, "x": 16, "y": 14},
+      "id": 12,
+      "options": {"legend": {"calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "desc"}},
+      "targets": [{"rawSql": "SELECT timestamp, sum(CASE WHEN passed THEN 1 ELSE 0 END) as passed, sum(CASE WHEN NOT passed THEN 1 ELSE 0 END) as failed FROM claude_test_runs WHERE timestamp > dateadd('d', -14, now()) SAMPLE BY 1d ALIGN TO CALENDAR", "refId": "A", "format": "time_series"}],
+      "title": "Test Results (14d)",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 22},
+      "id": 102,
+      "panels": [],
+      "title": "⚡ Performance & Tools",
+      "type": "row"
+    },
+    {
+      "datasource": {"type": "questdb-questdb-datasource", "uid": "P2596F1C8E12435D2"},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "custom": {"axisBorderShow": false, "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 10, "gradientMode": "none", "hideFrom": {"legend": false, "tooltip": false, "viz": false}, "insertNulls": false, "lineInterpolation": "smooth", "lineWidth": 2, "pointSize": 5, "scaleDistribution": {"type": "linear"}, "showPoints": "never", "spanNulls": false, "stacking": {"group": "A", "mode": "none"}, "thresholdsStyle": {"mode": "off"}},
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+          "unit": "s"
+        }
+      },
+      "gridPos": {"h": 8, "w": 8, "x": 0, "y": 23},
+      "id": 20,
+      "options": {"legend": {"calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "desc"}},
+      "targets": [{"rawSql": "SELECT timestamp, avg(seconds) as avg_cycle_time FROM claude_cycle_times WHERE timestamp > dateadd('d', -7, now()) SAMPLE BY 1h ALIGN TO CALENDAR", "refId": "A", "format": "time_series"}],
+      "title": "Cycle Time (7d)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "questdb-questdb-datasource", "uid": "P2596F1C8E12435D2"},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "custom": {"align": "auto", "cellOptions": {"type": "auto"}, "inspect": false},
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}
+        },
+        "overrides": [
+          {"matcher": {"id": "byName", "options": "calls"}, "properties": [{"id": "custom.cellOptions", "value": {"mode": "gradient", "type": "gauge"}}]},
+          {"matcher": {"id": "byName", "options": "avg_ms"}, "properties": [{"id": "unit", "value": "ms"}]}
+        ]
+      },
+      "gridPos": {"h": 8, "w": 8, "x": 8, "y": 23},
+      "id": 21,
+      "options": {"cellHeight": "sm", "footer": {"countRows": false, "fields": "", "reducer": ["sum"], "show": false}, "showHeader": true, "sortBy": [{"desc": true, "displayName": "calls"}]},
+      "targets": [{"rawSql": "SELECT tool_name, count() as calls, avg(duration_ms) as avg_ms FROM claude_tool_usage WHERE timestamp > dateadd('d', -7, now()) GROUP BY tool_name ORDER BY calls DESC LIMIT 15", "refId": "A", "format": "table"}],
+      "title": "Top Tools (7d)",
+      "type": "table"
+    },
+    {
+      "datasource": {"type": "questdb-questdb-datasource", "uid": "P2596F1C8E12435D2"},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "custom": {"axisBorderShow": false, "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 10, "gradientMode": "none", "hideFrom": {"legend": false, "tooltip": false, "viz": false}, "insertNulls": false, "lineInterpolation": "smooth", "lineWidth": 2, "pointSize": 5, "scaleDistribution": {"type": "linear"}, "showPoints": "never", "spanNulls": false, "stacking": {"group": "A", "mode": "none"}, "thresholdsStyle": {"mode": "off"}},
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+          "unit": "percent"
+        }
+      },
+      "gridPos": {"h": 8, "w": 8, "x": 16, "y": 23},
+      "id": 22,
+      "options": {"legend": {"calcs": ["mean"], "displayMode": "table", "placement": "bottom", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "desc"}},
+      "targets": [{"rawSql": "SELECT timestamp, avg(utilization_pct) as context_usage FROM claude_context WHERE timestamp > dateadd('d', -7, now()) SAMPLE BY 1h ALIGN TO CALENDAR", "refId": "A", "format": "time_series"}],
+      "title": "Context Utilization (7d)",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 31},
+      "id": 103,
+      "panels": [],
+      "title": "🚀 Pre-Push Reviews",
+      "type": "row"
+    },
+    {
+      "datasource": {"type": "questdb-questdb-datasource", "uid": "P2596F1C8E12435D2"},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+          "unit": "short"
+        }
+      },
+      "gridPos": {"h": 4, "w": 4, "x": 0, "y": 32},
+      "id": 30,
+      "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "targets": [{"rawSql": "SELECT count() FROM claude_prepush_reviews", "refId": "A", "format": "table"}],
+      "title": "Total Reviews",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "questdb-questdb-datasource", "uid": "P2596F1C8E12435D2"},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 30}, {"color": "red", "value": 60}]},
+          "unit": "short"
+        }
+      },
+      "gridPos": {"h": 4, "w": 4, "x": 4, "y": 32},
+      "id": 31,
+      "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["mean"], "fields": "", "values": false}, "textMode": "auto"},
+      "targets": [{"rawSql": "SELECT avg(risk_score) FROM claude_prepush_reviews", "refId": "A", "format": "table"}],
+      "title": "Avg Risk Score",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "questdb-questdb-datasource", "uid": "P2596F1C8E12435D2"},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 3000}, {"color": "red", "value": 10000}]},
+          "unit": "ms"
+        }
+      },
+      "gridPos": {"h": 4, "w": 4, "x": 8, "y": 32},
+      "id": 32,
+      "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["mean"], "fields": "", "values": false}, "textMode": "auto"},
+      "targets": [{"rawSql": "SELECT avg(duration_ms) FROM claude_prepush_reviews", "refId": "A", "format": "table"}],
+      "title": "Avg Duration",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "questdb-questdb-datasource", "uid": "P2596F1C8E12435D2"},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 0.2}, {"color": "red", "value": 0.5}]},
+          "unit": "percentunit"
+        }
+      },
+      "gridPos": {"h": 4, "w": 4, "x": 12, "y": 32},
+      "id": 33,
+      "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "targets": [{"rawSql": "SELECT CAST(sum(CASE WHEN used_ai THEN 1 ELSE 0 END) AS DOUBLE) / count() FROM claude_prepush_reviews", "refId": "A", "format": "table"}],
+      "title": "AI Escalation Rate",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "questdb-questdb-datasource", "uid": "P2596F1C8E12435D2"},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "custom": {"hideFrom": {"legend": false, "tooltip": false, "viz": false}},
+          "mappings": []
+        }
+      },
+      "gridPos": {"h": 4, "w": 8, "x": 16, "y": 32},
+      "id": 34,
+      "options": {"displayLabels": ["name", "percent"], "legend": {"displayMode": "list", "placement": "right", "showLegend": true}, "pieType": "donut", "reduceOptions": {"calcs": ["sum"], "fields": "", "values": false}, "tooltip": {"mode": "single", "sort": "none"}},
+      "targets": [{"rawSql": "SELECT result, count() as total FROM claude_prepush_reviews GROUP BY result", "refId": "A", "format": "table"}],
+      "title": "Review Results",
+      "type": "piechart"
+    },
+    {
+      "datasource": {"type": "questdb-questdb-datasource", "uid": "P2596F1C8E12435D2"},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "custom": {"align": "auto", "cellOptions": {"type": "auto"}, "inspect": false},
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}
+        },
+        "overrides": [
+          {"matcher": {"id": "byName", "options": "risk_score"}, "properties": [{"id": "custom.cellOptions", "value": {"mode": "gradient", "type": "gauge", "valueDisplayMode": "text"}}]},
+          {"matcher": {"id": "byName", "options": "duration_ms"}, "properties": [{"id": "unit", "value": "ms"}]}
+        ]
+      },
+      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 36},
+      "id": 35,
+      "options": {"cellHeight": "sm", "footer": {"countRows": false, "fields": "", "reducer": ["sum"], "show": false}, "showHeader": true, "sortBy": [{"desc": true, "displayName": "timestamp"}]},
+      "targets": [{"rawSql": "SELECT timestamp, result, risk_level, risk_score, files_count, duration_ms, used_ai FROM claude_prepush_reviews ORDER BY timestamp DESC LIMIT 20", "refId": "A", "format": "table"}],
+      "title": "Recent Reviews",
+      "type": "table"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 44},
+      "id": 104,
+      "panels": [],
+      "title": "🤖 MCP & ClaudeFlow",
+      "type": "row"
+    },
+    {
+      "datasource": {"type": "questdb-questdb-datasource", "uid": "P2596F1C8E12435D2"},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "yellow", "value": 0.5}, {"color": "green", "value": 0.8}]},
+          "unit": "short"
+        }
+      },
+      "gridPos": {"h": 4, "w": 4, "x": 0, "y": 45},
+      "id": 40,
+      "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "targets": [{"rawSql": "SELECT health FROM claude_mcp_system ORDER BY timestamp DESC LIMIT 1", "refId": "A", "format": "table"}],
+      "title": "MCP Health",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "questdb-questdb-datasource", "uid": "P2596F1C8E12435D2"},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 50}, {"color": "red", "value": 80}]},
+          "unit": "percent"
+        }
+      },
+      "gridPos": {"h": 4, "w": 4, "x": 4, "y": 45},
+      "id": 41,
+      "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "targets": [{"rawSql": "SELECT cpu FROM claude_mcp_system ORDER BY timestamp DESC LIMIT 1", "refId": "A", "format": "table"}],
+      "title": "MCP CPU",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "questdb-questdb-datasource", "uid": "P2596F1C8E12435D2"},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 60}, {"color": "red", "value": 85}]},
+          "unit": "percent"
+        }
+      },
+      "gridPos": {"h": 4, "w": 4, "x": 8, "y": 45},
+      "id": 42,
+      "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "targets": [{"rawSql": "SELECT memory_pct FROM claude_mcp_system ORDER BY timestamp DESC LIMIT 1", "refId": "A", "format": "table"}],
+      "title": "MCP Memory",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "questdb-questdb-datasource", "uid": "P2596F1C8E12435D2"},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+          "unit": "short"
+        }
+      },
+      "gridPos": {"h": 4, "w": 4, "x": 12, "y": 45},
+      "id": 43,
+      "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "targets": [{"rawSql": "SELECT entry_count FROM claude_mcp_memory ORDER BY timestamp DESC LIMIT 1", "refId": "A", "format": "table"}],
+      "title": "Memory Entries",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "questdb-questdb-datasource", "uid": "P2596F1C8E12435D2"},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "custom": {"align": "auto", "cellOptions": {"type": "auto"}, "inspect": false},
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}
+        }
+      },
+      "gridPos": {"h": 4, "w": 8, "x": 16, "y": 45},
+      "id": 44,
+      "options": {"cellHeight": "sm", "footer": {"countRows": false, "fields": "", "reducer": ["sum"], "show": false}, "showHeader": true},
+      "targets": [{"rawSql": "SELECT agent_type, status, model, health FROM claude_mcp_agents ORDER BY timestamp DESC LIMIT 5", "refId": "A", "format": "table"}],
+      "title": "MCP Agents",
+      "type": "table"
+    },
+    {
+      "datasource": {"type": "questdb-questdb-datasource", "uid": "P2596F1C8E12435D2"},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "custom": {"axisBorderShow": false, "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 10, "gradientMode": "none", "hideFrom": {"legend": false, "tooltip": false, "viz": false}, "insertNulls": false, "lineInterpolation": "smooth", "lineWidth": 2, "pointSize": 5, "scaleDistribution": {"type": "linear"}, "showPoints": "never", "spanNulls": false, "stacking": {"group": "A", "mode": "none"}, "thresholdsStyle": {"mode": "off"}},
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}
+        }
+      },
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 49},
+      "id": 45,
+      "options": {"legend": {"calcs": ["mean"], "displayMode": "table", "placement": "bottom", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "desc"}},
+      "targets": [{"rawSql": "SELECT timestamp, confidence, success_rate FROM claude_neural_patterns WHERE timestamp > dateadd('d', -7, now()) ORDER BY timestamp", "refId": "A", "format": "time_series"}],
+      "title": "Neural Patterns (7d)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "questdb-questdb-datasource", "uid": "P2596F1C8E12435D2"},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "custom": {"hideFrom": {"legend": false, "tooltip": false, "viz": false}},
+          "mappings": []
+        }
+      },
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 49},
+      "id": 46,
+      "options": {"displayLabels": ["name", "percent"], "legend": {"displayMode": "table", "placement": "right", "showLegend": true, "values": ["value"]}, "pieType": "pie", "reduceOptions": {"calcs": ["sum"], "fields": "", "values": false}, "tooltip": {"mode": "single", "sort": "none"}},
+      "targets": [{"rawSql": "SELECT strategy, sum(uses) as total_uses FROM claude_strategy_metrics GROUP BY strategy", "refId": "A", "format": "table"}],
+      "title": "Strategy Usage",
+      "type": "piechart"
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 39,
+  "tags": ["claude", "metrics", "questdb"],
+  "templating": {"list": []},
+  "time": {"from": "now-7d", "to": "now"},
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Claude Code Metrics",
+  "uid": "claude-metrics-v1",
+  "version": 1
+}

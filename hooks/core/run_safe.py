@@ -45,8 +45,14 @@ def main():
         stdin_data = sys.stdin.read()
 
         # Run the actual hook
+        # Use python3 explicitly for .py files to avoid permission/shebang issues
+        if hook_path.endswith(".py"):
+            cmd = ["python3", hook_path] + hook_args
+        else:
+            cmd = [hook_path] + hook_args
+
         result = subprocess.run(
-            [hook_path] + hook_args,
+            cmd,
             input=stdin_data,
             capture_output=True,
             text=True,
