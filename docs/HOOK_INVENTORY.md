@@ -1,7 +1,42 @@
 # Hook Inventory & Usage Guide
 
-**Last Updated**: 2026-01-12
-**Total Hooks**: 14 files (11 Python, 1 Bash, 2 SQL)
+**Last Updated**: 2026-01-19
+**Total Hooks**: 16 files (13 Python, 1 Bash, 2 SQL)
+
+---
+
+## 🛡️ Error Handling Infrastructure (NEW)
+
+### Safe Hook Wrapper (`hooks/core/run_safe.py`)
+
+**Purpose**: Wraps any hook to ensure it NEVER crashes with user-visible errors.
+
+**Usage in settings.json**:
+```json
+{
+  "command": "/media/sam/1TB/claude-hooks-shared/hooks/core/run_safe.py /path/to/actual_hook.py",
+  "timeout": 12
+}
+```
+
+**Features**:
+- Catches ALL exceptions (permission denied, timeout, import errors, etc.)
+- Logs errors to `~/.claude/metrics/hook_errors.log` for debugging
+- Returns `{}` on failure (Claude sees success)
+- Uses `python3` explicitly for `.py` files (avoids shebang/permission issues)
+- Internal 9s timeout (outer 12s = 9s + buffer)
+
+**Debug errors**:
+```bash
+cat ~/.claude/metrics/hook_errors.log | tail -30
+```
+
+**Why needed**: After context compaction ("Brewed"), hooks can fail intermittently due to:
+- Resource contention (slow disk/CPU)
+- Permission issues (missing execute bit)
+- Shebang issues (virtualenv not found)
+
+**All UserPromptSubmit hooks are wrapped** in `~/.claude/settings.json`.
 
 ---
 
