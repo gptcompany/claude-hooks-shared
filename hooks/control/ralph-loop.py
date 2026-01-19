@@ -511,8 +511,13 @@ def check_tests_pass() -> tuple[bool, str]:
 def check_lint_pass() -> tuple[bool, str]:
     """Check if lint passes."""
     try:
+        # Use global ruff config if exists, otherwise default
+        global_config = Path.home() / ".claude" / "ruff.toml"
+        cmd = ["uv", "run", "ruff", "check", "."]
+        if global_config.exists():
+            cmd = ["uv", "run", "ruff", "check", ".", "--config", str(global_config)]
         result = subprocess.run(
-            ["uv", "run", "ruff", "check", "."],
+            cmd,
             capture_output=True,
             text=True,
             timeout=60,

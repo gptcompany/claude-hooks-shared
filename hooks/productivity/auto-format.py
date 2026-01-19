@@ -38,15 +38,25 @@ def format_file(file_path):
     if not Path(file_path).exists():
         return None
 
+    # Use global ruff config if exists
+    global_config = Path.home() / ".claude" / "ruff.toml"
+    config_args = ["--config", str(global_config)] if global_config.exists() else []
+
     try:
         # Format with Ruff (via uv)
         format_result = subprocess.run(
-            ["uv", "run", "ruff", "format", file_path], capture_output=True, text=True, timeout=10
+            ["uv", "run", "ruff", "format", file_path] + config_args,
+            capture_output=True,
+            text=True,
+            timeout=10,
         )
 
         # Auto-fix linting issues (unused imports, etc.)
         check_result = subprocess.run(
-            ["uv", "run", "ruff", "check", "--fix", file_path], capture_output=True, text=True, timeout=10
+            ["uv", "run", "ruff", "check", "--fix", file_path] + config_args,
+            capture_output=True,
+            text=True,
+            timeout=10,
         )
 
         # Check if any changes were made
@@ -55,7 +65,11 @@ def format_file(file_path):
         formatted = format_result.returncode == 0
         fixed = "fixed" in check_result.stdout.lower()
 
-        return {"formatted": formatted, "fixed": fixed, "filename": Path(file_path).name}
+        return {
+            "formatted": formatted,
+            "fixed": fixed,
+            "filename": Path(file_path).name,
+        }
 
     except subprocess.TimeoutExpired:
         return None
@@ -92,7 +106,12 @@ def main():
             if result["fixed"]:
                 message += " (+ auto-fixed linting)"
 
-            output = {"hookSpecificOutput": {"hookEventName": "PostToolUse", "message": message}}
+            output = {
+                "hookSpecificOutput": {
+                    "hookEventName": "PostToolUse",
+                    "message": message,
+                }
+            }
             print(json.dumps(output))
 
         # Always exit 0 (fail open)
