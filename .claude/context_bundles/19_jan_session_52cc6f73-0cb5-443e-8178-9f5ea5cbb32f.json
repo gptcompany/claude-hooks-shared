@@ -11,7 +11,71 @@
       "operation": "read",
       "timestamp": "2026-01-19T13:03:56.153134",
       "file_path": "/media/sam/1TB/claude-hooks-shared/scripts/tips_engine.py"
+    },
+    {
+      "operation": "bash",
+      "timestamp": "2026-01-19T13:04:10.063560",
+      "command": "ruff check hooks/ux/tips-auto-inject.py scripts/tips_engine.py 2>&1 | head -60",
+      "description": "Run ruff linter on changed files"
+    },
+    {
+      "operation": "bash",
+      "timestamp": "2026-01-19T13:04:13.878997",
+      "command": "ruff check . 2>&1 | head -80",
+      "description": "Run full lint check on repo"
+    },
+    {
+      "operation": "read",
+      "timestamp": "2026-01-19T13:04:17.902338",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/hooks/intelligence/strategy_router.py"
+    },
+    {
+      "operation": "edit",
+      "timestamp": "2026-01-19T13:04:22.005614",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/hooks/intelligence/strategy_router.py",
+      "old_string": "import json\nimport subprocess\nimport sys\nimport time\nfrom enum import Enum\nfrom pathlib import Path"
+    },
+    {
+      "operation": "bash",
+      "timestamp": "2026-01-19T13:04:25.727593",
+      "command": "head -15 /media/sam/1TB/claude-hooks-shared/hooks/intelligence/strategy_router.py",
+      "description": "Check current state of file"
+    },
+    {
+      "operation": "read",
+      "timestamp": "2026-01-19T13:04:28.594045",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/hooks/intelligence/strategy_router.py"
+    },
+    {
+      "operation": "edit",
+      "timestamp": "2026-01-19T13:04:32.541987",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/hooks/intelligence/strategy_router.py",
+      "old_string": "import json\nimport subprocess\nimport sys\nimport time\nfrom enum import Enum\nfrom pathlib import Path"
+    },
+    {
+      "operation": "bash",
+      "timestamp": "2026-01-19T13:04:36.658264",
+      "command": "cat /media/sam/1TB/claude-hooks-shared/pyproject.toml | grep -A 20 \"\\[tool.ruff\"",
+      "description": "Check ruff config"
+    },
+    {
+      "operation": "write",
+      "timestamp": "2026-01-19T13:04:49.040614",
+      "file_path": "/media/sam/1TB/claude-hooks-shared/hooks/intelligence/strategy_router.py",
+      "content_length": 3758
+    },
+    {
+      "operation": "bash",
+      "timestamp": "2026-01-19T13:04:52.466748",
+      "command": "ruff check /media/sam/1TB/claude-hooks-shared/ 2>&1",
+      "description": "Run full lint check"
+    },
+    {
+      "operation": "bash",
+      "timestamp": "2026-01-19T13:04:56.289915",
+      "command": "ruff check . && ruff format --check . 2>&1",
+      "description": "Full lint and format check"
     }
   ],
-  "last_updated": "2026-01-19T13:03:56.153152"
+  "last_updated": "2026-01-19T13:04:56.289936"
 }

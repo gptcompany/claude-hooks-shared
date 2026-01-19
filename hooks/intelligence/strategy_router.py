@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Strategy Router v2: State Machine + PMW Fixes."""
 
+import contextlib
 import json
 import subprocess
 import sys
@@ -25,16 +26,14 @@ CACHE_TTL = 30  # seconds
 def cached_gh(cmd: list[str]) -> dict | None:
     """Cached gh CLI call."""
     cache_key = " ".join(cmd)
-    try:
+    with contextlib.suppress(Exception):
         if CACHE_FILE.exists():
             cache = json.loads(CACHE_FILE.read_text())
             if cache.get("key") == cache_key and time.time() - cache.get("ts", 0) < CACHE_TTL:
                 return cache.get("data")
-    except Exception:
-        pass
 
     try:
-        r = subprocess.run(["gh"] + cmd, capture_output=True, text=True, timeout=10)
+        r = subprocess.run(["gh", *cmd], capture_output=True, text=True, timeout=10)
         if r.returncode == 0:
             data = json.loads(r.stdout) if r.stdout.strip() else None
             CACHE_FILE.write_text(json.dumps({"key": cache_key, "ts": time.time(), "data": data}))
@@ -48,16 +47,12 @@ def get_phase_and_directive() -> tuple[Phase, str | None]:
     """Get current phase and directive."""
     # Load metrics
     state = {}
-    try:
+    with contextlib.suppress(Exception):
         state = json.loads((METRICS / "session_state.json").read_text())
-    except Exception:
-        pass
 
     edits = {}
-    try:
+    with contextlib.suppress(Exception):
         edits = json.loads((METRICS / "file_edits.json").read_text())
-    except Exception:
-        pass
 
     errors = state.get("errors", 0)
     calls = max(state.get("tool_calls", 1), 1)
@@ -104,19 +99,15 @@ def get_phase_and_directive() -> tuple[Phase, str | None]:
 
 
 def main():
-    try:
+    with contextlib.suppress(Exception):
         json.load(sys.stdin)
-    except Exception:
-        pass
 
     phase, directive = get_phase_and_directive()
 
     # Save phase state
-    try:
+    with contextlib.suppress(Exception):
         METRICS.mkdir(parents=True, exist_ok=True)
         (METRICS / "strategy_state.json").write_text(json.dumps({"phase": phase.value}))
-    except Exception:
-        pass
 
     if directive:
         print(json.dumps({"systemMessage": directive}))
