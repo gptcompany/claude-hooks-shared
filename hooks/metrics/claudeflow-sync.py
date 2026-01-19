@@ -22,7 +22,7 @@ import json
 import socket
 import sqlite3
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 QUESTDB_HOST = "localhost"
@@ -276,14 +276,14 @@ MCP_DATA_DIR = Path.home() / ".claude-flow"
 def sync_mcp_data() -> list[str]:
     """Sync data from MCP tools stored in ~/.claude-flow/."""
     lines = []
-    ts_now = int(datetime.now(tz=timezone.utc).timestamp() * 1e9)
+    ts_now = int(datetime.now(tz=UTC).timestamp() * 1e9)
 
     # 1. Sync agents
     agents_file = MCP_DATA_DIR / "agents" / "store.json"
     if agents_file.exists():
         try:
             data = json.loads(agents_file.read_text())
-            for agent_id, agent in data.get("agents", {}).items():
+            for _agent_id, agent in data.get("agents", {}).items():
                 agent_type = escape_tag(agent.get("agentType", "unknown"))
                 status = escape_tag(agent.get("status", "unknown"))
                 model = escape_tag(agent.get("model", "unknown"))
@@ -307,7 +307,7 @@ def sync_mcp_data() -> list[str]:
     if tasks_file.exists():
         try:
             data = json.loads(tasks_file.read_text())
-            for task_id, task in data.get("tasks", {}).items():
+            for _task_id, task in data.get("tasks", {}).items():
                 task_type = escape_tag(task.get("type", "unknown"))
                 status = escape_tag(task.get("status", "unknown"))
                 priority = escape_tag(task.get("priority", "normal"))
@@ -418,7 +418,7 @@ def main():
         "lines_sent": sent,
         "sqlite_db": str(GLOBAL_DB) if GLOBAL_DB.exists() else None,
         "mcp_dir": str(MCP_DATA_DIR) if MCP_DATA_DIR.exists() else None,
-        "timestamp": datetime.now(tz=timezone.utc).isoformat(),
+        "timestamp": datetime.now(tz=UTC).isoformat(),
     }
 
     print(json.dumps(result))

@@ -46,10 +46,7 @@ def main():
 
         # Run the actual hook
         # Use python3 explicitly for .py files to avoid permission/shebang issues
-        if hook_path.endswith(".py"):
-            cmd = ["python3", hook_path] + hook_args
-        else:
-            cmd = [hook_path] + hook_args
+        cmd = ["python3", hook_path] + hook_args if hook_path.endswith(".py") else [hook_path] + hook_args
 
         result = subprocess.run(
             cmd,
