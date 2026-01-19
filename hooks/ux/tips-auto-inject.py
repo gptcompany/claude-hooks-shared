@@ -92,6 +92,9 @@ def is_tips_fresh(tips_data: dict) -> bool:
 
     try:
         timestamp = datetime.fromisoformat(timestamp_str)
+        # Handle timezone-aware timestamps by removing tzinfo for comparison
+        if timestamp.tzinfo is not None:
+            timestamp = timestamp.replace(tzinfo=None)
         age = datetime.now() - timestamp
         return age < timedelta(hours=MAX_TIPS_AGE_HOURS)
     except (ValueError, TypeError):
@@ -126,7 +129,7 @@ def format_tips_for_injection(tips_data: dict) -> tuple[str, str]:
         message = tip.get("message", "")
         command = tip.get("command", "")
 
-        conf_pct = int(confidence * 100) if confidence < 1 else confidence
+        conf_pct = int(confidence * 100) if confidence <= 1 else int(confidence)
         lines.append(f"{i}. [{conf_pct}%] {message} -> {command}")
 
     context_text = " | ".join(lines)
@@ -147,8 +150,8 @@ def debug_log(msg: str) -> None:
 def main():
     try:
         json.load(sys.stdin)  # Consume stdin (hook protocol)
-    except json.JSONDecodeError:
-        debug_log("Failed to parse stdin JSON")
+    except (json.JSONDecodeError, EOFError):
+        debug_log("Failed to parse stdin JSON or empty input")
         print(json.dumps({}))
         sys.exit(0)
 
