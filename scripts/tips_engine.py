@@ -804,4 +804,3 @@ if __name__ == "__main__":
 
     tips = generate_all_tips(current, historical)
     print(format_tips_for_display(tips, cold_start=True))
-# v3 test
