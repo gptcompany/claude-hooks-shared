@@ -87,7 +87,7 @@
 |-------|--------|----------|
 | Phase 1: Session Recovery | **VERIFIED** | [x] All 5 UAT tests passed |
 | Phase 2: Trajectory Learning | **VERIFIED** | [x] All 6 UAT tests passed |
-| Phase 3: Lesson Learning | pending | [ ] |
+| Phase 3: Lesson Learning | **VERIFIED** | [x] All 56 tests passed |
 | Phase 4: Coordination | pending | [ ] |
 | Phase 5: Swarm | pending | [ ] |
 
@@ -104,6 +104,20 @@
 - End event: Completes trajectory with success_rate calculation
 - MCP store: Trajectories stored and indexed for retrieval
 
+### Phase 3 Verification Results
+- meta_learning.py (Stop hook): Extracts patterns from session data
+  - Detects high_rework (>3 edits on same file)
+  - Detects high_error (>25% error rate)
+  - Detects quality_drop (declining trend)
+  - Stores patterns via pattern_store() with confidence scores
+- lesson_injector.py (UserPromptSubmit hook): Injects lessons
+  - Searches patterns via pattern_search()
+  - HIGH (>0.8): Auto-inject
+  - MEDIUM (0.5-0.8): "Consider:" prefix
+  - LOW (<0.5): Skip
+  - Max 3 lessons to avoid context pollution
+- Tests: 34 (meta_learning) + 14 (lesson_injector) + 8 (integration) = 56 total
+
 ---
 *Created: 2026-01-20*
-*Updated: 2026-01-20 - Phase 2 verified*
+*Updated: 2026-01-20 - Phase 3 verified*
