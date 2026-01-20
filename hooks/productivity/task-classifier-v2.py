@@ -279,7 +279,7 @@ Type "STOP RALPH" to exit | "RALPH STATUS" for info
     # For lower confidence or other modes - add context (not block)
     kw_display = ", ".join(keywords[:3])
     mode_info = {
-        "ralph": f"Task appears mechanical (Ralph candidate). Keywords: {kw_display}. Say 'use ralph mode' to activate.",
+        "ralph": f"Task appears mechanical (Ralph candidate). Keywords: {kw_display}. Say 'use ralph mode'.",
         "specialist": f"Specialist task detected. Keywords: {kw_display}",
         "alpha-evolve": f"Design task detected. Consider multiple approaches. Keywords: {kw_display}",
     }

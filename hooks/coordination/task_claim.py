@@ -13,6 +13,7 @@ Output: JSON {} (always allows task to proceed)
 """
 
 import argparse
+import contextlib
 import hashlib
 import json
 import os
@@ -64,10 +65,8 @@ def get_session_id() -> str:
     import uuid
 
     session_id = f"session-{uuid.uuid4().hex[:8]}"
-    try:
+    with contextlib.suppress(Exception):
         session_file.write_text(session_id)
-    except Exception:
-        pass
 
     return session_id
 

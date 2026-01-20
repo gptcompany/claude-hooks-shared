@@ -15,6 +15,7 @@ Usage:
 """
 
 import argparse
+import contextlib
 import json
 import os
 import sys
@@ -28,8 +29,8 @@ try:
     from core.mcp_client import (
         get_project_name,
         get_timestamp,
-        memory_store,
         memory_retrieve,
+        memory_store,
     )
 except ImportError:
     # Fallback - direct file access
@@ -258,10 +259,8 @@ def main():
     # Read hook input from stdin
     hook_input = {}
     if not sys.stdin.isatty():
-        try:
+        with contextlib.suppress(json.JSONDecodeError):
             hook_input = json.load(sys.stdin)
-        except json.JSONDecodeError:
-            pass
 
     try:
         if args.event == "start":

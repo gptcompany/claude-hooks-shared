@@ -17,6 +17,7 @@ Returns:
 """
 
 import argparse
+import contextlib
 import json
 import os
 import subprocess
@@ -56,10 +57,8 @@ def get_session_id() -> str:
 
     # Generate new session ID
     session_id = f"session-{uuid.uuid4().hex[:8]}"
-    try:
+    with contextlib.suppress(Exception):
         session_file.write_text(session_id)
-    except Exception:
-        pass
 
     return session_id
 
@@ -159,15 +158,13 @@ def main():
         default="claim",
         help="Event type (default: claim)",
     )
-    args = parser.parse_args()
+    parser.parse_args()  # Validate args but don't store (unused)
 
     # Read hook input from stdin
     hook_input = {}
     if not sys.stdin.isatty():
-        try:
+        with contextlib.suppress(json.JSONDecodeError):
             hook_input = json.load(sys.stdin)
-        except json.JSONDecodeError:
-            pass
 
     try:
         tool_input = hook_input.get("tool_input", {})

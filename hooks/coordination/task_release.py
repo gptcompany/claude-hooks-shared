@@ -235,9 +235,9 @@ def on_subagent_stop(hook_input: dict) -> dict:
                 },
             )
 
-            log(
-                f"Released and broadcast task {task_id}: release={release_result.get('success')}, notify={notify_result.get('success')}"
-            )
+            release_ok = release_result.get("success")
+            notify_ok = notify_result.get("success")
+            log(f"Released and broadcast task {task_id}: release={release_ok}, notify={notify_ok}")
         else:
             log(f"Failed to release task {task_id}: {release_result.get('error', 'unknown')}")
 

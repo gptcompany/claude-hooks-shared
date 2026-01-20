@@ -7,6 +7,7 @@ and suggests running code-simplifier agent.
 Hook type: Stop
 """
 
+import contextlib
 import json
 import subprocess
 import sys
@@ -86,13 +87,10 @@ def check_complexity(filepath: str) -> dict:
 
 def main():
     """Main entry point."""
-    # Read hook input (not used but required)
-    hook_input = {}
+    # Consume stdin (required by hook protocol, not used by this hook)
     if not sys.stdin.isatty():
-        try:
-            hook_input = json.load(sys.stdin)
-        except json.JSONDecodeError:
-            pass
+        with contextlib.suppress(json.JSONDecodeError):
+            json.load(sys.stdin)
 
     # Get modified code files
     modified_files = get_modified_files()

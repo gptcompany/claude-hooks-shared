@@ -9,6 +9,7 @@ Questo hook viene eseguito alla fine di ogni sessione Claude e:
 Hook type: Stop
 """
 
+import contextlib
 import json
 import os
 import sys
@@ -22,8 +23,8 @@ try:
     from core.mcp_client import (
         get_project_name,
         get_timestamp,
-        session_save,
         memory_store,
+        session_save,
     )
 except ImportError:
     # Fallback if import fails - use direct file access
@@ -120,10 +121,8 @@ def main():
         # Read hook input
         hook_input = {}
         if not sys.stdin.isatty():
-            try:
+            with contextlib.suppress(json.JSONDecodeError):
                 hook_input = json.load(sys.stdin)
-            except json.JSONDecodeError:
-                pass
 
         project = get_project_name()
         timestamp = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")

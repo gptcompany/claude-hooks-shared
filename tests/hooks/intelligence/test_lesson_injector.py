@@ -386,17 +386,20 @@ class TestHookIntegration:
         """Test that main() reads from stdin and writes JSON to stdout."""
         mock_pattern_search.return_value = high_confidence_patterns
 
-        from lesson_injector import main
         import io
+
+        from lesson_injector import main
 
         input_json = json.dumps({"prompt": "test", "cwd": "/tmp"})
 
-        with patch("sys.stdin", io.StringIO(input_json)):
-            with patch("sys.stdout", new_callable=io.StringIO) as mock_stdout:
-                with patch("sys.exit") as mock_exit:
-                    main()
+        with (
+            patch("sys.stdin", io.StringIO(input_json)),
+            patch("sys.stdout", new_callable=io.StringIO) as mock_stdout,
+            patch("sys.exit"),  # noqa: F841
+        ):
+            main()
 
-                output = mock_stdout.getvalue()
-                # Should be valid JSON
-                result = json.loads(output)
-                assert "additionalContext" in result
+            output = mock_stdout.getvalue()
+            # Should be valid JSON
+            result = json.loads(output)
+            assert "additionalContext" in result

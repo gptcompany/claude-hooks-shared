@@ -19,16 +19,15 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / "hooks" / "i
 
 # Will fail until meta_learning.py is created
 from meta_learning import (  # type: ignore  # noqa: E402
-    THRESHOLD_REWORK_EDITS,
     THRESHOLD_ERROR_RATE,
     THRESHOLD_QUALITY_DROP,
-    extract_rework_pattern,
-    extract_error_pattern,
-    extract_quality_drop_pattern,
-    extract_patterns,
+    THRESHOLD_REWORK_EDITS,
     calculate_confidence,
+    extract_error_pattern,
+    extract_patterns,
+    extract_quality_drop_pattern,
+    extract_rework_pattern,
 )
-
 
 # =============================================================================
 # Fixtures
@@ -519,7 +518,7 @@ class TestMainFunction:
             # Import and call main
             import meta_learning
 
-            result = meta_learning.main()
+            meta_learning.main()
 
         # Verify patterns were stored
         assert mock_pattern_store.called

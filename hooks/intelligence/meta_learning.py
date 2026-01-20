@@ -11,6 +11,7 @@ Patterns are stored via mcp_client.pattern_store() for SONA learning.
 
 from __future__ import annotations
 
+import contextlib
 import json
 import logging
 import os
@@ -272,10 +273,8 @@ def main() -> int:
     try:
         # Read stdin (required by hook protocol, but not used by this hook)
         if not sys.stdin.isatty():
-            try:
+            with contextlib.suppress(json.JSONDecodeError):
                 json.load(sys.stdin)  # Consume stdin
-            except json.JSONDecodeError:
-                pass
 
         project = get_project_name()
         trajectory_index = load_trajectory_data(project)

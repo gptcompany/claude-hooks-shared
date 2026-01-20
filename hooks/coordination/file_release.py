@@ -15,6 +15,7 @@ Returns:
 """
 
 import argparse
+import contextlib
 import json
 import os
 import subprocess
@@ -196,15 +197,13 @@ def main():
         default="release",
         help="Event type (default: release)",
     )
-    args = parser.parse_args()
+    parser.parse_args()  # Validate args but don't store (unused)
 
     # Read hook input from stdin
     hook_input = {}
     if not sys.stdin.isatty():
-        try:
+        with contextlib.suppress(json.JSONDecodeError):
             hook_input = json.load(sys.stdin)
-        except json.JSONDecodeError:
-            pass
 
     try:
         tool_input = hook_input.get("tool_input", {})

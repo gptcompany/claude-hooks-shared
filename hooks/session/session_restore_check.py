@@ -8,10 +8,11 @@ Questo hook viene eseguito all'inizio di ogni prompt utente e:
 Hook type: UserPromptSubmit
 """
 
+import contextlib
 import json
 import os
 import sys
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 # Add parent to path for imports
@@ -131,13 +132,10 @@ def is_same_project(last_session: dict, current_project: str) -> bool:
 def main():
     """Main hook execution."""
     try:
-        # Read hook input
-        hook_input = {}
+        # Consume stdin (required by hook protocol)
         if not sys.stdin.isatty():
-            try:
-                hook_input = json.load(sys.stdin)
-            except json.JSONDecodeError:
-                pass
+            with contextlib.suppress(json.JSONDecodeError):
+                json.load(sys.stdin)
 
         project = get_project_name()
         log(f"Checking for interrupted sessions for project: {project}")

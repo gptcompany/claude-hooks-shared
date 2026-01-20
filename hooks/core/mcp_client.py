@@ -99,8 +99,6 @@ def memory_search(query: str, top_k: int = 5) -> list[dict]:
     if not success:
         return []
 
-    # Parse results - this is best effort
-    results = []
     # Output format varies, return raw for now
     return [{"raw": output}] if output else []
 

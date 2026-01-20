@@ -1,0 +1,906 @@
+[
+  {
+    "cell": null,
+    "code": "SIM105",
+    "end_location": {
+      "column": 13,
+      "row": 62
+    },
+    "filename": "/home/sam/actions-runner/_work/claude-hooks-shared/claude-hooks-shared/hooks/coordination/file_claim.py",
+    "fix": {
+      "applicability": "unsafe",
+      "edits": [
+        {
+          "content": "import contextlib\n",
+          "end_location": {
+            "column": 1,
+            "row": 27
+          },
+          "location": {
+            "column": 1,
+            "row": 27
+          }
+        },
+        {
+          "content": "with contextlib.suppress(Exception)",
+          "end_location": {
+            "column": 8,
+            "row": 59
+          },
+          "location": {
+            "column": 5,
+            "row": 59
+          }
+        },
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 63
+          },
+          "location": {
+            "column": 1,
+            "row": 61
+          }
+        }
+      ],
+      "message": "Replace `try`-`except`-`pass` with `with contextlib.suppress(Exception): ...`"
+    },
+    "location": {
+      "column": 5,
+      "row": 59
+    },
+    "message": "Use `contextlib.suppress(Exception)` instead of `try`-`except`-`pass`",
+    "noqa_row": 59,
+    "url": "https://docs.astral.sh/ruff/rules/suppressible-exception"
+  },
+  {
+    "cell": null,
+    "code": "F841",
+    "end_location": {
+      "column": 9,
+      "row": 162
+    },
+    "filename": "/home/sam/actions-runner/_work/claude-hooks-shared/claude-hooks-shared/hooks/coordination/file_claim.py",
+    "fix": {
+      "applicability": "unsafe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 12,
+            "row": 162
+          },
+          "location": {
+            "column": 5,
+            "row": 162
+          }
+        }
+      ],
+      "message": "Remove assignment to unused variable `args`"
+    },
+    "location": {
+      "column": 5,
+      "row": 162
+    },
+    "message": "Local variable `args` is assigned to but never used",
+    "noqa_row": 162,
+    "url": "https://docs.astral.sh/ruff/rules/unused-variable"
+  },
+  {
+    "cell": null,
+    "code": "SIM105",
+    "end_location": {
+      "column": 17,
+      "row": 170
+    },
+    "filename": "/home/sam/actions-runner/_work/claude-hooks-shared/claude-hooks-shared/hooks/coordination/file_claim.py",
+    "fix": {
+      "applicability": "unsafe",
+      "edits": [
+        {
+          "content": "import contextlib\n",
+          "end_location": {
+            "column": 1,
+            "row": 27
+          },
+          "location": {
+            "column": 1,
+            "row": 27
+          }
+        },
+        {
+          "content": "with contextlib.suppress(json.JSONDecodeError)",
+          "end_location": {
+            "column": 12,
+            "row": 167
+          },
+          "location": {
+            "column": 9,
+            "row": 167
+          }
+        },
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 171
+          },
+          "location": {
+            "column": 1,
+            "row": 169
+          }
+        }
+      ],
+      "message": "Replace `try`-`except`-`pass` with `with contextlib.suppress(json.JSONDecodeError): ...`"
+    },
+    "location": {
+      "column": 9,
+      "row": 167
+    },
+    "message": "Use `contextlib.suppress(json.JSONDecodeError)` instead of `try`-`except`-`pass`",
+    "noqa_row": 167,
+    "url": "https://docs.astral.sh/ruff/rules/suppressible-exception"
+  },
+  {
+    "cell": null,
+    "code": "F841",
+    "end_location": {
+      "column": 9,
+      "row": 199
+    },
+    "filename": "/home/sam/actions-runner/_work/claude-hooks-shared/claude-hooks-shared/hooks/coordination/file_release.py",
+    "fix": {
+      "applicability": "unsafe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 12,
+            "row": 199
+          },
+          "location": {
+            "column": 5,
+            "row": 199
+          }
+        }
+      ],
+      "message": "Remove assignment to unused variable `args`"
+    },
+    "location": {
+      "column": 5,
+      "row": 199
+    },
+    "message": "Local variable `args` is assigned to but never used",
+    "noqa_row": 199,
+    "url": "https://docs.astral.sh/ruff/rules/unused-variable"
+  },
+  {
+    "cell": null,
+    "code": "SIM105",
+    "end_location": {
+      "column": 17,
+      "row": 207
+    },
+    "filename": "/home/sam/actions-runner/_work/claude-hooks-shared/claude-hooks-shared/hooks/coordination/file_release.py",
+    "fix": {
+      "applicability": "unsafe",
+      "edits": [
+        {
+          "content": "import contextlib\n",
+          "end_location": {
+            "column": 1,
+            "row": 24
+          },
+          "location": {
+            "column": 1,
+            "row": 24
+          }
+        },
+        {
+          "content": "with contextlib.suppress(json.JSONDecodeError)",
+          "end_location": {
+            "column": 12,
+            "row": 204
+          },
+          "location": {
+            "column": 9,
+            "row": 204
+          }
+        },
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 208
+          },
+          "location": {
+            "column": 1,
+            "row": 206
+          }
+        }
+      ],
+      "message": "Replace `try`-`except`-`pass` with `with contextlib.suppress(json.JSONDecodeError): ...`"
+    },
+    "location": {
+      "column": 9,
+      "row": 204
+    },
+    "message": "Use `contextlib.suppress(json.JSONDecodeError)` instead of `try`-`except`-`pass`",
+    "noqa_row": 204,
+    "url": "https://docs.astral.sh/ruff/rules/suppressible-exception"
+  },
+  {
+    "cell": null,
+    "code": "SIM105",
+    "end_location": {
+      "column": 13,
+      "row": 70
+    },
+    "filename": "/home/sam/actions-runner/_work/claude-hooks-shared/claude-hooks-shared/hooks/coordination/task_claim.py",
+    "fix": {
+      "applicability": "unsafe",
+      "edits": [
+        {
+          "content": "import contextlib\n",
+          "end_location": {
+            "column": 1,
+            "row": 23
+          },
+          "location": {
+            "column": 1,
+            "row": 23
+          }
+        },
+        {
+          "content": "with contextlib.suppress(Exception)",
+          "end_location": {
+            "column": 8,
+            "row": 67
+          },
+          "location": {
+            "column": 5,
+            "row": 67
+          }
+        },
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 71
+          },
+          "location": {
+            "column": 1,
+            "row": 69
+          }
+        }
+      ],
+      "message": "Replace `try`-`except`-`pass` with `with contextlib.suppress(Exception): ...`"
+    },
+    "location": {
+      "column": 5,
+      "row": 67
+    },
+    "message": "Use `contextlib.suppress(Exception)` instead of `try`-`except`-`pass`",
+    "noqa_row": 67,
+    "url": "https://docs.astral.sh/ruff/rules/suppressible-exception"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 137,
+      "row": 239
+    },
+    "filename": "/home/sam/actions-runner/_work/claude-hooks-shared/claude-hooks-shared/hooks/coordination/task_release.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 239
+    },
+    "message": "Line too long (136 > 120)",
+    "noqa_row": 239,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "F841",
+    "end_location": {
+      "column": 12,
+      "row": 103
+    },
+    "filename": "/home/sam/actions-runner/_work/claude-hooks-shared/claude-hooks-shared/hooks/core/mcp_client.py",
+    "fix": {
+      "applicability": "unsafe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 104
+          },
+          "location": {
+            "column": 1,
+            "row": 103
+          }
+        }
+      ],
+      "message": "Remove assignment to unused variable `results`"
+    },
+    "location": {
+      "column": 5,
+      "row": 103
+    },
+    "message": "Local variable `results` is assigned to but never used",
+    "noqa_row": 103,
+    "url": "https://docs.astral.sh/ruff/rules/unused-variable"
+  },
+  {
+    "cell": null,
+    "code": "SIM105",
+    "end_location": {
+      "column": 21,
+      "row": 278
+    },
+    "filename": "/home/sam/actions-runner/_work/claude-hooks-shared/claude-hooks-shared/hooks/intelligence/meta_learning.py",
+    "fix": null,
+    "location": {
+      "column": 13,
+      "row": 275
+    },
+    "message": "Use `contextlib.suppress(json.JSONDecodeError)` instead of `try`-`except`-`pass`",
+    "noqa_row": 275,
+    "url": "https://docs.astral.sh/ruff/rules/suppressible-exception"
+  },
+  {
+    "cell": null,
+    "code": "I001",
+    "end_location": {
+      "column": 6,
+      "row": 33
+    },
+    "filename": "/home/sam/actions-runner/_work/claude-hooks-shared/claude-hooks-shared/hooks/intelligence/trajectory_tracker.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "    from core.mcp_client import (\n        get_project_name,\n        get_timestamp,\n        memory_retrieve,\n        memory_store,\n    )\n",
+          "end_location": {
+            "column": 1,
+            "row": 34
+          },
+          "location": {
+            "column": 1,
+            "row": 28
+          }
+        }
+      ],
+      "message": "Organize imports"
+    },
+    "location": {
+      "column": 5,
+      "row": 28
+    },
+    "message": "Import block is un-sorted or un-formatted",
+    "noqa_row": 28,
+    "url": "https://docs.astral.sh/ruff/rules/unsorted-imports"
+  },
+  {
+    "cell": null,
+    "code": "SIM105",
+    "end_location": {
+      "column": 17,
+      "row": 264
+    },
+    "filename": "/home/sam/actions-runner/_work/claude-hooks-shared/claude-hooks-shared/hooks/intelligence/trajectory_tracker.py",
+    "fix": {
+      "applicability": "unsafe",
+      "edits": [
+        {
+          "content": "import contextlib\n",
+          "end_location": {
+            "column": 1,
+            "row": 23
+          },
+          "location": {
+            "column": 1,
+            "row": 23
+          }
+        },
+        {
+          "content": "with contextlib.suppress(json.JSONDecodeError)",
+          "end_location": {
+            "column": 12,
+            "row": 261
+          },
+          "location": {
+            "column": 9,
+            "row": 261
+          }
+        },
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 265
+          },
+          "location": {
+            "column": 1,
+            "row": 263
+          }
+        }
+      ],
+      "message": "Replace `try`-`except`-`pass` with `with contextlib.suppress(json.JSONDecodeError): ...`"
+    },
+    "location": {
+      "column": 9,
+      "row": 261
+    },
+    "message": "Use `contextlib.suppress(json.JSONDecodeError)` instead of `try`-`except`-`pass`",
+    "noqa_row": 261,
+    "url": "https://docs.astral.sh/ruff/rules/suppressible-exception"
+  },
+  {
+    "cell": null,
+    "code": "SIM105",
+    "end_location": {
+      "column": 17,
+      "row": 95
+    },
+    "filename": "/home/sam/actions-runner/_work/claude-hooks-shared/claude-hooks-shared/hooks/productivity/auto-simplify-check.py",
+    "fix": {
+      "applicability": "unsafe",
+      "edits": [
+        {
+          "content": "import contextlib\n",
+          "end_location": {
+            "column": 1,
+            "row": 14
+          },
+          "location": {
+            "column": 1,
+            "row": 14
+          }
+        },
+        {
+          "content": "with contextlib.suppress(json.JSONDecodeError)",
+          "end_location": {
+            "column": 12,
+            "row": 92
+          },
+          "location": {
+            "column": 9,
+            "row": 92
+          }
+        },
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 96
+          },
+          "location": {
+            "column": 1,
+            "row": 94
+          }
+        }
+      ],
+      "message": "Replace `try`-`except`-`pass` with `with contextlib.suppress(json.JSONDecodeError): ...`"
+    },
+    "location": {
+      "column": 9,
+      "row": 92
+    },
+    "message": "Use `contextlib.suppress(json.JSONDecodeError)` instead of `try`-`except`-`pass`",
+    "noqa_row": 92,
+    "url": "https://docs.astral.sh/ruff/rules/suppressible-exception"
+  },
+  {
+    "cell": null,
+    "code": "F841",
+    "end_location": {
+      "column": 23,
+      "row": 93
+    },
+    "filename": "/home/sam/actions-runner/_work/claude-hooks-shared/claude-hooks-shared/hooks/productivity/auto-simplify-check.py",
+    "fix": {
+      "applicability": "unsafe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 26,
+            "row": 93
+          },
+          "location": {
+            "column": 13,
+            "row": 93
+          }
+        }
+      ],
+      "message": "Remove assignment to unused variable `hook_input`"
+    },
+    "location": {
+      "column": 13,
+      "row": 93
+    },
+    "message": "Local variable `hook_input` is assigned to but never used",
+    "noqa_row": 93,
+    "url": "https://docs.astral.sh/ruff/rules/unused-variable"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 122,
+      "row": 282
+    },
+    "filename": "/home/sam/actions-runner/_work/claude-hooks-shared/claude-hooks-shared/hooks/productivity/task-classifier-v2.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 282
+    },
+    "message": "Line too long (121 > 120)",
+    "noqa_row": 282,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "I001",
+    "end_location": {
+      "column": 6,
+      "row": 27
+    },
+    "filename": "/home/sam/actions-runner/_work/claude-hooks-shared/claude-hooks-shared/hooks/session/session_checkpoint.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "    from core.mcp_client import (\n        get_project_name,\n        get_timestamp,\n        memory_store,\n        session_save,\n    )\n",
+          "end_location": {
+            "column": 1,
+            "row": 28
+          },
+          "location": {
+            "column": 1,
+            "row": 22
+          }
+        }
+      ],
+      "message": "Organize imports"
+    },
+    "location": {
+      "column": 5,
+      "row": 22
+    },
+    "message": "Import block is un-sorted or un-formatted",
+    "noqa_row": 22,
+    "url": "https://docs.astral.sh/ruff/rules/unsorted-imports"
+  },
+  {
+    "cell": null,
+    "code": "SIM105",
+    "end_location": {
+      "column": 21,
+      "row": 126
+    },
+    "filename": "/home/sam/actions-runner/_work/claude-hooks-shared/claude-hooks-shared/hooks/session/session_checkpoint.py",
+    "fix": {
+      "applicability": "unsafe",
+      "edits": [
+        {
+          "content": "import contextlib\n",
+          "end_location": {
+            "column": 1,
+            "row": 17
+          },
+          "location": {
+            "column": 1,
+            "row": 17
+          }
+        },
+        {
+          "content": "with contextlib.suppress(json.JSONDecodeError)",
+          "end_location": {
+            "column": 16,
+            "row": 123
+          },
+          "location": {
+            "column": 13,
+            "row": 123
+          }
+        },
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 127
+          },
+          "location": {
+            "column": 1,
+            "row": 125
+          }
+        }
+      ],
+      "message": "Replace `try`-`except`-`pass` with `with contextlib.suppress(json.JSONDecodeError): ...`"
+    },
+    "location": {
+      "column": 13,
+      "row": 123
+    },
+    "message": "Use `contextlib.suppress(json.JSONDecodeError)` instead of `try`-`except`-`pass`",
+    "noqa_row": 123,
+    "url": "https://docs.astral.sh/ruff/rules/suppressible-exception"
+  },
+  {
+    "cell": null,
+    "code": "I001",
+    "end_location": {
+      "column": 25,
+      "row": 15
+    },
+    "filename": "/home/sam/actions-runner/_work/claude-hooks-shared/claude-hooks-shared/hooks/session/session_restore_check.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "import json\nimport os\nimport sys\nfrom datetime import datetime, timedelta, timezone\nfrom pathlib import Path\n\n",
+          "end_location": {
+            "column": 1,
+            "row": 17
+          },
+          "location": {
+            "column": 1,
+            "row": 11
+          }
+        }
+      ],
+      "message": "Organize imports"
+    },
+    "location": {
+      "column": 1,
+      "row": 11
+    },
+    "message": "Import block is un-sorted or un-formatted",
+    "noqa_row": 11,
+    "url": "https://docs.astral.sh/ruff/rules/unsorted-imports"
+  },
+  {
+    "cell": null,
+    "code": "SIM105",
+    "end_location": {
+      "column": 21,
+      "row": 140
+    },
+    "filename": "/home/sam/actions-runner/_work/claude-hooks-shared/claude-hooks-shared/hooks/session/session_restore_check.py",
+    "fix": {
+      "applicability": "unsafe",
+      "edits": [
+        {
+          "content": "import contextlib\n",
+          "end_location": {
+            "column": 1,
+            "row": 16
+          },
+          "location": {
+            "column": 1,
+            "row": 16
+          }
+        },
+        {
+          "content": "with contextlib.suppress(json.JSONDecodeError)",
+          "end_location": {
+            "column": 16,
+            "row": 137
+          },
+          "location": {
+            "column": 13,
+            "row": 137
+          }
+        },
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 141
+          },
+          "location": {
+            "column": 1,
+            "row": 139
+          }
+        }
+      ],
+      "message": "Replace `try`-`except`-`pass` with `with contextlib.suppress(json.JSONDecodeError): ...`"
+    },
+    "location": {
+      "column": 13,
+      "row": 137
+    },
+    "message": "Use `contextlib.suppress(json.JSONDecodeError)` instead of `try`-`except`-`pass`",
+    "noqa_row": 137,
+    "url": "https://docs.astral.sh/ruff/rules/suppressible-exception"
+  },
+  {
+    "cell": null,
+    "code": "F841",
+    "end_location": {
+      "column": 27,
+      "row": 138
+    },
+    "filename": "/home/sam/actions-runner/_work/claude-hooks-shared/claude-hooks-shared/hooks/session/session_restore_check.py",
+    "fix": {
+      "applicability": "unsafe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 30,
+            "row": 138
+          },
+          "location": {
+            "column": 17,
+            "row": 138
+          }
+        }
+      ],
+      "message": "Remove assignment to unused variable `hook_input`"
+    },
+    "location": {
+      "column": 17,
+      "row": 138
+    },
+    "message": "Local variable `hook_input` is assigned to but never used",
+    "noqa_row": 138,
+    "url": "https://docs.astral.sh/ruff/rules/unused-variable"
+  },
+  {
+    "cell": null,
+    "code": "I001",
+    "end_location": {
+      "column": 18,
+      "row": 390
+    },
+    "filename": "/home/sam/actions-runner/_work/claude-hooks-shared/claude-hooks-shared/tests/hooks/intelligence/test_lesson_injector.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "        import io\n\n        from lesson_injector import main\n",
+          "end_location": {
+            "column": 1,
+            "row": 391
+          },
+          "location": {
+            "column": 1,
+            "row": 389
+          }
+        }
+      ],
+      "message": "Organize imports"
+    },
+    "location": {
+      "column": 9,
+      "row": 389
+    },
+    "message": "Import block is un-sorted or un-formatted",
+    "noqa_row": 389,
+    "url": "https://docs.astral.sh/ruff/rules/unsorted-imports"
+  },
+  {
+    "cell": null,
+    "code": "SIM117",
+    "end_location": {
+      "column": 79,
+      "row": 395
+    },
+    "filename": "/home/sam/actions-runner/_work/claude-hooks-shared/claude-hooks-shared/tests/hooks/intelligence/test_lesson_injector.py",
+    "fix": null,
+    "location": {
+      "column": 9,
+      "row": 394
+    },
+    "message": "Use a single `with` statement with multiple contexts instead of nested `with` statements",
+    "noqa_row": 394,
+    "url": "https://docs.astral.sh/ruff/rules/multiple-with-statements"
+  },
+  {
+    "cell": null,
+    "code": "F841",
+    "end_location": {
+      "column": 52,
+      "row": 396
+    },
+    "filename": "/home/sam/actions-runner/_work/claude-hooks-shared/claude-hooks-shared/tests/hooks/intelligence/test_lesson_injector.py",
+    "fix": {
+      "applicability": "unsafe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 52,
+            "row": 396
+          },
+          "location": {
+            "column": 39,
+            "row": 396
+          }
+        }
+      ],
+      "message": "Remove assignment to unused variable `mock_exit`"
+    },
+    "location": {
+      "column": 43,
+      "row": 396
+    },
+    "message": "Local variable `mock_exit` is assigned to but never used",
+    "noqa_row": 396,
+    "url": "https://docs.astral.sh/ruff/rules/unused-variable"
+  },
+  {
+    "cell": null,
+    "code": "I001",
+    "end_location": {
+      "column": 2,
+      "row": 30
+    },
+    "filename": "/home/sam/actions-runner/_work/claude-hooks-shared/claude-hooks-shared/tests/hooks/intelligence/test_meta_learning.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from meta_learning import (  # type: ignore  # noqa: E402\n    THRESHOLD_ERROR_RATE,\n    THRESHOLD_QUALITY_DROP,\n    THRESHOLD_REWORK_EDITS,\n    calculate_confidence,\n    extract_error_pattern,\n    extract_patterns,\n    extract_quality_drop_pattern,\n    extract_rework_pattern,\n)\n\n",
+          "end_location": {
+            "column": 1,
+            "row": 33
+          },
+          "location": {
+            "column": 1,
+            "row": 21
+          }
+        }
+      ],
+      "message": "Organize imports"
+    },
+    "location": {
+      "column": 1,
+      "row": 21
+    },
+    "message": "Import block is un-sorted or un-formatted",
+    "noqa_row": 21,
+    "url": "https://docs.astral.sh/ruff/rules/unsorted-imports"
+  },
+  {
+    "cell": null,
+    "code": "F841",
+    "end_location": {
+      "column": 19,
+      "row": 522
+    },
+    "filename": "/home/sam/actions-runner/_work/claude-hooks-shared/claude-hooks-shared/tests/hooks/intelligence/test_meta_learning.py",
+    "fix": {
+      "applicability": "unsafe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 22,
+            "row": 522
+          },
+          "location": {
+            "column": 13,
+            "row": 522
+          }
+        }
+      ],
+      "message": "Remove assignment to unused variable `result`"
+    },
+    "location": {
+      "column": 13,
+      "row": 522
+    },
+    "message": "Local variable `result` is assigned to but never used",
+    "noqa_row": 522,
+    "url": "https://docs.astral.sh/ruff/rules/unused-variable"
+  }
+]
