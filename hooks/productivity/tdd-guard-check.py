@@ -27,6 +27,7 @@ PRODUCTION_PATHS = [
     "controllers/",
     "utils/",
     "helpers/",
+    "hooks/",  # Claude Code hooks need tests too!
 ]
 
 # Paths to skip (tests, docs, config)
