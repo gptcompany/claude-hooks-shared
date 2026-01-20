@@ -1,0 +1,184 @@
+scripts/tips_engine.py:192: error: Returning Any from function declared to return "float"  [no-any-return]
+scripts/tips_engine.py:419: error: "object" has no attribute "__iter__"; maybe "__dir__" or "__str__"? (not iterable)  [attr-defined]
+scripts/tips_engine.py:430: error: Need type annotation for "factor"  [var-annotated]
+scripts/tips_engine.py:430: error: Argument 1 to "enumerate" has incompatible type "object"; expected "Iterable[Never]"  [arg-type]
+scripts/tips_engine.py:434: error: Unsupported operand types for * ("float" and "None")  [operator]
+scripts/tips_engine.py:434: note: Right operand is of type "float | None"
+scripts/statistical_analyzer.py:265: error: Argument 4 to "compare_to_benchmark" has incompatible type "float"; expected "bool"  [arg-type]
+scripts/statistical_analyzer.py:271: error: Argument 4 to "compare_to_benchmark" has incompatible type "float"; expected "bool"  [arg-type]
+scripts/statistical_analyzer.py:277: error: Argument 4 to "compare_to_benchmark" has incompatible type "float"; expected "bool"  [arg-type]
+scripts/statistical_analyzer.py:283: error: Argument 4 to "compare_to_benchmark" has incompatible type "float"; expected "bool"  [arg-type]
+hooks/safety/ci-batch-check.py:25: error: Returning Any from function declared to return "list[Any]"  [no-any-return]
+hooks/productivity/repo-health-notify.py:78: error: Returning Any from function declared to return "str"  [no-any-return]
+hooks/intelligence/strategy_router.py:33: error: Returning Any from function declared to return "dict[Any, Any] | None"  [no-any-return]
+hooks/intelligence/strategy_router.py:101: error: Function is missing a return type annotation  [no-untyped-def]
+hooks/intelligence/strategy_router.py:101: note: Use "-> None" if function does not return a value
+hooks/intelligence/framework-detector.py:70: error: "object" has no attribute "extend"  [attr-defined]
+hooks/intelligence/framework-detector.py:82: error: "object" has no attribute "extend"  [attr-defined]
+hooks/intelligence/framework-detector.py:95: error: Value of type "object" is not indexable  [index]
+hooks/intelligence/framework-detector.py:105: error: Function is missing a return type annotation  [no-untyped-def]
+hooks/intelligence/framework-detector.py:105: note: Use "-> None" if function does not return a value
+hooks/intelligence/ci_status_injector.py:211: error: Function is missing a return type annotation  [no-untyped-def]
+hooks/intelligence/ci_status_injector.py:211: note: Use "-> None" if function does not return a value
+scripts/stats-extended.py:306: error: Returning Any from function declared to return "dict[Any, Any]"  [no-any-return]
+hooks/ux/tips-auto-inject.py:33: error: Returning Any from function declared to return "str"  [no-any-return]
+hooks/ux/tips-auto-inject.py:49: error: Returning Any from function declared to return "bool"  [no-any-return]
+hooks/ux/tips-auto-inject.py:70: error: Returning Any from function declared to return "dict[Any, Any] | None"  [no-any-return]
+hooks/ux/tips-auto-inject.py:79: error: Returning Any from function declared to return "dict[Any, Any] | None"  [no-any-return]
+hooks/ux/session_insights_writer.py:33: error: Returning Any from function declared to return "dict[Any, Any] | None"  [no-any-return]
+hooks/session/session_restore_check.py:86: error: Need type annotation for "data"  [var-annotated]
+hooks/quality/sentry-error-context.py:67: error: Returning Any from function declared to return "bool"  [no-any-return]
+hooks/quality/pr-merge-readiness.py:52: error: Returning Any from function declared to return "bool"  [no-any-return]
+hooks/quality/ci-autofix.py:70: error: Returning Any from function declared to return "dict[Any, Any]"  [no-any-return]
+hooks/intelligence/trajectory_tracker.py:41: error: Function is missing a return type annotation  [no-untyped-def]
+hooks/intelligence/trajectory_tracker.py:44: error: Function is missing a return type annotation  [no-untyped-def]
+hooks/intelligence/trajectory_tracker.py:47: error: Function is missing a return type annotation  [no-untyped-def]
+hooks/intelligence/trajectory_tracker.py:54: error: Function is missing a type annotation  [no-untyped-def]
+hooks/intelligence/trajectory_tracker.py:58: error: Function is missing a type annotation  [no-untyped-def]
+hooks/intelligence/trajectory_tracker.py:73: error: Function is missing a type annotation  [no-untyped-def]
+hooks/intelligence/trajectory_tracker.py:90: error: Function is missing a return type annotation  [no-untyped-def]
+hooks/intelligence/trajectory_tracker.py:104: error: Returning Any from function declared to return "dict[Any, Any] | None"  [no-any-return]
+hooks/intelligence/trajectory_tracker.py:110: error: Function is missing a return type annotation  [no-untyped-def]
+hooks/intelligence/trajectory_tracker.py:116: error: Function is missing a return type annotation  [no-untyped-def]
+hooks/intelligence/trajectory_tracker.py:116: note: Use "-> None" if function does not return a value
+hooks/intelligence/trajectory_tracker.py:129: error: Function is missing a return type annotation  [no-untyped-def]
+hooks/intelligence/trajectory_tracker.py:159: error: Function is missing a return type annotation  [no-untyped-def]
+hooks/intelligence/trajectory_tracker.py:192: error: Function is missing a return type annotation  [no-untyped-def]
+hooks/intelligence/trajectory_tracker.py:248: error: Function is missing a return type annotation  [no-untyped-def]
+hooks/intelligence/session_start_tracker.py:100: error: Function is missing a return type annotation  [no-untyped-def]
+hooks/intelligence/session_start_tracker.py:156: error: Returning Any from function declared to return "dict[Any, Any] | None"  [no-any-return]
+hooks/intelligence/session_start_tracker.py:250: error: Function is missing a return type annotation  [no-untyped-def]
+hooks/intelligence/session_start_tracker.py:250: note: Use "-> None" if function does not return a value
+hooks/coordination/task_release.py:66: error: Returning Any from function declared to return "dict[Any, Any]"  [no-any-return]
+hooks/coordination/task_claim.py:87: error: Returning Any from function declared to return "dict[Any, Any]"  [no-any-return]
+hooks/coordination/file_release.py:63: error: Returning Any from function declared to return "dict[Any, Any]"  [no-any-return]
+hooks/coordination/file_release.py:91: error: Returning Any from function declared to return "str | None"  [no-any-return]
+hooks/coordination/file_claim.py:71: error: Returning Any from function declared to return "dict[Any, Any]"  [no-any-return]
+hooks/coordination/file_claim.py:99: error: Returning Any from function declared to return "str | None"  [no-any-return]
+hooks/coordination/claims_dashboard.py:31: error: Need type annotation for "default"  [var-annotated]
+hooks/coordination/claims_dashboard.py:94: error: Argument 2 to "to_claim_list" has incompatible type "None"; expected "str"  [arg-type]
+hooks/control/auto-ralph.py:341: error: Returning Any from function declared to return "bool"  [no-any-return]
+scripts/session_manager.py:38: error: Incompatible redefinition (redefinition with type "Callable[[], Any]", original type "_lru_cache_wrapper[str]")  [misc]
+scripts/session_manager.py:41: error: All conditional function variants must have identical signatures  [misc]
+scripts/session_manager.py:41: note: Original:
+scripts/session_manager.py:41: note:     def get_database_url() -> str
+scripts/session_manager.py:41: note: Redefinition:
+scripts/session_manager.py:41: note:     def get_database_url() -> Any
+scripts/session_manager.py:104: error: Item "None" of "Any | None" has no attribute "cursor"  [union-attr]
+scripts/session_manager.py:113: error: Item "None" of "Any | None" has no attribute "commit"  [union-attr]
+scripts/session_manager.py:123: error: Item "None" of "Any | None" has no attribute "cursor"  [union-attr]
+scripts/session_manager.py:146: error: Item "None" of "Any | None" has no attribute "commit"  [union-attr]
+scripts/session_manager.py:154: error: Item "None" of "Any | None" has no attribute "cursor"  [union-attr]
+scripts/session_manager.py:168: error: Item "None" of "Any | None" has no attribute "commit"  [union-attr]
+scripts/session_manager.py:193: error: Item "None" of "Any | None" has no attribute "cursor"  [union-attr]
+scripts/session_manager.py:228: error: Item "None" of "Any | None" has no attribute "commit"  [union-attr]
+scripts/session_manager.py:236: error: Item "None" of "Any | None" has no attribute "cursor"  [union-attr]
+scripts/questdb_metrics.py:33: error: Incompatible redefinition (redefinition with type "Callable[[], Any]", original type "_lru_cache_wrapper[str]")  [misc]
+scripts/questdb_metrics.py:117: error: Incompatible default for argument "project_name" (default has type "None", argument has type "str")  [assignment]
+scripts/questdb_metrics.py:117: note: PEP 484 prohibits implicit Optional. Accordingly, mypy has changed its default to no_implicit_optional=True
+scripts/questdb_metrics.py:117: note: Use https://github.com/hauntsaninja/no_implicit_optional to automatically upgrade your codebase
+scripts/questdb_metrics.py:141: error: Incompatible default for argument "tool_params" (default has type "None", argument has type "dict[Any, Any]")  [assignment]
+scripts/questdb_metrics.py:141: note: PEP 484 prohibits implicit Optional. Accordingly, mypy has changed its default to no_implicit_optional=True
+scripts/questdb_metrics.py:141: note: Use https://github.com/hauntsaninja/no_implicit_optional to automatically upgrade your codebase
+scripts/questdb_metrics.py:144: error: Incompatible default for argument "error" (default has type "None", argument has type "str")  [assignment]
+scripts/questdb_metrics.py:144: note: PEP 484 prohibits implicit Optional. Accordingly, mypy has changed its default to no_implicit_optional=True
+scripts/questdb_metrics.py:144: note: Use https://github.com/hauntsaninja/no_implicit_optional to automatically upgrade your codebase
+scripts/questdb_metrics.py:175: error: Incompatible types in assignment (expression has type "str", target has type "int")  [assignment]
+scripts/questdb_metrics.py:177: error: Incompatible types in assignment (expression has type "str", target has type "int")  [assignment]
+scripts/questdb_metrics.py:188: error: Incompatible default for argument "tool_name" (default has type "None", argument has type "str")  [assignment]
+scripts/questdb_metrics.py:188: note: PEP 484 prohibits implicit Optional. Accordingly, mypy has changed its default to no_implicit_optional=True
+scripts/questdb_metrics.py:188: note: Use https://github.com/hauntsaninja/no_implicit_optional to automatically upgrade your codebase
+scripts/questdb_metrics.py:189: error: Incompatible default for argument "error_message" (default has type "None", argument has type "str")  [assignment]
+scripts/questdb_metrics.py:189: note: PEP 484 prohibits implicit Optional. Accordingly, mypy has changed its default to no_implicit_optional=True
+scripts/questdb_metrics.py:189: note: Use https://github.com/hauntsaninja/no_implicit_optional to automatically upgrade your codebase
+scripts/questdb_metrics.py:208: error: Incompatible types in assignment (expression has type "str", target has type "int")  [assignment]
+scripts/questdb_metrics.py:224: error: Incompatible default for argument "git_branch" (default has type "None", argument has type "str")  [assignment]
+scripts/questdb_metrics.py:224: note: PEP 484 prohibits implicit Optional. Accordingly, mypy has changed its default to no_implicit_optional=True
+scripts/questdb_metrics.py:224: note: Use https://github.com/hauntsaninja/no_implicit_optional to automatically upgrade your codebase
+scripts/questdb_metrics.py:225: error: Incompatible default for argument "task_type" (default has type "None", argument has type "str")  [assignment]
+scripts/questdb_metrics.py:225: note: PEP 484 prohibits implicit Optional. Accordingly, mypy has changed its default to no_implicit_optional=True
+scripts/questdb_metrics.py:225: note: Use https://github.com/hauntsaninja/no_implicit_optional to automatically upgrade your codebase
+scripts/questdb_metrics.py:271: error: Incompatible default for argument "error" (default has type "None", argument has type "str")  [assignment]
+scripts/questdb_metrics.py:271: note: PEP 484 prohibits implicit Optional. Accordingly, mypy has changed its default to no_implicit_optional=True
+scripts/questdb_metrics.py:271: note: Use https://github.com/hauntsaninja/no_implicit_optional to automatically upgrade your codebase
+scripts/questdb_metrics.py:272: error: Incompatible default for argument "parent_agent" (default has type "None", argument has type "str")  [assignment]
+scripts/questdb_metrics.py:272: note: PEP 484 prohibits implicit Optional. Accordingly, mypy has changed its default to no_implicit_optional=True
+scripts/questdb_metrics.py:272: note: Use https://github.com/hauntsaninja/no_implicit_optional to automatically upgrade your codebase
+scripts/questdb_metrics.py:296: error: Incompatible types in assignment (expression has type "str", target has type "int")  [assignment]
+scripts/questdb_metrics.py:311: error: Incompatible default for argument "tool_matcher" (default has type "None", argument has type "str")  [assignment]
+scripts/questdb_metrics.py:311: note: PEP 484 prohibits implicit Optional. Accordingly, mypy has changed its default to no_implicit_optional=True
+scripts/questdb_metrics.py:311: note: Use https://github.com/hauntsaninja/no_implicit_optional to automatically upgrade your codebase
+scripts/questdb_metrics.py:312: error: Incompatible default for argument "error" (default has type "None", argument has type "str")  [assignment]
+scripts/questdb_metrics.py:312: note: PEP 484 prohibits implicit Optional. Accordingly, mypy has changed its default to no_implicit_optional=True
+scripts/questdb_metrics.py:312: note: Use https://github.com/hauntsaninja/no_implicit_optional to automatically upgrade your codebase
+scripts/questdb_metrics.py:334: error: Incompatible types in assignment (expression has type "str", target has type "int")  [assignment]
+scripts/questdb_metrics.py:405: error: Incompatible default for argument "task_id" (default has type "None", argument has type "str")  [assignment]
+scripts/questdb_metrics.py:405: note: PEP 484 prohibits implicit Optional. Accordingly, mypy has changed its default to no_implicit_optional=True
+scripts/questdb_metrics.py:405: note: Use https://github.com/hauntsaninja/no_implicit_optional to automatically upgrade your codebase
+scripts/questdb_metrics.py:446: error: Incompatible default for argument "project_name" (default has type "None", argument has type "str")  [assignment]
+scripts/questdb_metrics.py:446: note: PEP 484 prohibits implicit Optional. Accordingly, mypy has changed its default to no_implicit_optional=True
+scripts/questdb_metrics.py:446: note: Use https://github.com/hauntsaninja/no_implicit_optional to automatically upgrade your codebase
+hooks/metrics/claudeflow-sync.py:71: error: Need type annotation for "lines" (hint: "lines: list[<type>] = ...")  [var-annotated]
+hooks/metrics/claudeflow-sync.py:149: error: Need type annotation for "lines" (hint: "lines: list[<type>] = ...")  [var-annotated]
+hooks/metrics/claudeflow-sync.py:223: error: Need type annotation for "lines" (hint: "lines: list[<type>] = ...")  [var-annotated]
+scripts/secrets_loader.py:202: error: Incompatible default for argument "default" (default has type "None", argument has type "str")  [assignment]
+scripts/secrets_loader.py:202: note: PEP 484 prohibits implicit Optional. Accordingly, mypy has changed its default to no_implicit_optional=True
+scripts/secrets_loader.py:202: note: Use https://github.com/hauntsaninja/no_implicit_optional to automatically upgrade your codebase
+hooks/intelligence/meta_learning.py:46: error: Returning Any from function declared to return "dict[Any, Any]"  [no-any-return]
+hooks/intelligence/meta_learning.py:98: error: Returning Any from function declared to return "dict[str, Any]"  [no-any-return]
+hooks/intelligence/meta_learning.py:110: error: Returning Any from function declared to return "dict[str, int]"  [no-any-return]
+hooks/intelligence/meta_learning.py:247: error: Cannot call function of unknown type  [operator]
+hooks/intelligence/lesson_injector.py:164: error: Function is missing a return type annotation  [no-untyped-def]
+hooks/intelligence/lesson_injector.py:164: note: Use "-> None" if function does not return a value
+hooks/core/mcp_client.py:183: error: Returning Any from function declared to return "dict[Any, Any]"  [no-any-return]
+hooks/coordination/stuck_detector.py:52: error: Need type annotation for "default"  [var-annotated]
+scripts/hook_health.py:58: error: Returning Any from function declared to return "dict[Any, Any]"  [no-any-return]
+scripts/hook_health.py:87: error: Incompatible types in assignment (expression has type "dict[Any, Any]", variable has type "None")  [assignment]
+scripts/hook_health.py:88: error: Incompatible return value type (got "None", expected "dict[Any, Any]")  [return-value]
+scripts/hook_health.py:115: error: Returning Any from function declared to return "str | None"  [no-any-return]
+scripts/hook_health.py:130: error: Incompatible default for argument "error" (default has type "None", argument has type "str")  [assignment]
+scripts/hook_health.py:130: note: PEP 484 prohibits implicit Optional. Accordingly, mypy has changed its default to no_implicit_optional=True
+scripts/hook_health.py:130: note: Use https://github.com/hauntsaninja/no_implicit_optional to automatically upgrade your codebase
+scripts/hook_health.py:174: error: Incompatible default for argument "error" (default has type "None", argument has type "str")  [assignment]
+scripts/hook_health.py:174: note: PEP 484 prohibits implicit Optional. Accordingly, mypy has changed its default to no_implicit_optional=True
+scripts/hook_health.py:174: note: Use https://github.com/hauntsaninja/no_implicit_optional to automatically upgrade your codebase
+scripts/context-monitor.py:332: error: Argument "task_type" to "log_session_metric" of "QuestDBMetrics" has incompatible type "str | None"; expected "str"  [arg-type]
+hooks/metrics/dora-tracker.py:28: error: Incompatible types in assignment (expression has type "None", variable has type "QuestDBMetrics")  [assignment]
+hooks/metrics/dora-tracker.py:46: error: Returning Any from function declared to return "dict[Any, Any]"  [no-any-return]
+hooks/metrics/dora-tracker.py:156: error: Returning Any from function declared to return "dict[Any, Any]"  [no-any-return]
+hooks/core/post-tool-use.py:39: error: Cannot assign to a type  [misc]
+hooks/core/post-tool-use.py:39: error: Incompatible types in assignment (expression has type "None", variable has type "type[QuestDBMetrics]")  [assignment]
+hooks/core/post-tool-use.py:86: error: Argument "error" to "log_tool_use" of "QuestDBMetrics" has incompatible type "Any | None"; expected "str"  [arg-type]
+hooks/core/context_bundle_builder.py:25: error: Cannot assign to a type  [misc]
+hooks/core/context_bundle_builder.py:25: error: Incompatible types in assignment (expression has type "None", variable has type "type[QuestDBMetrics]")  [assignment]
+hooks/ux/notification.py:14: error: Incompatible default for argument "voice_message" (default has type "None", argument has type "str")  [assignment]
+hooks/ux/notification.py:14: note: PEP 484 prohibits implicit Optional. Accordingly, mypy has changed its default to no_implicit_optional=True
+hooks/ux/notification.py:14: note: Use https://github.com/hauntsaninja/no_implicit_optional to automatically upgrade your codebase
+scripts/secret_rotation.py:65: error: Returning Any from function declared to return "dict[Any, Any]"  [no-any-return]
+scripts/secret_rotation.py:352: error: Value of type "str | None" is not indexable  [index]
+hooks/metrics/quality-score-tracker.py:155: error: Incompatible types in assignment (expression has type "float", target has type "int")  [assignment]
+hooks/metrics/quality-score-tracker.py:256: error: Incompatible types in assignment (expression has type "int", target has type "None")  [assignment]
+hooks/metrics/quality-score-tracker.py:258: error: Incompatible types in assignment (expression has type "int", target has type "None")  [assignment]
+hooks/metrics/quality-score-tracker.py:263: error: Incompatible types in assignment (expression has type "int", target has type "None")  [assignment]
+hooks/metrics/quality-score-tracker.py:265: error: Incompatible types in assignment (expression has type "int", target has type "None")  [assignment]
+hooks/safety/smart-safety-check.py:104: error: Incompatible types in assignment (expression has type "CompletedProcess[str]", variable has type "CompletedProcess[bytes]")  [assignment]
+hooks/safety/smart-safety-check.py:108: error: Incompatible types in assignment (expression has type "CompletedProcess[str]", variable has type "CompletedProcess[bytes]")  [assignment]
+hooks/safety/smart-safety-check.py:118: error: Incompatible types in assignment (expression has type "CompletedProcess[str]", variable has type "CompletedProcess[bytes]")  [assignment]
+scripts/repo_compliance.py:70: error: Incompatible types in assignment (expression has type "TextIOWrapper[_WrappedBuffer]", variable has type "str")  [assignment]
+hooks/session/ralph-resume.py:140: error: Returning Any from function declared to return "dict[Any, Any] | None"  [no-any-return]
+hooks/control/ralph-loop.py:205: error: Incompatible types in assignment (expression has type "bool", variable has type "str")  [assignment]
+hooks/control/ralph-loop.py:207: error: Incompatible types in assignment (expression has type "bool", variable has type "str")  [assignment]
+hooks/control/ralph-loop.py:209: error: Incompatible types in assignment (expression has type "None", variable has type "str")  [assignment]
+hooks/control/ralph-loop.py:211: error: Incompatible types in assignment (expression has type "int", variable has type "str")  [assignment]
+hooks/control/ralph-loop.py:217: error: Argument 2 to "get" of "dict" has incompatible type "bool"; expected "str"  [arg-type]
+hooks/control/ralph-loop.py:261: error: Returning Any from function declared to return "dict[Any, Any] | None"  [no-any-return]
+scripts/questdb_client.py:53: error: Returning Any from function declared to return "dict[Any, Any] | None"  [no-any-return]
+scripts/questdb_client.py:352: error: Returning Any from function declared to return "bool"  [no-any-return]
+scripts/questdb_client.py:382: error: Returning Any from function declared to return "dict[Any, Any] | None"  [no-any-return]
+scripts/questdb_client.py:434: error: Incompatible types in assignment (expression has type "float", target has type "int | bool | None")  [assignment]
+scripts/questdb_client.py:441: error: Incompatible types in assignment (expression has type "str", target has type "int | bool | None")  [assignment]
+scripts/questdb_client.py:456: error: Incompatible types in assignment (expression has type "str", target has type "bool | None")  [assignment]
+scripts/questdb_client.py:464: error: Incompatible types in assignment (expression has type "float", target has type "bool | None")  [assignment]
+scripts/questdb_client.py:467: error: Incompatible types in assignment (expression has type "str", target has type "bool | None")  [assignment]
+hooks/ux/session-summary.py:48: error: Returning Any from function declared to return "dict[Any, Any]"  [no-any-return]
+hooks/ux/session-summary.py:175: error: Incompatible return value type (got "None", expected "SessionMetrics")  [return-value]
