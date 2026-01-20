@@ -51,8 +51,12 @@ except ImportError:
         return store.get("entries", {}).get(full_key, {}).get("value")
 
     def pattern_store(
-        pattern: str, pattern_type: str, confidence: float, metadata: dict | None = None
+        _pattern: str,
+        _pattern_type: str,
+        _confidence: float,
+        _metadata: dict | None = None,
     ) -> dict:
+        """Fallback stub - args prefixed with _ to suppress unused warnings."""
         return {"success": True, "fallback": True}
 
 
@@ -124,24 +128,28 @@ def load_quality_scores() -> list[float]:
 
 
 def calculate_confidence(pattern_type: str, data: dict[str, Any]) -> float:
-    """Calculate confidence score for a pattern based on signal strength."""
-    configs = {
-        "high_rework": lambda d: 0.5
-        + min(
-            0.5,
-            (d.get("edit_count", 0) - d.get("threshold", THRESHOLD_REWORK_EDITS))
-            * 0.15,
-        ),
-        "high_error": lambda d: 0.5
-        + min(0.5, (d.get("error_rate", 0) - THRESHOLD_ERROR_RATE) * 1.5),
-        "quality_drop": lambda d: 0.5
-        + min(
-            0.5,
-            (d.get("total_drop", 0) - d.get("threshold", THRESHOLD_QUALITY_DROP)) * 2,
-        ),
-    }
-    calc = configs.get(pattern_type, lambda _: 0.5)
-    return min(1.0, max(0.0, calc(data)))
+    """Calculate confidence score for a pattern based on signal strength.
+
+    Base confidence is 0.5, with up to 0.5 additional based on severity.
+    """
+    base = 0.5
+    bonus = 0.0
+
+    if pattern_type == "high_rework":
+        excess = data.get("edit_count", 0) - data.get(
+            "threshold", THRESHOLD_REWORK_EDITS
+        )
+        bonus = min(0.5, excess * 0.15)
+    elif pattern_type == "high_error":
+        excess = data.get("error_rate", 0) - THRESHOLD_ERROR_RATE
+        bonus = min(0.5, excess * 1.5)
+    elif pattern_type == "quality_drop":
+        excess = data.get("total_drop", 0) - data.get(
+            "threshold", THRESHOLD_QUALITY_DROP
+        )
+        bonus = min(0.5, excess * 2)
+
+    return min(1.0, max(0.0, base + bonus))
 
 
 def extract_rework_pattern(file_edit_counts: dict[str, int]) -> dict[str, Any] | None:
@@ -233,7 +241,6 @@ def extract_quality_drop_pattern(quality_scores: list[float]) -> dict[str, Any] 
 
 
 def extract_patterns(
-    trajectory_index: list[dict[str, Any]],
     session_analysis: dict[str, Any],
     file_edit_counts: dict[str, int],
     quality_scores: list[float],
@@ -271,10 +278,10 @@ def store_patterns(patterns: list[dict[str, Any]]) -> None:
 def main() -> int:
     """Main hook entry point. Returns 0 for graceful failure."""
     try:
-        hook_input = {}
+        # Read stdin (required by hook protocol, but not used by this hook)
         if not sys.stdin.isatty():
             try:
-                hook_input = json.load(sys.stdin)
+                json.load(sys.stdin)  # Consume stdin
             except json.JSONDecodeError:
                 pass
 
@@ -290,7 +297,6 @@ def main() -> int:
         )
 
         patterns = extract_patterns(
-            trajectory_index=trajectory_index,
             session_analysis=session_analysis,
             file_edit_counts=file_edit_counts,
             quality_scores=quality_scores,

@@ -112,7 +112,7 @@ def call_claims_claim(issue_id: str, claimant: str, context: str) -> dict:
             "claude-flow@latest",
             "claims",
             "claim",
-            "--issue-id",
+            "--issueId",
             issue_id,
             "--claimant",
             claimant,

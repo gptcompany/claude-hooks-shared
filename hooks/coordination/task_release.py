@@ -90,7 +90,7 @@ def call_claims_release(issue_id: str, claimant: str) -> dict:
             "claude-flow@latest",
             "claims",
             "release",
-            "--issue-id",
+            "--issueId",
             issue_id,
             "--claimant",
             claimant,

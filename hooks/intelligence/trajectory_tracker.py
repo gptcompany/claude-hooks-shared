@@ -238,8 +238,8 @@ def on_end(hook_input: dict):
     # Clear active trajectory
     clear_active_trajectory()
 
-    # Clear MCP active marker
-    memory_store(f"trajectory:{project}:active", None)
+    # Clear MCP active marker (use empty dict instead of None for JSON safety)
+    memory_store(f"trajectory:{project}:active", {"cleared": True, "at": now})
 
     log(
         f"Ended trajectory {trajectory_id}: success={overall_success}, steps={len(steps)}, rate={success_rate:.2f}"
@@ -272,10 +272,8 @@ def main():
             result = on_start(hook_input)
         elif args.event == "step":
             result = on_step(hook_input)
-        elif args.event == "end":
+        else:  # args.event == "end" (validated by argparse choices)
             result = on_end(hook_input)
-        else:
-            result = {}
 
         print(json.dumps(result))
         return 0

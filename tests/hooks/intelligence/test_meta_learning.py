@@ -387,14 +387,12 @@ class TestNoPatternOnGoodSession:
 
     def test_healthy_session_no_patterns(
         self,
-        mock_trajectory_index: list[dict[str, Any]],
         mock_session_analysis: dict[str, Any],
         mock_file_edit_counts_normal: dict[str, int],
         mock_quality_scores_stable: list[float],
     ) -> None:
         """Test that healthy sessions produce no patterns."""
         patterns = extract_patterns(
-            trajectory_index=mock_trajectory_index,
             session_analysis=mock_session_analysis,
             file_edit_counts=mock_file_edit_counts_normal,
             quality_scores=mock_quality_scores_stable,
@@ -405,7 +403,6 @@ class TestNoPatternOnGoodSession:
     def test_empty_data_no_patterns(self) -> None:
         """Test that empty data produces no patterns."""
         patterns = extract_patterns(
-            trajectory_index=[],
             session_analysis={},
             file_edit_counts={},
             quality_scores=[],
