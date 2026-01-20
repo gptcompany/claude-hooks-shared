@@ -76,11 +76,11 @@ jobs:
 
       - name: Test hooks with simulated input
         run: |
-          echo "Testing session-start-tracker..."
-          echo '{}' | python3 hooks/intelligence/session-start-tracker.py
+          echo "Testing session_start_tracker..."
+          echo '{}' | python3 hooks/intelligence/session_start_tracker.py
 
-          echo "Testing session-analyzer..."
-          echo '{"session": {"tool_calls": 50, "errors": 5}}' | python3 hooks/intelligence/session-analyzer.py
+          echo "Testing session_analyzer..."
+          echo '{"session": {"tool_calls": 50, "errors": 5}}' | python3 hooks/intelligence/session_analyzer.py
 
           echo "Testing context-preservation..."
           echo '{"transcript_path": "/tmp/test"}' | python3 hooks/core/context-preservation.py
