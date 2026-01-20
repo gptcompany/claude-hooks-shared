@@ -14,7 +14,6 @@ Hook Type: PostToolUse
 
 import json
 import re
-import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -22,8 +21,6 @@ from pathlib import Path
 # Configuration
 MAX_RETRIES = 3
 RETRY_STATE_FILE = Path.home() / ".claude" / "state" / "ci_retry_state.json"
-CLAUDEFLOW_BIN = Path("/media/sam/1TB/claude-flow/bin/pair-autofix-only.js")
-CLAUDEFLOW_ENDPOINT = "http://localhost:3847/auto-fix"
 
 # Patterns to detect CI commands
 CI_COMMAND_PATTERNS = [
@@ -93,12 +90,16 @@ def get_test_key(command: str) -> str:
 
 def is_ci_command(command: str) -> bool:
     """Check if command is a CI/test command."""
-    return any(re.search(pattern, command, re.IGNORECASE) for pattern in CI_COMMAND_PATTERNS)
+    return any(
+        re.search(pattern, command, re.IGNORECASE) for pattern in CI_COMMAND_PATTERNS
+    )
 
 
 def has_failure(output: str) -> bool:
     """Check if output contains failure indicators."""
-    return any(re.search(pattern, output, re.IGNORECASE) for pattern in FAILURE_PATTERNS)
+    return any(
+        re.search(pattern, output, re.IGNORECASE) for pattern in FAILURE_PATTERNS
+    )
 
 
 def extract_error_context(output: str, command: str) -> dict:
@@ -138,74 +139,33 @@ def extract_error_context(output: str, command: str) -> dict:
     return context
 
 
-def invoke_claudeflow(error_context: dict) -> bool:
-    """Invoke ClaudeFlow for auto-fix."""
-    prompt = f"""
-CI Failure detected. Please analyze and fix:
-
-## Command
-{error_context["command"]}
+def generate_fix_instruction(error_context: dict) -> str:
+    """Generate fix instruction for Claude."""
+    instruction = f"""
+🔴 **CI FAILURE - Auto-Fix Required**
 
 ## Error
 {error_context["error_message"]}
 
-## File
-{error_context.get("file_path", "Unknown")}:{error_context.get("line_number", "?")}
+## Location
+`{error_context.get("file_path", "Unknown")}:{error_context.get("line_number", "?")}`
 
 ## Test
-{error_context.get("test_name", "Unknown")}
+`{error_context.get("test_name", "Unknown")}`
 
 ## Stack Trace
 ```
-{error_context.get("stack_trace", "Not available")}
+{error_context.get("stack_trace", "Not available")[:500]}
 ```
 
-Please:
-1. Analyze the root cause
-2. Fix the code
-3. Re-run the test to verify
+**Action Required:**
+1. Read the failing file
+2. Analyze the root cause
+3. Fix the code
+4. Re-run the test: `{error_context["command"]}`
 """
-
-    log_event("claudeflow_invoked", {"context": error_context})
-
-    # Try HTTP endpoint first (if ClaudeFlow server is running)
-    try:
-        import requests
-
-        response = requests.post(
-            CLAUDEFLOW_ENDPOINT,
-            json={"prompt": prompt, "context": error_context},
-            timeout=5,
-        )
-        if response.ok:
-            log_event("claudeflow_success", {"method": "http"})
-            return True
-    except Exception:
-        pass  # Fall through to subprocess
-
-    # Fallback to direct invocation
-    if CLAUDEFLOW_BIN.exists():
-        try:
-            result = subprocess.run(
-                ["node", str(CLAUDEFLOW_BIN), "--prompt", prompt],
-                capture_output=True,
-                text=True,
-                timeout=300,  # 5 minute timeout
-            )
-            log_event(
-                "claudeflow_result",
-                {"returncode": result.returncode, "method": "subprocess"},
-            )
-            return result.returncode == 0
-        except subprocess.TimeoutExpired:
-            log_event("claudeflow_timeout", {})
-            return False
-        except Exception as e:
-            log_event("claudeflow_error", {"error": str(e)})
-            return False
-
-    log_event("claudeflow_not_available", {})
-    return False
+    log_event("fix_instruction_generated", {"context": error_context})
+    return instruction
 
 
 def main():
@@ -244,7 +204,9 @@ def main():
     state = get_retry_state()
 
     # Get current retry count
-    retry_info = state.get(test_key, {"count": 0, "first_failure": datetime.now().isoformat()})
+    retry_info = state.get(
+        test_key, {"count": 0, "first_failure": datetime.now().isoformat()}
+    )
     retry_count = retry_info["count"]
 
     if retry_count < MAX_RETRIES:
@@ -254,7 +216,9 @@ def main():
 
         state[test_key] = {
             "count": retry_count,
-            "first_failure": retry_info.get("first_failure", datetime.now().isoformat()),
+            "first_failure": retry_info.get(
+                "first_failure", datetime.now().isoformat()
+            ),
             "last_retry": datetime.now().isoformat(),
         }
         save_retry_state(state)
@@ -266,16 +230,23 @@ def main():
 
         # Output message for Claude to see
         msg = f"CI failure detected (attempt {retry_count}/{MAX_RETRIES}). Auto-retry in {delay}s recommended."
-        result = {"continue": True, "message": f"{msg}\nRun the command again: {command}"}
+        result = {
+            "continue": True,
+            "message": f"{msg}\nRun the command again: {command}",
+        }
         print(json.dumps(result))
 
     else:
-        # Retries exhausted - invoke ClaudeFlow
+        # Retries exhausted - generate fix instruction for Claude
         error_context = extract_error_context(tool_result, command)
 
         log_event(
             "retries_exhausted",
-            {"test_key": test_key, "retry_count": retry_count, "error": error_context["error_message"]},
+            {
+                "test_key": test_key,
+                "retry_count": retry_count,
+                "error": error_context["error_message"],
+            },
         )
 
         # Clear retry state
@@ -283,14 +254,12 @@ def main():
             del state[test_key]
             save_retry_state(state)
 
-        # Invoke ClaudeFlow
-        success = invoke_claudeflow(error_context)
+        # Generate fix instruction
+        fix_instruction = generate_fix_instruction(error_context)
 
         result = {
             "continue": True,
-            "message": f"CI failure persists after {MAX_RETRIES} retries. "
-            f"{'ClaudeFlow auto-fix triggered.' if success else 'ClaudeFlow not available - manual fix needed.'}\n"
-            f"Error: {error_context['error_message']}",
+            "message": fix_instruction,
         }
         print(json.dumps(result))
 

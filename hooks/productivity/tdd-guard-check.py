@@ -19,6 +19,14 @@ PRODUCTION_PATHS = [
     "strategies/",
     "src/",
     "lib/",
+    "app/",
+    "core/",
+    "services/",
+    "models/",
+    "handlers/",
+    "controllers/",
+    "utils/",
+    "helpers/",
 ]
 
 # Paths to skip (tests, docs, config)
@@ -31,7 +39,15 @@ SKIP_PATHS = [
     ".claude/",
     "specs/",
     "config/",
+    ".planning/",
+    "scripts/",
+    "migrations/",
+    "fixtures/",
 ]
+
+# Environment variable to control blocking behavior
+# Set TDD_GUARD_MODE=warn to only warn (default: block)
+BLOCKING_MODE = os.environ.get("TDD_GUARD_MODE", "block") == "block"
 
 # Extensions that need tests
 CODE_EXTENSIONS = {".py", ".rs", ".ts", ".js"}
@@ -176,18 +192,45 @@ def main():
         print(json.dumps({}))
         sys.exit(0)
 
-    # No test found - warn but don't block
+    # No test found - block or warn based on mode
     log_tdd_metric(
         {
             "type": "violation",
             "file": file_path,
             "test_file": None,
+            "blocked": BLOCKING_MODE,
         }
     )
 
-    # Generate warning message
+    # Generate message
     base_name = Path(file_path).stem
-    warning = f"""
+
+    if BLOCKING_MODE:
+        # BLOCK the operation
+        block_message = f"""
+🚫 **TDD VIOLATION**: No test file found for `{Path(file_path).name}`
+
+Expected test file patterns:
+- `tests/test_{base_name}.py`
+- `tests/strategies/test_{base_name}.py`
+- `test_{base_name}.py` (same directory)
+
+**Action Required**: Write the test FIRST (Red phase), then implement.
+
+To bypass: Set TDD_GUARD_MODE=warn in environment.
+"""
+        output = {
+            "hookSpecificOutput": {
+                "hookEventName": "PreToolUse",
+                "decision": "block",
+                "reason": block_message,
+            }
+        }
+        print(json.dumps(output))
+        sys.exit(1)  # Non-zero exit to block
+    else:
+        # Warn only
+        warning = f"""
 ⚠️ **TDD Warning**: No test file found for `{Path(file_path).name}`
 
 Expected test file patterns:
@@ -196,20 +239,15 @@ Expected test file patterns:
 - `test_{base_name}.py` (same directory)
 
 **TDD Best Practice**: Write failing test BEFORE production code.
-
-Proceeding anyway (warning only, not blocking).
 """
-
-    # Return warning but allow operation
-    output = {
-        "hookSpecificOutput": {
-            "hookEventName": "PreToolUse",
-            "notification": warning,
+        output = {
+            "hookSpecificOutput": {
+                "hookEventName": "PreToolUse",
+                "notification": warning,
+            }
         }
-    }
-
-    print(json.dumps(output))
-    sys.exit(0)
+        print(json.dumps(output))
+        sys.exit(0)
 
 
 if __name__ == "__main__":
