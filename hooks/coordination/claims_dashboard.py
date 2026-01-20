@@ -196,7 +196,8 @@ def main() -> int:
     if args.watch:
         try:
             while True:
-                os.system("clear" if os.name != "nt" else "cls")
+                # nosec B605 - command is hardcoded, no injection risk
+                os.system("clear" if os.name != "nt" else "cls")  # nosec
                 print(display())
                 print(f"\nRefreshing every {args.interval}s... (Ctrl+C to stop)")
                 time.sleep(args.interval)
