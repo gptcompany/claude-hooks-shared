@@ -1,346 +1,46 @@
 {
   "testModules": [
     {
-      "moduleId": "tests/hooks/intelligence/test_session_analyzer.py",
+      "moduleId": "tests/hooks/intelligence/test_lesson_learning_integration.py",
       "tests": [
         {
-          "name": "test_default_values",
-          "fullName": "tests/hooks/intelligence/test_session_analyzer.py::TestGitChanges::test_default_values",
+          "name": "test_meta_learning_runs_without_error",
+          "fullName": "tests/hooks/intelligence/test_lesson_learning_integration.py::TestLessonLearningIntegration::test_meta_learning_runs_without_error",
           "state": "passed"
         },
         {
-          "name": "test_with_values",
-          "fullName": "tests/hooks/intelligence/test_session_analyzer.py::TestGitChanges::test_with_values",
+          "name": "test_lesson_injector_runs_without_error",
+          "fullName": "tests/hooks/intelligence/test_lesson_learning_integration.py::TestLessonLearningIntegration::test_lesson_injector_runs_without_error",
           "state": "passed"
         },
         {
-          "name": "test_error_rate_zero_calls",
-          "fullName": "tests/hooks/intelligence/test_session_analyzer.py::TestSessionMetrics::test_error_rate_zero_calls",
+          "name": "test_meta_learning_extracts_patterns_from_session_analysis",
+          "fullName": "tests/hooks/intelligence/test_lesson_learning_integration.py::TestLessonLearningIntegration::test_meta_learning_extracts_patterns_from_session_analysis",
           "state": "passed"
         },
         {
-          "name": "test_error_rate_calculation",
-          "fullName": "tests/hooks/intelligence/test_session_analyzer.py::TestSessionMetrics::test_error_rate_calculation",
+          "name": "test_lesson_injector_handles_empty_patterns",
+          "fullName": "tests/hooks/intelligence/test_lesson_learning_integration.py::TestLessonLearningIntegration::test_lesson_injector_handles_empty_patterns",
           "state": "passed"
         },
         {
-          "name": "test_error_rate_no_errors",
-          "fullName": "tests/hooks/intelligence/test_session_analyzer.py::TestSessionMetrics::test_error_rate_no_errors",
+          "name": "test_extracts_high_rework_pattern",
+          "fullName": "tests/hooks/intelligence/test_lesson_learning_integration.py::TestPatternExtractionFlow::test_extracts_high_rework_pattern",
           "state": "passed"
         },
         {
-          "name": "test_code_files[src/main.py-code]",
-          "fullName": "tests/hooks/intelligence/test_session_analyzer.py::TestCategorizeFile::test_code_files[src/main.py-code]",
+          "name": "test_handles_missing_data_gracefully",
+          "fullName": "tests/hooks/intelligence/test_lesson_learning_integration.py::TestPatternExtractionFlow::test_handles_missing_data_gracefully",
           "state": "passed"
         },
         {
-          "name": "test_code_files[lib/utils.rs-code]",
-          "fullName": "tests/hooks/intelligence/test_session_analyzer.py::TestCategorizeFile::test_code_files[lib/utils.rs-code]",
+          "name": "test_injects_lessons_with_correct_format",
+          "fullName": "tests/hooks/intelligence/test_lesson_learning_integration.py::TestLessonInjectionFlow::test_injects_lessons_with_correct_format",
           "state": "passed"
         },
         {
-          "name": "test_code_files[app/index.ts-code]",
-          "fullName": "tests/hooks/intelligence/test_session_analyzer.py::TestCategorizeFile::test_code_files[app/index.ts-code]",
-          "state": "passed"
-        },
-        {
-          "name": "test_code_files[server.go-code]",
-          "fullName": "tests/hooks/intelligence/test_session_analyzer.py::TestCategorizeFile::test_code_files[server.go-code]",
-          "state": "passed"
-        },
-        {
-          "name": "test_test_files[tests/test_main.py-test]",
-          "fullName": "tests/hooks/intelligence/test_session_analyzer.py::TestCategorizeFile::test_test_files[tests/test_main.py-test]",
-          "state": "passed"
-        },
-        {
-          "name": "test_test_files[src/main_test.go-test]",
-          "fullName": "tests/hooks/intelligence/test_session_analyzer.py::TestCategorizeFile::test_test_files[src/main_test.go-test]",
-          "state": "passed"
-        },
-        {
-          "name": "test_test_files[spec/utils.spec.ts-test]",
-          "fullName": "tests/hooks/intelligence/test_session_analyzer.py::TestCategorizeFile::test_test_files[spec/utils.spec.ts-test]",
-          "state": "passed"
-        },
-        {
-          "name": "test_test_files[tests/integration/test_api.py-test]",
-          "fullName": "tests/hooks/intelligence/test_session_analyzer.py::TestCategorizeFile::test_test_files[tests/integration/test_api.py-test]",
-          "state": "passed"
-        },
-        {
-          "name": "test_config_files[config.json-config]",
-          "fullName": "tests/hooks/intelligence/test_session_analyzer.py::TestCategorizeFile::test_config_files[config.json-config]",
-          "state": "passed"
-        },
-        {
-          "name": "test_config_files[settings.yaml-config]",
-          "fullName": "tests/hooks/intelligence/test_session_analyzer.py::TestCategorizeFile::test_config_files[settings.yaml-config]",
-          "state": "passed"
-        },
-        {
-          "name": "test_config_files[pyproject.toml-config]",
-          "fullName": "tests/hooks/intelligence/test_session_analyzer.py::TestCategorizeFile::test_config_files[pyproject.toml-config]",
-          "state": "passed"
-        },
-        {
-          "name": "test_config_files[.env-config]",
-          "fullName": "tests/hooks/intelligence/test_session_analyzer.py::TestCategorizeFile::test_config_files[.env-config]",
-          "state": "passed"
-        },
-        {
-          "name": "test_other_files[README.md-other]",
-          "fullName": "tests/hooks/intelligence/test_session_analyzer.py::TestCategorizeFile::test_other_files[README.md-other]",
-          "state": "passed"
-        },
-        {
-          "name": "test_other_files[LICENSE-other]",
-          "fullName": "tests/hooks/intelligence/test_session_analyzer.py::TestCategorizeFile::test_other_files[LICENSE-other]",
-          "state": "passed"
-        },
-        {
-          "name": "test_other_files[Makefile-other]",
-          "fullName": "tests/hooks/intelligence/test_session_analyzer.py::TestCategorizeFile::test_other_files[Makefile-other]",
-          "state": "passed"
-        },
-        {
-          "name": "test_empty_input",
-          "fullName": "tests/hooks/intelligence/test_session_analyzer.py::TestParseSessionMetrics::test_empty_input",
-          "state": "passed"
-        },
-        {
-          "name": "test_with_session_data",
-          "fullName": "tests/hooks/intelligence/test_session_analyzer.py::TestParseSessionMetrics::test_with_session_data",
-          "state": "passed"
-        },
-        {
-          "name": "test_missing_fields",
-          "fullName": "tests/hooks/intelligence/test_session_analyzer.py::TestParseSessionMetrics::test_missing_fields",
-          "state": "passed"
-        },
-        {
-          "name": "test_no_changes_no_metrics",
-          "fullName": "tests/hooks/intelligence/test_session_analyzer.py::TestFormatSessionStats::test_no_changes_no_metrics",
-          "state": "passed"
-        },
-        {
-          "name": "test_with_uncommitted_changes",
-          "fullName": "tests/hooks/intelligence/test_session_analyzer.py::TestFormatSessionStats::test_with_uncommitted_changes",
-          "state": "passed"
-        },
-        {
-          "name": "test_with_session_metrics",
-          "fullName": "tests/hooks/intelligence/test_session_analyzer.py::TestFormatSessionStats::test_with_session_metrics",
-          "state": "passed"
-        },
-        {
-          "name": "test_with_commits",
-          "fullName": "tests/hooks/intelligence/test_session_analyzer.py::TestFormatSessionStats::test_with_commits",
-          "state": "passed"
-        },
-        {
-          "name": "test_complete_output",
-          "fullName": "tests/hooks/intelligence/test_session_analyzer.py::TestFormatSessionStats::test_complete_output",
-          "state": "passed"
-        },
-        {
-          "name": "test_with_suggestions",
-          "fullName": "tests/hooks/intelligence/test_session_analyzer.py::TestFormatSessionStats::test_with_suggestions",
-          "state": "passed"
-        },
-        {
-          "name": "test_suggestion_creation",
-          "fullName": "tests/hooks/intelligence/test_session_analyzer.py::TestSuggestion::test_suggestion_creation",
-          "state": "passed"
-        },
-        {
-          "name": "test_empty_suggestions",
-          "fullName": "tests/hooks/intelligence/test_session_analyzer.py::TestFormatSuggestions::test_empty_suggestions",
-          "state": "passed"
-        },
-        {
-          "name": "test_single_suggestion",
-          "fullName": "tests/hooks/intelligence/test_session_analyzer.py::TestFormatSuggestions::test_single_suggestion",
-          "state": "passed"
-        },
-        {
-          "name": "test_multiple_suggestions",
-          "fullName": "tests/hooks/intelligence/test_session_analyzer.py::TestFormatSuggestions::test_multiple_suggestions",
-          "state": "passed"
-        },
-        {
-          "name": "test_short_session_no_suggestions",
-          "fullName": "tests/hooks/intelligence/test_session_analyzer.py::TestGetSuggestions::test_short_session_no_suggestions",
-          "state": "passed"
-        },
-        {
-          "name": "test_clean_session_no_suggestions",
-          "fullName": "tests/hooks/intelligence/test_session_analyzer.py::TestGetSuggestions::test_clean_session_no_suggestions",
-          "state": "passed"
-        },
-        {
-          "name": "test_high_error_rate_suggests_checkpoint",
-          "fullName": "tests/hooks/intelligence/test_session_analyzer.py::TestGetSuggestions::test_high_error_rate_suggests_checkpoint",
-          "state": "passed"
-        },
-        {
-          "name": "test_high_error_rate_low_count_no_suggestion",
-          "fullName": "tests/hooks/intelligence/test_session_analyzer.py::TestGetSuggestions::test_high_error_rate_low_count_no_suggestion",
-          "state": "passed"
-        },
-        {
-          "name": "test_many_config_files_suggests_health",
-          "fullName": "tests/hooks/intelligence/test_session_analyzer.py::TestGetSuggestions::test_many_config_files_suggests_health",
-          "state": "passed"
-        },
-        {
-          "name": "test_significant_changes_suggests_review",
-          "fullName": "tests/hooks/intelligence/test_session_analyzer.py::TestGetSuggestions::test_significant_changes_suggests_review",
-          "state": "passed"
-        },
-        {
-          "name": "test_long_session_suggests_context",
-          "fullName": "tests/hooks/intelligence/test_session_analyzer.py::TestGetSuggestions::test_long_session_suggests_context",
-          "state": "passed"
-        },
-        {
-          "name": "test_multiple_triggers_limited_to_two",
-          "fullName": "tests/hooks/intelligence/test_session_analyzer.py::TestGetSuggestions::test_multiple_triggers_limited_to_two",
-          "state": "passed"
-        },
-        {
-          "name": "test_suggestions_sorted_by_priority",
-          "fullName": "tests/hooks/intelligence/test_session_analyzer.py::TestGetSuggestions::test_suggestions_sorted_by_priority",
-          "state": "passed"
-        },
-        {
-          "name": "test_priority_1_errors_comes_first",
-          "fullName": "tests/hooks/intelligence/test_session_analyzer.py::TestGetSuggestions::test_priority_1_errors_comes_first",
-          "state": "passed"
-        },
-        {
-          "name": "test_error_rate_threshold_reasonable",
-          "fullName": "tests/hooks/intelligence/test_session_analyzer.py::TestThresholdConstants::test_error_rate_threshold_reasonable",
-          "state": "passed"
-        },
-        {
-          "name": "test_min_errors_threshold_reasonable",
-          "fullName": "tests/hooks/intelligence/test_session_analyzer.py::TestThresholdConstants::test_min_errors_threshold_reasonable",
-          "state": "passed"
-        },
-        {
-          "name": "test_lines_changed_threshold_reasonable",
-          "fullName": "tests/hooks/intelligence/test_session_analyzer.py::TestThresholdConstants::test_lines_changed_threshold_reasonable",
-          "state": "passed"
-        },
-        {
-          "name": "test_config_files_threshold_reasonable",
-          "fullName": "tests/hooks/intelligence/test_session_analyzer.py::TestThresholdConstants::test_config_files_threshold_reasonable",
-          "state": "passed"
-        },
-        {
-          "name": "test_long_session_threshold_reasonable",
-          "fullName": "tests/hooks/intelligence/test_session_analyzer.py::TestThresholdConstants::test_long_session_threshold_reasonable",
-          "state": "passed"
-        },
-        {
-          "name": "test_min_tool_calls_threshold_reasonable",
-          "fullName": "tests/hooks/intelligence/test_session_analyzer.py::TestThresholdConstants::test_min_tool_calls_threshold_reasonable",
-          "state": "passed"
-        }
-      ]
-    },
-    {
-      "moduleId": "tests/hooks/test_ralph_loop.py",
-      "tests": [
-        {
-          "name": "test_checksum_calculation",
-          "fullName": "tests/hooks/test_ralph_loop.py::TestStateChecksum::test_checksum_calculation",
-          "state": "passed"
-        },
-        {
-          "name": "test_checksum_excludes_self",
-          "fullName": "tests/hooks/test_ralph_loop.py::TestStateChecksum::test_checksum_excludes_self",
-          "state": "passed"
-        },
-        {
-          "name": "test_checksum_changes_with_data",
-          "fullName": "tests/hooks/test_ralph_loop.py::TestStateChecksum::test_checksum_changes_with_data",
-          "state": "passed"
-        },
-        {
-          "name": "test_backup_creates_file",
-          "fullName": "tests/hooks/test_ralph_loop.py::TestStateBackup::test_backup_creates_file",
-          "state": "passed"
-        },
-        {
-          "name": "test_backup_handles_missing_file",
-          "fullName": "tests/hooks/test_ralph_loop.py::TestStateBackup::test_backup_handles_missing_file",
-          "state": "passed"
-        },
-        {
-          "name": "test_detect_orphaned_session",
-          "fullName": "tests/hooks/test_ralph_loop.py::TestResumeDetection::test_detect_orphaned_session",
-          "state": "passed"
-        },
-        {
-          "name": "test_ignore_old_sessions",
-          "fullName": "tests/hooks/test_ralph_loop.py::TestResumeDetection::test_ignore_old_sessions",
-          "state": "passed"
-        },
-        {
-          "name": "test_resume_command_detection",
-          "fullName": "tests/hooks/test_ralph_loop.py::TestResumeDetection::test_resume_command_detection",
-          "state": "passed"
-        },
-        {
-          "name": "test_max_iterations_breaker",
-          "fullName": "tests/hooks/test_ralph_loop.py::TestCircuitBreakers::test_max_iterations_breaker",
-          "state": "passed"
-        },
-        {
-          "name": "test_consecutive_errors_breaker",
-          "fullName": "tests/hooks/test_ralph_loop.py::TestCircuitBreakers::test_consecutive_errors_breaker",
-          "state": "passed"
-        },
-        {
-          "name": "test_rate_limit_under_threshold",
-          "fullName": "tests/hooks/test_ralph_loop.py::TestRateLimiting::test_rate_limit_under_threshold",
-          "state": "passed"
-        },
-        {
-          "name": "test_default_config_values",
-          "fullName": "tests/hooks/test_ralph_loop.py::TestSSOTConfig::test_default_config_values",
-          "state": "passed"
-        },
-        {
-          "name": "test_ssot_config_loaded",
-          "fullName": "tests/hooks/test_ralph_loop.py::TestSSOTConfig::test_ssot_config_loaded",
-          "state": "passed"
-        },
-        {
-          "name": "test_full_state_lifecycle",
-          "fullName": "tests/hooks/test_ralph_loop.py::TestIntegration::test_full_state_lifecycle",
-          "state": "passed"
-        },
-        {
-          "name": "test_scenario_pr_review_trigger",
-          "fullName": "tests/hooks/test_ralph_loop.py::TestVerificationScenarios::test_scenario_pr_review_trigger",
-          "state": "passed"
-        },
-        {
-          "name": "test_scenario_drawdown_alert",
-          "fullName": "tests/hooks/test_ralph_loop.py::TestVerificationScenarios::test_scenario_drawdown_alert",
-          "state": "passed"
-        },
-        {
-          "name": "test_scenario_rollback_execution",
-          "fullName": "tests/hooks/test_ralph_loop.py::TestVerificationScenarios::test_scenario_rollback_execution",
-          "state": "passed"
-        },
-        {
-          "name": "test_scenario_staging_deploy",
-          "fullName": "tests/hooks/test_ralph_loop.py::TestVerificationScenarios::test_scenario_staging_deploy",
+          "name": "test_limits_lessons_to_max",
+          "fullName": "tests/hooks/intelligence/test_lesson_learning_integration.py::TestLessonInjectionFlow::test_limits_lessons_to_max",
           "state": "passed"
         }
       ]

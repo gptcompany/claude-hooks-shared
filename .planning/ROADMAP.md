@@ -50,18 +50,23 @@
 ---
 
 ### Phase 4: Coordination & Claims
-**Goal:** Multi-agent work distribution
+**Goal:** Multi-agent work distribution with file-level locking
 
 **Deliverables:**
-- `hooks/coordination/orchestrator.py` - Multi-agent coordination
-- `hooks/coordination/claims_manager.py` - Work claim/release
-- Verification: Run parallel Task agents, verify claims tracked
+- `hooks/coordination/file_claim.py` - PreToolUse hook for Write|Edit|MultiEdit
+- `hooks/coordination/file_release.py` - PostToolUse hook for Write|Edit|MultiEdit
+- `hooks/coordination/task_claim.py` - PreToolUse hook for Task (informational)
+- `hooks/coordination/task_release.py` - SubagentStop hook
+- `hooks/coordination/stuck_detector.py` - Stop hook to mark orphaned claims
+- `hooks/coordination/claims_dashboard.py` - Utility to view claims board
 
 **Verification Criteria:**
-- [ ] orchestrator.py initializes topology for multi-agent
-- [ ] claims_manager.py claims work on PreToolUse(Task)
-- [ ] claims_manager.py releases on SubagentStop
-- [ ] claude-flow claims_board shows distribution
+- [x] file_claim.py claims files before edit operations
+- [x] file_release.py releases files after edit operations
+- [x] task_claim.py tracks task agent spawns (informational, non-blocking)
+- [x] task_release.py releases task claims on SubagentStop
+- [x] stuck_detector.py marks active claims as stealable on Stop
+- [x] claims_dashboard.py displays formatted claims board
 
 ---
 
@@ -88,7 +93,7 @@
 | Phase 1: Session Recovery | **VERIFIED** | [x] All 5 UAT tests passed |
 | Phase 2: Trajectory Learning | **VERIFIED** | [x] All 6 UAT tests passed |
 | Phase 3: Lesson Learning | **VERIFIED** | [x] All 56 tests passed |
-| Phase 4: Coordination | pending | [ ] |
+| Phase 4: Coordination | **VERIFIED** | [x] All hooks registered and tested |
 | Phase 5: Swarm | pending | [ ] |
 
 ### Phase 1 Verification Results
@@ -118,6 +123,27 @@
   - Max 3 lessons to avoid context pollution
 - Tests: 34 (meta_learning) + 14 (lesson_injector) + 8 (integration) = 56 total
 
+### Phase 4 Verification Results
+- file_claim.py (PreToolUse): Claims files via `npx claude-flow claims claim`
+  - Creates file:// issues in claims store
+  - Blocks if file already claimed by different session
+  - Returns {decision: "block"} on conflict
+- file_release.py (PostToolUse): Releases files and broadcasts
+  - Uses `npx claude-flow claims release` and `hooks notify`
+  - Logs to /tmp/claude-metrics/coordination.log
+- task_claim.py (PreToolUse): Tracks task spawns (informational only)
+  - Never blocks, always returns {}
+  - Generates task_id from description hash + timestamp
+- task_release.py (SubagentStop): Releases task claims
+  - Gracefully handles no active claims
+  - Broadcasts completion notifications
+- stuck_detector.py (Stop): Marks orphaned claims as stealable
+  - Reads directly from ~/.claude-flow/claims/claims.json
+  - Uses `npx claude-flow claims mark-stealable`
+- claims_dashboard.py (utility): Displays formatted claims board
+  - Supports --json, --watch, --interval flags
+  - Shows ACTIVE, STEALABLE, and summary sections
+
 ---
 *Created: 2026-01-20*
-*Updated: 2026-01-20 - Phase 3 verified*
+*Updated: 2026-01-20 - Phase 4 verified*
