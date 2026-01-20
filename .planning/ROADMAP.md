@@ -86,7 +86,7 @@
 | Phase | Status | Verified |
 |-------|--------|----------|
 | Phase 1: Session Recovery | **VERIFIED** | [x] All 5 UAT tests passed |
-| Phase 2: Trajectory Learning | in_progress | [ ] |
+| Phase 2: Trajectory Learning | **VERIFIED** | [x] All 6 UAT tests passed |
 | Phase 3: Lesson Learning | pending | [ ] |
 | Phase 4: Coordination | pending | [ ] |
 | Phase 5: Swarm | pending | [ ] |
@@ -97,5 +97,13 @@
 - MCP `memory_retrieve` can see entries created by hooks
 - Discovery: CLI and MCP use **different** databases (SQLite vs JSON)
 
+### Phase 2 Verification Results
+- trajectory_tracker.py: Registered for PreToolUse(Task), PostToolUse(Task), Stop
+- Start event: Creates trajectory with id, project, task, status
+- Step event: Records steps with action, success, quality
+- End event: Completes trajectory with success_rate calculation
+- MCP store: Trajectories stored and indexed for retrieval
+
 ---
 *Created: 2026-01-20*
+*Updated: 2026-01-20 - Phase 2 verified*
