@@ -120,11 +120,7 @@ def format_dashboard(data: dict, width: int = DISPLAY_WIDTH) -> str:
 
     def format_claim_box(claim: dict) -> list:
         lines = [box_line("", "top")]
-        lines.append(
-            box_line(
-                claim.get("issueId", claim.get("issue_id", "unknown"))[: width - 6]
-            )
-        )
+        lines.append(box_line(claim.get("issueId", claim.get("issue_id", "unknown"))[: width - 6]))
         claimant = normalize_claimant(claim.get("claimant", claim.get("owner")))
         lines.append(box_line(f"Claimed by: {claimant[: width - 18]}"))
         if claimed_at := claim.get("claimedAt", claim.get("claimed_at")):
@@ -157,12 +153,8 @@ def format_dashboard(data: dict, width: int = DISPLAY_WIDTH) -> str:
 
     active_count = len(data.get("active", []))
     stealable_count = len(data.get("stealable", []))
-    completed_count = len(data.get("completed", [])) or data.get("stats", {}).get(
-        "completed", 0
-    )
-    lines.append(
-        f"Summary: {active_count} active, {stealable_count} stealable, {completed_count} completed"
-    )
+    completed_count = len(data.get("completed", [])) or data.get("stats", {}).get("completed", 0)
+    lines.append(f"Summary: {active_count} active, {stealable_count} stealable, {completed_count} completed")
     lines.append(title_bar)
 
     return "\n".join(lines)
@@ -170,28 +162,16 @@ def format_dashboard(data: dict, width: int = DISPLAY_WIDTH) -> str:
 
 def main() -> int:
     """Main entry point."""
-    parser = argparse.ArgumentParser(
-        description="Claims Dashboard - display claims board"
-    )
+    parser = argparse.ArgumentParser(description="Claims Dashboard - display claims board")
     parser.add_argument("--json", action="store_true", help="Output raw JSON")
-    parser.add_argument(
-        "--watch", "-w", action="store_true", help="Watch mode - refresh periodically"
-    )
-    parser.add_argument(
-        "--interval", "-i", type=int, default=5, help="Refresh interval in seconds"
-    )
-    parser.add_argument(
-        "--width", type=int, default=DISPLAY_WIDTH, help="Display width"
-    )
+    parser.add_argument("--watch", "-w", action="store_true", help="Watch mode - refresh periodically")
+    parser.add_argument("--interval", "-i", type=int, default=5, help="Refresh interval in seconds")
+    parser.add_argument("--width", type=int, default=DISPLAY_WIDTH, help="Display width")
     args = parser.parse_args()
 
     def display():
         data = get_claims_board()
-        return (
-            json.dumps(data, indent=2)
-            if args.json
-            else format_dashboard(data, args.width)
-        )
+        return json.dumps(data, indent=2) if args.json else format_dashboard(data, args.width)
 
     if args.watch:
         try:

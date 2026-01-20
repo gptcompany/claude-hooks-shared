@@ -239,9 +239,7 @@ def on_subagent_stop(hook_input: dict) -> dict:
                 f"Released and broadcast task {task_id}: release={release_result.get('success')}, notify={notify_result.get('success')}"
             )
         else:
-            log(
-                f"Failed to release task {task_id}: {release_result.get('error', 'unknown')}"
-            )
+            log(f"Failed to release task {task_id}: {release_result.get('error', 'unknown')}")
 
     # Clear all claims from state file
     save_active_claims({"claims": []})
@@ -253,9 +251,7 @@ def on_subagent_stop(hook_input: dict) -> dict:
 
 def main():
     """Main entry point."""
-    parser = argparse.ArgumentParser(
-        description="Task Release Hook - SubagentStop for releasing task claims"
-    )
+    parser = argparse.ArgumentParser(description="Task Release Hook - SubagentStop for releasing task claims")
     parser.add_argument(
         "--version",
         action="version",

@@ -22,9 +22,7 @@ def get_modified_files() -> list[str]:
     """Get code files modified in recent commits or working tree."""
     try:
         # Check working tree changes first
-        result = subprocess.run(
-            ["git", "diff", "--name-only"], capture_output=True, text=True, timeout=5
-        )
+        result = subprocess.run(["git", "diff", "--name-only"], capture_output=True, text=True, timeout=5)
         files = result.stdout.strip().split("\n") if result.stdout.strip() else []
 
         # Also check staged changes

@@ -13,9 +13,7 @@ from unittest.mock import patch
 import pytest
 
 # Add hooks to path for import
-sys.path.insert(
-    0, str(Path(__file__).parent.parent.parent.parent / "hooks" / "intelligence")
-)
+sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / "hooks" / "intelligence"))
 
 
 # =============================================================================
@@ -90,13 +88,9 @@ def low_confidence_patterns():
 
 
 @pytest.fixture
-def mixed_confidence_patterns(
-    high_confidence_patterns, medium_confidence_patterns, low_confidence_patterns
-):
+def mixed_confidence_patterns(high_confidence_patterns, medium_confidence_patterns, low_confidence_patterns):
     """Mix of high, medium, and low confidence patterns."""
-    return (
-        high_confidence_patterns + medium_confidence_patterns + low_confidence_patterns
-    )
+    return high_confidence_patterns + medium_confidence_patterns + low_confidence_patterns
 
 
 # =============================================================================
@@ -107,9 +101,7 @@ def mixed_confidence_patterns(
 class TestHighConfidenceInjection:
     """Tests for high confidence lesson injection (>0.8)."""
 
-    def test_injects_high_confidence_lesson(
-        self, mock_pattern_search, mock_get_project_name, high_confidence_patterns
-    ):
+    def test_injects_high_confidence_lesson(self, mock_pattern_search, mock_get_project_name, high_confidence_patterns):
         """Test that high confidence patterns (>0.8) are auto-injected."""
         mock_pattern_search.return_value = high_confidence_patterns
 
@@ -169,9 +161,7 @@ class TestMediumConfidenceSuggestion:
 class TestLowConfidenceSkip:
     """Tests for low confidence lesson filtering (<0.5)."""
 
-    def test_skips_low_confidence_lesson(
-        self, mock_pattern_search, mock_get_project_name, low_confidence_patterns
-    ):
+    def test_skips_low_confidence_lesson(self, mock_pattern_search, mock_get_project_name, low_confidence_patterns):
         """Test that low confidence patterns (<0.5) are not injected."""
         mock_pattern_search.return_value = low_confidence_patterns
 
@@ -195,9 +185,7 @@ class TestLowConfidenceSkip:
 class TestPatternSearchBehavior:
     """Tests for pattern search integration."""
 
-    def test_searches_patterns_by_project(
-        self, mock_pattern_search, mock_get_project_name
-    ):
+    def test_searches_patterns_by_project(self, mock_pattern_search, mock_get_project_name):
         """Test that pattern search uses project-specific search."""
         mock_pattern_search.return_value = []
         mock_get_project_name.return_value = "my-specific-project"
@@ -213,9 +201,7 @@ class TestPatternSearchBehavior:
         call_args = mock_pattern_search.call_args
         assert call_args is not None
 
-    def test_searches_patterns_by_context(
-        self, mock_pattern_search, mock_get_project_name
-    ):
+    def test_searches_patterns_by_context(self, mock_pattern_search, mock_get_project_name):
         """Test that pattern search uses prompt context for relevance."""
         mock_pattern_search.return_value = []
 
@@ -281,9 +267,7 @@ class TestOutputFormat:
 class TestNoPatterns:
     """Tests for handling no patterns found."""
 
-    def test_no_injection_when_no_patterns(
-        self, mock_pattern_search, mock_get_project_name
-    ):
+    def test_no_injection_when_no_patterns(self, mock_pattern_search, mock_get_project_name):
         """Test that empty patterns returns no additionalContext."""
         mock_pattern_search.return_value = []
 
@@ -327,9 +311,7 @@ class TestLessonLimits:
         lesson_count = context.count("\n- ")
         # Account for first lesson which might not have newline before
         if context.startswith("- ") or "[Lessons" in context:
-            lesson_count = len(
-                [line for line in context.split("\n") if line.strip().startswith("- ")]
-            )
+            lesson_count = len([line for line in context.split("\n") if line.strip().startswith("- ")])
 
         assert lesson_count <= 3, f"Expected max 3 lessons, got {lesson_count}"
 
@@ -342,18 +324,14 @@ class TestLessonLimits:
 class TestErrorHandling:
     """Tests for graceful error handling."""
 
-    def test_returns_empty_on_invalid_input(
-        self, mock_pattern_search, mock_get_project_name
-    ):
+    def test_returns_empty_on_invalid_input(self, mock_pattern_search, mock_get_project_name):
         """Test graceful handling of invalid input."""
         from lesson_injector import process_hook
 
         result = process_hook({})
         assert result == {} or isinstance(result, dict)
 
-    def test_returns_empty_on_pattern_search_error(
-        self, mock_pattern_search, mock_get_project_name
-    ):
+    def test_returns_empty_on_pattern_search_error(self, mock_pattern_search, mock_get_project_name):
         """Test graceful handling when pattern_search fails."""
         mock_pattern_search.side_effect = Exception("Connection error")
 
@@ -374,9 +352,7 @@ class TestErrorHandling:
 class TestHookIntegration:
     """Integration-style tests for the complete hook flow."""
 
-    def test_full_flow_with_mixed_patterns(
-        self, mock_pattern_search, mock_get_project_name, mixed_confidence_patterns
-    ):
+    def test_full_flow_with_mixed_patterns(self, mock_pattern_search, mock_get_project_name, mixed_confidence_patterns):
         """Test complete flow with mixed confidence patterns."""
         # Only include patterns that would pass min_confidence filter
         patterns = [p for p in mixed_confidence_patterns if p["confidence"] >= 0.5]

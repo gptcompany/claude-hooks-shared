@@ -128,9 +128,7 @@ def generate_trajectory_id() -> str:
 def on_start(hook_input: dict):
     """Handle PreToolUse Task - start new trajectory."""
     tool_input = hook_input.get("tool_input", {})
-    task_description = tool_input.get(
-        "description", tool_input.get("prompt", "unknown")
-    )[:200]
+    task_description = tool_input.get("description", tool_input.get("prompt", "unknown"))[:200]
 
     trajectory_id = generate_trajectory_id()
     project = get_project_name()
@@ -241,9 +239,7 @@ def on_end(hook_input: dict):
     # Clear MCP active marker (use empty dict instead of None for JSON safety)
     memory_store(f"trajectory:{project}:active", {"cleared": True, "at": now})
 
-    log(
-        f"Ended trajectory {trajectory_id}: success={overall_success}, steps={len(steps)}, rate={success_rate:.2f}"
-    )
+    log(f"Ended trajectory {trajectory_id}: success={overall_success}, steps={len(steps)}, rate={success_rate:.2f}")
 
     return {}
 

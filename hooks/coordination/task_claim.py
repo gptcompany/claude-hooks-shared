@@ -160,9 +160,7 @@ def on_pre_task(hook_input: dict) -> dict:
     tool_input = hook_input.get("tool_input", {})
 
     # Extract task description from description or prompt field
-    description = (
-        tool_input.get("description") or tool_input.get("prompt") or "unknown task"
-    )
+    description = tool_input.get("description") or tool_input.get("prompt") or "unknown task"
     description = str(description)[:200]  # Truncate to 200 chars
 
     # Generate task ID and session ID
@@ -193,9 +191,7 @@ def on_pre_task(hook_input: dict) -> dict:
     )
     save_active_claims(claims)
 
-    log(
-        f"Task claim registered: {task_id} (claim_api_success={result.get('success', False)})"
-    )
+    log(f"Task claim registered: {task_id} (claim_api_success={result.get('success', False)})")
 
     # INFORMATIONAL: Always allow task to proceed
     return {}
@@ -203,9 +199,7 @@ def on_pre_task(hook_input: dict) -> dict:
 
 def main():
     """Main entry point."""
-    parser = argparse.ArgumentParser(
-        description="Task Claim Hook - PreToolUse for Task tool"
-    )
+    parser = argparse.ArgumentParser(description="Task Claim Hook - PreToolUse for Task tool")
     parser.add_argument(
         "--version",
         action="version",

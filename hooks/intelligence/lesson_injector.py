@@ -50,9 +50,7 @@ except ImportError:
             """Fallback: get project name from cwd."""
             return Path.cwd().name
 
-        def pattern_search(
-            query: str, top_k: int = 3, min_confidence: float = 0.7
-        ) -> list[dict]:
+        def pattern_search(query: str, top_k: int = 3, min_confidence: float = 0.7) -> list[dict]:
             """Fallback: return empty patterns."""
             return []
 
@@ -121,9 +119,7 @@ def process_hook(hook_input: dict) -> dict:
         search_query = prompt[:100] if len(prompt) > 100 else prompt
 
         # Search for relevant patterns
-        logger.debug(
-            f"Searching patterns for project={project}, query={search_query[:50]}..."
-        )
+        logger.debug(f"Searching patterns for project={project}, query={search_query[:50]}...")
         patterns = pattern_search(
             query=search_query,
             top_k=5,  # Get a few more to filter

@@ -41,9 +41,7 @@ def log_msg(msg: str) -> None:
     """Log message to coordination log."""
     try:
         with open(LOG_FILE, "a") as f:
-            f.write(
-                f"{datetime.now(timezone.utc).isoformat()} - stuck_detector - {msg}\n"
-            )
+            f.write(f"{datetime.now(timezone.utc).isoformat()} - stuck_detector - {msg}\n")
     except Exception:
         pass
 
@@ -150,17 +148,13 @@ def on_stop(hook_input: dict, dry_run: bool = False) -> dict:
 
 def main() -> int:
     """Main entry point."""
-    parser = argparse.ArgumentParser(
-        description="Stuck Detector Hook - marks active claims as stealable on Stop"
-    )
+    parser = argparse.ArgumentParser(description="Stuck Detector Hook - marks active claims as stealable on Stop")
     parser.add_argument(
         "--dry-run",
         action="store_true",
         help="Don't actually mark claims, just log what would happen",
     )
-    parser.add_argument(
-        "--test", action="store_true", help="Run in test mode with sample data"
-    )
+    parser.add_argument("--test", action="store_true", help="Run in test mode with sample data")
     args = parser.parse_args()
 
     # Read hook input from stdin

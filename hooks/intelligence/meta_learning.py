@@ -136,17 +136,13 @@ def calculate_confidence(pattern_type: str, data: dict[str, Any]) -> float:
     bonus = 0.0
 
     if pattern_type == "high_rework":
-        excess = data.get("edit_count", 0) - data.get(
-            "threshold", THRESHOLD_REWORK_EDITS
-        )
+        excess = data.get("edit_count", 0) - data.get("threshold", THRESHOLD_REWORK_EDITS)
         bonus = min(0.5, excess * 0.15)
     elif pattern_type == "high_error":
         excess = data.get("error_rate", 0) - THRESHOLD_ERROR_RATE
         bonus = min(0.5, excess * 1.5)
     elif pattern_type == "quality_drop":
-        excess = data.get("total_drop", 0) - data.get(
-            "threshold", THRESHOLD_QUALITY_DROP
-        )
+        excess = data.get("total_drop", 0) - data.get("threshold", THRESHOLD_QUALITY_DROP)
         bonus = min(0.5, excess * 2)
 
     return min(1.0, max(0.0, base + bonus))
@@ -157,11 +153,7 @@ def extract_rework_pattern(file_edit_counts: dict[str, int]) -> dict[str, Any] |
     if not file_edit_counts:
         return None
 
-    high_rework_files = [
-        path
-        for path, count in file_edit_counts.items()
-        if count > THRESHOLD_REWORK_EDITS
-    ]
+    high_rework_files = [path for path, count in file_edit_counts.items() if count > THRESHOLD_REWORK_EDITS]
 
     if not high_rework_files:
         return None

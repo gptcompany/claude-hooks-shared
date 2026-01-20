@@ -90,16 +90,12 @@ def get_test_key(command: str) -> str:
 
 def is_ci_command(command: str) -> bool:
     """Check if command is a CI/test command."""
-    return any(
-        re.search(pattern, command, re.IGNORECASE) for pattern in CI_COMMAND_PATTERNS
-    )
+    return any(re.search(pattern, command, re.IGNORECASE) for pattern in CI_COMMAND_PATTERNS)
 
 
 def has_failure(output: str) -> bool:
     """Check if output contains failure indicators."""
-    return any(
-        re.search(pattern, output, re.IGNORECASE) for pattern in FAILURE_PATTERNS
-    )
+    return any(re.search(pattern, output, re.IGNORECASE) for pattern in FAILURE_PATTERNS)
 
 
 def extract_error_context(output: str, command: str) -> dict:
@@ -204,9 +200,7 @@ def main():
     state = get_retry_state()
 
     # Get current retry count
-    retry_info = state.get(
-        test_key, {"count": 0, "first_failure": datetime.now().isoformat()}
-    )
+    retry_info = state.get(test_key, {"count": 0, "first_failure": datetime.now().isoformat()})
     retry_count = retry_info["count"]
 
     if retry_count < MAX_RETRIES:
@@ -216,9 +210,7 @@ def main():
 
         state[test_key] = {
             "count": retry_count,
-            "first_failure": retry_info.get(
-                "first_failure", datetime.now().isoformat()
-            ),
+            "first_failure": retry_info.get("first_failure", datetime.now().isoformat()),
             "last_retry": datetime.now().isoformat(),
         }
         save_retry_state(state)

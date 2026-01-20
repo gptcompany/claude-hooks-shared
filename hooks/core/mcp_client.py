@@ -94,9 +94,7 @@ def memory_search(query: str, top_k: int = 5) -> list[dict]:
 
     Uses: claude-flow memory search -q "query"
     """
-    success, output = _run_claude_flow(
-        ["memory", "search", "-q", query, "-n", str(top_k)]
-    )
+    success, output = _run_claude_flow(["memory", "search", "-q", query, "-n", str(top_k)])
 
     if not success:
         return []
@@ -306,9 +304,7 @@ def trajectory_start(task: str, agent: str = "main") -> str | None:
 
     Uses: claude-flow hooks intelligence trajectory-start
     """
-    success, output = _run_claude_flow(
-        ["hooks", "intelligence", "trajectory-start", "--task", task, "--agent", agent]
-    )
+    success, output = _run_claude_flow(["hooks", "intelligence", "trajectory-start", "--task", task, "--agent", agent])
 
     if success and "id" in output.lower():
         # Try to extract trajectory ID from output
@@ -356,9 +352,7 @@ def trajectory_end(trajectory_id: str, success_flag: bool) -> dict:
     return {"success": success, "output": output}
 
 
-def pattern_store(
-    pattern: str, pattern_type: str, confidence: float, metadata: dict | None = None
-) -> dict:
+def pattern_store(pattern: str, pattern_type: str, confidence: float, metadata: dict | None = None) -> dict:
     """Store a learned pattern."""
     args = [
         "hooks",
@@ -379,9 +373,7 @@ def pattern_store(
     return {"success": success, "output": output}
 
 
-def pattern_search(
-    query: str, top_k: int = 3, min_confidence: float = 0.7
-) -> list[dict]:
+def pattern_search(query: str, top_k: int = 3, min_confidence: float = 0.7) -> list[dict]:
     """Search learned patterns."""
     success, output = _run_claude_flow(
         [

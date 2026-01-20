@@ -15,9 +15,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 # Add hooks to path for import
-sys.path.insert(
-    0, str(Path(__file__).parent.parent.parent.parent / "hooks" / "intelligence")
-)
+sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / "hooks" / "intelligence"))
 
 # Will fail until meta_learning.py is created
 from meta_learning import (  # type: ignore  # noqa: E402
@@ -100,9 +98,7 @@ def mock_session_analysis_high_error() -> dict[str, Any]:
             "error_rate": 0.30,
         },
         "commits": 1,
-        "suggestions": [
-            {"command": "/undo:checkpoint", "trigger": "errors", "priority": 1}
-        ],
+        "suggestions": [{"command": "/undo:checkpoint", "trigger": "errors", "priority": 1}],
     }
 
 
@@ -147,9 +143,7 @@ def mock_quality_scores_stable() -> list[float]:
 class TestExtractReworkPattern:
     """Tests for high rework pattern detection."""
 
-    def test_detects_high_rework(
-        self, mock_file_edit_counts_high_rework: dict[str, int]
-    ) -> None:
+    def test_detects_high_rework(self, mock_file_edit_counts_high_rework: dict[str, int]) -> None:
         """Test detection of files with >3 edits."""
         pattern = extract_rework_pattern(mock_file_edit_counts_high_rework)
 
@@ -159,9 +153,7 @@ class TestExtractReworkPattern:
         assert "src/main.py" in pattern["files"]
         assert "src/utils.py" in pattern["files"]
 
-    def test_no_pattern_on_normal_editing(
-        self, mock_file_edit_counts_normal: dict[str, int]
-    ) -> None:
+    def test_no_pattern_on_normal_editing(self, mock_file_edit_counts_normal: dict[str, int]) -> None:
         """Test no pattern when editing is normal."""
         pattern = extract_rework_pattern(mock_file_edit_counts_normal)
 
@@ -197,9 +189,7 @@ class TestExtractReworkPattern:
 class TestExtractErrorPattern:
     """Tests for high error rate pattern detection."""
 
-    def test_detects_high_error_rate(
-        self, mock_session_analysis_high_error: dict[str, Any]
-    ) -> None:
+    def test_detects_high_error_rate(self, mock_session_analysis_high_error: dict[str, Any]) -> None:
         """Test detection of >25% error rate."""
         pattern = extract_error_pattern(mock_session_analysis_high_error)
 
@@ -208,9 +198,7 @@ class TestExtractErrorPattern:
         assert pattern["error_rate"] == 0.30
         assert pattern["total_errors"] == 30
 
-    def test_no_pattern_on_low_error_rate(
-        self, mock_session_analysis: dict[str, Any]
-    ) -> None:
+    def test_no_pattern_on_low_error_rate(self, mock_session_analysis: dict[str, Any]) -> None:
         """Test no pattern when error rate is below threshold."""
         pattern = extract_error_pattern(mock_session_analysis)
 
@@ -255,9 +243,7 @@ class TestExtractErrorPattern:
 class TestExtractQualityDropPattern:
     """Tests for quality trend decline pattern detection."""
 
-    def test_detects_quality_decline(
-        self, mock_quality_scores_declining: list[float]
-    ) -> None:
+    def test_detects_quality_decline(self, mock_quality_scores_declining: list[float]) -> None:
         """Test detection of declining quality trend."""
         pattern = extract_quality_drop_pattern(mock_quality_scores_declining)
 
@@ -267,9 +253,7 @@ class TestExtractQualityDropPattern:
         assert pattern["start_quality"] == pytest.approx(0.95, rel=0.01)
         assert pattern["end_quality"] == pytest.approx(0.68, rel=0.01)
 
-    def test_no_pattern_on_stable_quality(
-        self, mock_quality_scores_stable: list[float]
-    ) -> None:
+    def test_no_pattern_on_stable_quality(self, mock_quality_scores_stable: list[float]) -> None:
         """Test no pattern when quality is stable or improving."""
         pattern = extract_quality_drop_pattern(mock_quality_scores_stable)
 
@@ -351,9 +335,7 @@ class TestCalculateConfidence:
     def test_high_confidence_for_strong_signal(self) -> None:
         """Test high confidence for strong signals."""
         # 6 edits on same file is a strong signal
-        confidence = calculate_confidence(
-            "high_rework", {"edit_count": 6, "threshold": 3}
-        )
+        confidence = calculate_confidence("high_rework", {"edit_count": 6, "threshold": 3})
 
         assert confidence >= 0.8
         assert confidence <= 1.0
@@ -361,9 +343,7 @@ class TestCalculateConfidence:
     def test_low_confidence_for_weak_signal(self) -> None:
         """Test lower confidence for borderline cases."""
         # 4 edits is just above threshold
-        confidence = calculate_confidence(
-            "high_rework", {"edit_count": 4, "threshold": 3}
-        )
+        confidence = calculate_confidence("high_rework", {"edit_count": 4, "threshold": 3})
 
         assert confidence >= 0.5
         assert confidence < 0.8
@@ -436,9 +416,7 @@ class TestReadsTrajectoryData:
         assert len(data) == 1
 
     @patch("meta_learning.memory_retrieve")
-    def test_handles_missing_trajectory_data(
-        self, mock_memory_retrieve: MagicMock
-    ) -> None:
+    def test_handles_missing_trajectory_data(self, mock_memory_retrieve: MagicMock) -> None:
         """Test graceful handling when trajectory data is missing."""
         mock_memory_retrieve.return_value = None
 

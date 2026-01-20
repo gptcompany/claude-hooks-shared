@@ -95,9 +95,7 @@ def init_swarm(topology: str = "hierarchical-mesh") -> dict:
     hive_id = None
     if success and output:
         # Look for patterns like "Hive ID: abc123" or "hive_id": "abc123"
-        match = re.search(
-            r"(?:hive[_\s]?id|Hive ID)[:\s]+([a-zA-Z0-9_-]+)", output, re.I
-        )
+        match = re.search(r"(?:hive[_\s]?id|Hive ID)[:\s]+([a-zA-Z0-9_-]+)", output, re.I)
         if match:
             hive_id = match.group(1)
 
@@ -125,9 +123,7 @@ def spawn_workers(count: int = 3) -> dict:
     workers = []
     if success and output:
         # Look for patterns like "Worker: abc123" or "worker_id": "abc123"
-        workers = re.findall(
-            r"(?:worker[_\s]?id|Worker)[:\s]+([a-zA-Z0-9_-]+)", output, re.I
-        )
+        workers = re.findall(r"(?:worker[_\s]?id|Worker)[:\s]+([a-zA-Z0-9_-]+)", output, re.I)
 
     return {
         "success": success,
@@ -157,9 +153,7 @@ def submit_task(description: str, priority: str = "normal") -> dict:
     # Try to extract task_id from output
     task_id = None
     if success and output:
-        match = re.search(
-            r"(?:task[_\s]?id|Task ID)[:\s]+([a-zA-Z0-9_-]+)", output, re.I
-        )
+        match = re.search(r"(?:task[_\s]?id|Task ID)[:\s]+([a-zA-Z0-9_-]+)", output, re.I)
         if match:
             task_id = match.group(1)
 
@@ -230,9 +224,7 @@ def propose_consensus(topic: str, options: list[str]) -> dict:
     # Try to extract proposal_id from output
     proposal_id = None
     if success and output:
-        match = re.search(
-            r"(?:proposal[_\s]?id|Proposal ID)[:\s]+([a-zA-Z0-9_-]+)", output, re.I
-        )
+        match = re.search(r"(?:proposal[_\s]?id|Proposal ID)[:\s]+([a-zA-Z0-9_-]+)", output, re.I)
         if match:
             proposal_id = match.group(1)
 

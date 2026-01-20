@@ -17,9 +17,7 @@ from pathlib import Path
 import pytest
 
 # Add hooks to path
-sys.path.insert(
-    0, str(Path(__file__).parent.parent.parent.parent / "hooks" / "intelligence")
-)
+sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / "hooks" / "intelligence"))
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / "hooks"))
 
 
@@ -126,9 +124,7 @@ class TestLessonLearningIntegration:
         if log_file.exists():
             log_content = log_file.read_text()
             # Should have logged pattern extraction
-            assert (
-                "pattern" in log_content.lower() or "extracted" in log_content.lower()
-            )
+            assert "pattern" in log_content.lower() or "extracted" in log_content.lower()
 
     def test_lesson_injector_handles_empty_patterns(self, hooks_dir: Path):
         """lesson_injector handles case when no patterns exist."""
@@ -145,20 +141,14 @@ class TestLessonLearningIntegration:
         assert result.returncode == 0
         output = json.loads(result.stdout)
         # Should return empty dict when no patterns
-        assert (
-            output == {}
-            or "additionalContext" not in output
-            or output.get("additionalContext") == ""
-        )
+        assert output == {} or "additionalContext" not in output or output.get("additionalContext") == ""
 
 
 @pytest.mark.integration
 class TestPatternExtractionFlow:
     """Tests for pattern extraction from various data sources."""
 
-    def test_extracts_high_rework_pattern(
-        self, hooks_dir: Path, temp_metrics_dir: Path
-    ):
+    def test_extracts_high_rework_pattern(self, hooks_dir: Path, temp_metrics_dir: Path):
         """Extracts high_rework pattern when file edited multiple times."""
         # Setup: Create file edit counts file
         file_edits = {
@@ -182,9 +172,7 @@ class TestPatternExtractionFlow:
 
         assert result.returncode == 0
 
-    def test_handles_missing_data_gracefully(
-        self, hooks_dir: Path, temp_metrics_dir: Path
-    ):
+    def test_handles_missing_data_gracefully(self, hooks_dir: Path, temp_metrics_dir: Path):
         """Handles missing session/trajectory data without crashing."""
         # Run with empty metrics dir (no data files)
         result = subprocess.run(
