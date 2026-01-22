@@ -55,3 +55,4 @@ skipped: 0
 
 - UAT-001: Task submission fails via CLI (minor) - Test 4
   root_cause: "MCP tool not found: hive-mind/task" - Feature requires MCP server, CLI standalone not supported
+  resolution: **KNOWN_LIMITATION** - Not fixable in our code. Task submission works via MCP tools when server is connected. This is a claude-flow architecture constraint, not a bug.

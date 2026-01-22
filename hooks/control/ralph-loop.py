@@ -17,6 +17,7 @@ Enterprise Features (v2.0):
 - Proper error handling (no silent fails)
 """
 
+import asyncio
 import fcntl
 import json
 import logging
@@ -217,7 +218,9 @@ def parse_plugin_state_file() -> dict | None:
         state["active"] = state.get("active", False)
 
         if state.get("active"):
-            logger.info(f"Loaded state from plugin file: iteration={state.get('iteration', 0)}")
+            logger.info(
+                f"Loaded state from plugin file: iteration={state.get('iteration', 0)}"
+            )
             return state
 
     except Exception as e:
@@ -254,7 +257,9 @@ def get_ralph_state() -> dict | None:
         if stored_checksum:
             calculated = calculate_state_checksum(state)
             if stored_checksum != calculated:
-                logger.warning(f"State checksum mismatch: stored={stored_checksum}, calc={calculated}")
+                logger.warning(
+                    f"State checksum mismatch: stored={stored_checksum}, calc={calculated}"
+                )
                 # Continue anyway - might be manual edit
 
         if state.get("active"):
@@ -533,14 +538,78 @@ def check_lint_pass() -> tuple[bool, str]:
         return False, f"Lint check error: {e}"
 
 
+def find_validation_config() -> Path | None:
+    """Find validation config in project or templates."""
+    candidates = [
+        Path.cwd() / ".claude" / "validation" / "config.json",
+        Path.cwd() / "config" / "validation.json",
+    ]
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate
+    return None
+
+
 def run_ci_validation() -> tuple[bool, str, dict]:
     """
     Run CI validation between iterations to prevent broken code compounding.
 
+    Phase 7 Enhancement: Uses ValidationOrchestrator for 14-dimension validation
+    when config.json exists. Falls back to legacy tests+lint if not.
+
     Returns:
         (passed, message, details)
     """
-    details = {}
+    config_path = find_validation_config()
+
+    if config_path:
+        # Try orchestrator-based validation
+        try:
+            orchestrator_path = Path.home() / ".claude" / "templates" / "validation"
+            orchestrator_file = orchestrator_path / "orchestrator.py"
+
+            if orchestrator_file.exists():
+                import importlib.util
+
+                spec = importlib.util.spec_from_file_location(
+                    "orchestrator", orchestrator_file
+                )
+                if spec and spec.loader:
+                    module = importlib.util.module_from_spec(spec)
+                    spec.loader.exec_module(module)
+
+                    orchestrator = module.ValidationOrchestrator(config_path)
+                    report = asyncio.run(orchestrator.run_all())
+
+                    details = {
+                        "source": "orchestrator",
+                        "blocked": report.blocked,
+                        "execution_time_ms": report.execution_time_ms,
+                    }
+
+                    if report.blocked:
+                        failed = (
+                            report.tiers[0].failed_dimensions if report.tiers else []
+                        )
+                        return False, f"Tier 1 blocked: {failed}", details
+
+                    logger.info("Validation passed via orchestrator")
+                    return True, "Validation passed (orchestrator)", details
+
+        except Exception as e:
+            logger.warning(f"Orchestrator error, using legacy: {e}")
+
+    # Legacy validation (original behavior)
+    return run_ci_validation_legacy()
+
+
+def run_ci_validation_legacy() -> tuple[bool, str, dict]:
+    """
+    Original CI validation - tests + lint only.
+
+    Preserved as fallback when orchestrator is not available.
+    """
+    details = {"source": "legacy"}
 
     # Run tests
     tests_ok, tests_msg = check_tests_pass()
@@ -622,7 +691,9 @@ def check_rate_limit() -> tuple[bool, str]:
                 for line in f:
                     try:
                         entry = json.loads(line)
-                        ts = datetime.fromisoformat(entry.get("timestamp", "")).timestamp()
+                        ts = datetime.fromisoformat(
+                            entry.get("timestamp", "")
+                        ).timestamp()
                         if ts > cutoff:
                             iterations_in_window += 1
                             if last_iteration_time is None or ts > last_iteration_time:
@@ -812,7 +883,9 @@ def main():
             sys.exit(0)
 
         # CI failed but not max yet - include fix instructions in continuation
-        update_progress(iteration, f"⚠️ CI FAILED ({ci_failures}/{MAX_CI_FAILURES}): {ci_msg}")
+        update_progress(
+            iteration, f"⚠️ CI FAILED ({ci_failures}/{MAX_CI_FAILURES}): {ci_msg}"
+        )
     else:
         # CI passed - reset counter
         update_ralph_state({"consecutive_ci_failures": 0})
