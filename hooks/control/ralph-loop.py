@@ -56,9 +56,29 @@ DEFAULT_CONFIG = {
     "min_iteration_interval_secs": 10,
     "max_iterations_per_hour": 100,
     "estimated_cost_per_iteration": 2.0,
-    "state_path": "~/.claude/ralph/state.json",
+    "state_path": "~/.claude/ralph/state.json",  # Overridden by get_project_state_path()
     "progress_path": "~/.claude/ralph/progress.md",
 }
+
+
+def get_project_hash() -> str:
+    """Generate a short hash from current working directory for project isolation."""
+    import hashlib
+
+    cwd = str(Path.cwd().resolve())
+    return hashlib.sha256(cwd.encode()).hexdigest()[:12]
+
+
+def get_project_state_path() -> Path:
+    """Get project-specific state path to prevent cross-project interference."""
+    project_hash = get_project_hash()
+    return Path.home() / ".claude" / "ralph" / f"state_{project_hash}.json"
+
+
+def get_project_progress_path() -> Path:
+    """Get project-specific progress path."""
+    project_hash = get_project_hash()
+    return Path.home() / ".claude" / "ralph" / f"progress_{project_hash}.md"
 
 
 def load_ssot_config() -> dict:
@@ -91,9 +111,9 @@ def load_ssot_config() -> dict:
 
 CONFIG = load_ssot_config()
 
-# Paths
-RALPH_STATE = Path(os.path.expanduser(CONFIG["state_path"]))
-RALPH_PROGRESS = Path(os.path.expanduser(CONFIG["progress_path"]))
+# Paths - PROJECT-SPECIFIC to prevent cross-project interference
+RALPH_STATE = get_project_state_path()  # Was global, now per-project
+RALPH_PROGRESS = get_project_progress_path()  # Was global, now per-project
 METRICS_DIR = Path.home() / ".claude" / "metrics"
 RALPH_LOG = METRICS_DIR / "ralph_iterations.jsonl"
 
