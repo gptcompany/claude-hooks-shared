@@ -34,7 +34,11 @@ def get_project_name() -> str:
     # 2. Try to get from git repository root
     try:
         result = subprocess.run(
-            ["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True, timeout=2, cwd=os.getcwd()
+            ["git", "rev-parse", "--show-toplevel"],
+            capture_output=True,
+            text=True,
+            timeout=2,
+            cwd=os.getcwd(),
         )
         if result.returncode == 0:
             git_root = result.stdout.strip()
@@ -51,16 +55,6 @@ def get_project_name() -> str:
     return "unknown"
 
 
-def get_database_url() -> str:
-    """
-    Get database URL from environment with default.
-
-    Returns:
-        PostgreSQL connection URL
-    """
-    return os.environ.get("DATABASE_URL", "postgresql://n8n:n8n@localhost:5433/claude_sessions")
-
-
 def get_project_root() -> Path:
     """
     Get project root directory.
@@ -69,7 +63,12 @@ def get_project_root() -> Path:
         Path to project root (git root or cwd)
     """
     try:
-        result = subprocess.run(["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True, timeout=2)
+        result = subprocess.run(
+            ["git", "rev-parse", "--show-toplevel"],
+            capture_output=True,
+            text=True,
+            timeout=2,
+        )
         if result.returncode == 0:
             return Path(result.stdout.strip())
     except (subprocess.TimeoutExpired, FileNotFoundError, OSError):
@@ -82,4 +81,3 @@ if __name__ == "__main__":
     # Test auto-detection
     print(f"Project Name: {get_project_name()}")
     print(f"Project Root: {get_project_root()}")
-    print(f"Database URL: {get_database_url()}")

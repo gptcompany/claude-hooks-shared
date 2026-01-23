@@ -133,8 +133,7 @@ cat > "$PROJECT_PATH/.claude/settings.local.json" <<'EOF'
     "type": "command",
     "command": "python3 /media/sam/1TB/claude-hooks-shared/scripts/context-monitor.py",
     "env": {
-      "CLAUDE_PROJECT_NAME": "PROJECT_NAME_PLACEHOLDER",
-      "DATABASE_URL": "postgresql://n8n:n8n@localhost:5433/claude_sessions"
+      "CLAUDE_PROJECT_NAME": "PROJECT_NAME_PLACEHOLDER"
     }
   },
   "env": {
@@ -153,8 +152,7 @@ cat > "$PROJECT_PATH/.claude/settings.local.json" <<'EOF'
             "type": "command",
             "command": "/media/sam/1TB/claude-hooks-shared/hooks/core/context_bundle_builder.py",
             "env": {
-              "CLAUDE_PROJECT_NAME": "PROJECT_NAME_PLACEHOLDER",
-              "DATABASE_URL": "postgresql://n8n:n8n@localhost:5433/claude_sessions"
+              "CLAUDE_PROJECT_NAME": "PROJECT_NAME_PLACEHOLDER"
             }
           }
         ]
@@ -202,8 +200,7 @@ cat > "$PROJECT_PATH/.claude/settings.local.json" <<'EOF'
             "type": "command",
             "command": "/media/sam/1TB/claude-hooks-shared/hooks/core/post-tool-use.py",
             "env": {
-              "CLAUDE_PROJECT_NAME": "PROJECT_NAME_PLACEHOLDER",
-              "DATABASE_URL": "postgresql://n8n:n8n@localhost:5433/claude_sessions"
+              "CLAUDE_PROJECT_NAME": "PROJECT_NAME_PLACEHOLDER"
             }
           }
         ]
