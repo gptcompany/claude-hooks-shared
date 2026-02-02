@@ -17,11 +17,12 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROTATION_SCRIPT="$SCRIPT_DIR/secret_rotation.py"
-SOPS_ENV_FILE="/media/sam/1TB/claude-hooks-shared/.env.enc"
+DOTENVX="/home/sam/.local/bin/dotenvx"
+ENV_FILE="/media/sam/1TB/.env"
 
-# Load secrets from SOPS (not from environment/crontab!)
-if [[ -f "$SOPS_ENV_FILE" ]]; then
-    eval "$(SOPS_AGE_KEY_FILE="$HOME/.config/sops/age/keys.txt" sops -d --input-type dotenv --output-type dotenv "$SOPS_ENV_FILE" 2>/dev/null | grep -E '^[A-Z_]+=')"
+# Load secrets from dotenvx (not from environment/crontab!)
+if [[ -f "$ENV_FILE" ]]; then
+    eval "$($DOTENVX decrypt -f "$ENV_FILE" --stdout 2>/dev/null | grep -E '^[A-Z_]+=' | sed 's/^/export /')"
 fi
 
 DISCORD_WEBHOOK_URL="${DISCORD_WEBHOOK_URL:-}"
@@ -47,7 +48,7 @@ import json
 from pathlib import Path
 from datetime import datetime
 
-state_file = Path.home() / '.config/sops/age/rotation_state.json'
+state_file = Path.home() / '.config/dotenvx/rotation_state.json'
 if state_file.exists():
     state = json.load(open(state_file))
     last = datetime.fromisoformat(state.get('last_rotation', datetime.now().isoformat()))
@@ -63,7 +64,7 @@ curl -s -H "Content-Type: application/json" \
     -d "{
         \"embeds\": [{
             \"title\": \"🔐 Secret Rotation Due\",
-            \"description\": \"It's time to rotate your SOPS/age encryption keys.\",
+            \"description\": \"It's time to rotate your dotenvx encryption keys.\",
             \"color\": 16744448,
             \"fields\": [
                 {
@@ -78,7 +79,7 @@ curl -s -H "Content-Type: application/json" \
                 },
                 {
                     \"name\": \"What it does\",
-                    \"value\": \"• Generates new age keypair\\n• Re-encrypts all .env.enc files\\n• Creates backup before changes\\n• Updates SOPS config\",
+                    \"value\": \"• Runs dotenvx rotate\\n• Re-encrypts all .env files\\n• Creates backup before changes\",
                     \"inline\": false
                 }
             ],

@@ -48,24 +48,16 @@ def _get_audit_logger():
 class SecretsLoader:
     """Load secrets from SOPS-encrypted .env files."""
 
-    def __init__(self, env_file: str = ".env.enc", audit: bool = True):
+    def __init__(self, env_file: str = ".env", audit: bool = True):
         self.env_file = Path(env_file)
         self._loaded = False
         self._audit = audit
 
     @staticmethod
-    def _is_sops_available() -> bool:
-        """Check if sops CLI is available."""
-        try:
-            subprocess.run(
-                ["sops", "--version"],
-                capture_output=True,
-                check=True,
-                timeout=5,
-            )
-            return True
-        except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired):
-            return False
+    def _is_dotenvx_available() -> bool:
+        """Check if dotenvx CLI is available."""
+        dotenvx = Path.home() / ".local" / "bin" / "dotenvx"
+        return dotenvx.exists()
 
     def _log_audit(self, action: str, file_path: str, success: bool):
         """Log audit event."""
@@ -100,8 +92,8 @@ class SecretsLoader:
         if str(plaintext_file) == str(enc_file):
             plaintext_file = Path(".env")
 
-        # Try encrypted file first
-        if enc_file.exists() and self._is_sops_available():
+        # Try dotenvx-encrypted file first
+        if enc_file.exists() and self._is_dotenvx_available():
             success = self._load_encrypted(enc_file)
             if success:
                 return True
@@ -120,7 +112,7 @@ class SecretsLoader:
         """Decrypt and load secrets."""
         try:
             result = subprocess.run(
-                ["sops", "-d", "--input-type", "dotenv", "--output-type", "dotenv", str(path)],
+                [str(Path.home() / ".local" / "bin" / "dotenvx"), "decrypt", "-f", str(path), "--stdout"],
                 capture_output=True,
                 text=True,
                 check=True,

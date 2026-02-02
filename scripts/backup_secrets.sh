@@ -2,14 +2,15 @@
 #===============================================================================
 # Enterprise Secrets Backup Script
 #
-# Backs up all .env.enc files across repositories to timestamped directory.
-# Also backs up age keys (encrypted with age itself for safety).
+# Backs up all dotenvx .env + .env.keys files across repositories.
 #
 # Usage:
-#   ./backup_secrets.sh                 # Manual run
+#   ./backup_secrets.sh
 #   Add to crontab: 0 2 * * * /media/sam/1TB/claude-hooks-shared/scripts/backup_secrets.sh
 #
 # Retention: 30 days (configurable via RETENTION_DAYS)
+#
+# MIGRATION (2026-02-02): SOPS → dotenvx
 #===============================================================================
 
 set -euo pipefail
@@ -17,18 +18,14 @@ set -euo pipefail
 # Configuration
 BACKUP_ROOT="/media/sam/2TB-NVMe/backups/secrets"
 RETENTION_DAYS=30
-AGE_KEYS_FILE="$HOME/.config/sops/age/keys.txt"
 
-# Repositories to backup
-REPOS=(
-    "/media/sam/1TB/nautilus_dev"
+# Directories containing dotenvx .env + .env.keys
+DIRS=(
+    "/media/sam/1TB"
     "/media/sam/1TB/N8N_dev"
-    "/media/sam/1TB/UTXOracle"
-    "/media/sam/1TB/LiquidationHeatmap"
     "/media/sam/1TB/backstage-portal"
-    "/media/sam/1TB/academic_research"
-    "/media/sam/1TB/claude-hooks-shared"
-    "$HOME/.claude"
+    "/media/sam/1TB/hummingbot_scraper"
+    "/media/sam/1TB/n_backup"
 )
 
 # Create timestamped backup directory
@@ -39,28 +36,19 @@ mkdir -p "$BACKUP_DIR"
 echo "=== Secrets Backup Started: $(date) ==="
 echo "Backup directory: $BACKUP_DIR"
 
-# Backup .env.enc files from each repo
-for repo in "${REPOS[@]}"; do
-    repo_name=$(basename "$repo")
-    env_enc="$repo/.env.enc"
+# Backup .env and .env.keys from each directory
+for dir in "${DIRS[@]}"; do
+    dir_name=$(basename "$dir")
+    [[ "$dir" == "/media/sam/1TB" ]] && dir_name="SSOT-master"
 
-    if [[ -f "$env_enc" ]]; then
-        cp "$env_enc" "$BACKUP_DIR/${repo_name}.env.enc"
-        echo "OK: $repo_name"
-    else
-        echo "SKIP: $repo_name (no .env.enc)"
-    fi
+    for file in .env .env.keys; do
+        src="$dir/$file"
+        if [[ -f "$src" ]]; then
+            cp "$src" "$BACKUP_DIR/${dir_name}${file}"
+            echo "OK: ${dir_name}/${file}"
+        fi
+    done
 done
-
-# Backup age keys (self-encrypted for safety)
-if [[ -f "$AGE_KEYS_FILE" ]]; then
-    # Get public key from keys file
-    AGE_PUBLIC=$(grep "public key" "$AGE_KEYS_FILE" | cut -d: -f2 | tr -d ' ')
-
-    # Encrypt the keys file with itself
-    age -r "$AGE_PUBLIC" -o "$BACKUP_DIR/age_keys.txt.age" "$AGE_KEYS_FILE"
-    echo "OK: age keys (self-encrypted)"
-fi
 
 # Create manifest
 cat > "$BACKUP_DIR/MANIFEST.txt" << EOF
@@ -68,14 +56,15 @@ Backup Timestamp: $TIMESTAMP
 Backup Date: $(date)
 Hostname: $(hostname)
 User: $(whoami)
+Tool: dotenvx (ECIES encryption)
 
 Files:
 $(ls -la "$BACKUP_DIR")
 
 Recovery Instructions:
-1. To decrypt age keys: age -d -i <recovery_key> age_keys.txt.age > keys.txt
-2. To restore secrets: cp <repo>.env.enc /media/sam/1TB/<repo>/.env.enc
-3. SOPS will auto-decrypt using the age keys
+1. Copy .env and .env.keys back to original directory
+2. Verify: dotenvx get GITHUB_PAT -f /media/sam/1TB/.env
+3. dotenvx auto-decrypts using .env.keys in same directory
 EOF
 
 echo "OK: Manifest created"
@@ -86,6 +75,5 @@ if [[ -d "$BACKUP_ROOT" ]]; then
     find "$BACKUP_ROOT" -maxdepth 1 -type d -mtime +$RETENTION_DAYS -exec rm -rf {} \; 2>/dev/null || true
 fi
 
-# Count total backups
 BACKUP_COUNT=$(find "$BACKUP_ROOT" -maxdepth 1 -type d | wc -l)
 echo "=== Backup Complete: $BACKUP_COUNT total backups retained ==="
