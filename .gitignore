@@ -220,3 +220,4 @@ heartbeat.json
 # Local logs
 /logs/
 *.log
+.env.keys
