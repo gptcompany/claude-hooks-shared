@@ -48,7 +48,9 @@ function checkForcePush(command) {
   for (const pattern of forcePushPatterns) {
     if (pattern.test(command)) {
       // Check if pushing to main/master specifically
-      if (/\s+(origin\s+)?(main|master)(\s|$)/.test(command)) {
+      const protectedRe = new RegExp(`(?:\\s|^)(?:origin\\s+)?(?:${PROTECTED_BRANCHES.join('|')})(\\s|$)`);
+      const refspecRe = new RegExp(`:(?:${PROTECTED_BRANCHES.join('|')})(\\s|$)`);
+      if (protectedRe.test(command) || refspecRe.test(command)) {
         return { isForce: true, toProtected: true };
       }
       return { isForce: true, toProtected: false };
