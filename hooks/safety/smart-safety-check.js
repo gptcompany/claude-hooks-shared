@@ -78,11 +78,19 @@ const MEDIUM_RISK_PATTERNS = [
 ];
 
 /**
+ * Escape string for safe use in RegExp constructor
+ */
+function escapeRegExp(s) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/**
  * Check if command contains secrets
  */
 function checkForSecrets(command, config) {
   for (const pattern of config.secretPatterns) {
-    const regex = new RegExp(`${pattern}\\s*=\\s*['\"]?[^\\s'\"]+`, 'i');
+    const safe = escapeRegExp(String(pattern));
+    const regex = new RegExp(`${safe}\\s*=\\s*['\"]?[^\\s'\"]+`, 'i');
     if (regex.test(command)) {
       return pattern;
     }
@@ -113,6 +121,11 @@ function checkSudoWhitelist(command, config) {
  * Categorize command risk level
  */
 function categorizeRisk(command, config) {
+  // Flag shell evaluation syntax that defeats regex-based inspection
+  if (/[`]|(\$\()|(\<\<)/.test(command)) {
+    return { level: RISK_HIGH, reason: 'Shell evaluation syntax detected (backticks, $(), or heredoc)' };
+  }
+
   // Split chained commands and check each segment independently
   const segments = command.split(/\s*(?:&&|\|\||;)\s*/);
 

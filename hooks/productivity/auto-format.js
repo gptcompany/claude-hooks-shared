@@ -52,8 +52,8 @@ function shouldFormat(filePath) {
  */
 function commandExists(cmd) {
   try {
-    const command = process.platform === 'win32' ? `where ${cmd}` : `which ${cmd}`;
-    execSync(command, { stdio: 'pipe' });
+    const bin = process.platform === 'win32' ? 'where' : 'which';
+    execFileSync(bin, [cmd], { stdio: 'ignore' });
     return true;
   } catch {
     return false;
