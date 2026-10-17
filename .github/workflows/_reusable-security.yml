@@ -32,7 +32,7 @@ on:
 jobs:
   security:
     name: "Security Scan"
-    runs-on: [self-hosted, shared]
+    runs-on: ubuntu-latest
     timeout-minutes: 10
 
     outputs:

@@ -37,7 +37,7 @@ on:
 jobs:
   lint:
     name: "Lint & Type Check"
-    runs-on: [self-hosted, shared]
+    runs-on: ubuntu-latest
     timeout-minutes: 10
 
     outputs:
