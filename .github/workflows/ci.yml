@@ -56,7 +56,7 @@ jobs:
   integration:
     name: Integration Tests
     needs: [test]
-    runs-on: [self-hosted, shared]
+    runs-on: ubuntu-latest
     timeout-minutes: 10
 
     steps:
@@ -93,7 +93,7 @@ jobs:
   summary:
     name: Pipeline Summary
     needs: [security, lint, test, integration]
-    runs-on: [self-hosted, shared]
+    runs-on: ubuntu-latest
     if: always()
 
     steps:
