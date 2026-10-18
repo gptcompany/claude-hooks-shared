@@ -168,7 +168,8 @@ def run_pyright(files: list[Path]) -> dict:
                 result["has_errors"] = result["error_count"] > 0
                 # Take first 5 errors for context
                 result["errors"] = [
-                    f"{d.get('file', '?')}:{d.get('range', {}).get('start', {}).get('line', '?')}: {d.get('message', '')}"
+                    f"{d.get('file', '?')}:{d.get('range', {}).get('start', {}).get('line', '?')}: "
+                    f"{d.get('message', '')}"
                     for d in diagnostics[:5]
                 ]
             except json.JSONDecodeError:

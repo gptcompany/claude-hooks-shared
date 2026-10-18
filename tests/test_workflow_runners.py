@@ -1,4 +1,5 @@
 """Repo pubblico: i workflow girano su runner GitHub-hosted, non sul Dell."""
+
 from pathlib import Path
 
 import yaml
