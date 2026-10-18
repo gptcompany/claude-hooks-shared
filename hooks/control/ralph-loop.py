@@ -238,9 +238,7 @@ def parse_plugin_state_file() -> dict | None:
         state["active"] = state.get("active", False)
 
         if state.get("active"):
-            logger.info(
-                f"Loaded state from plugin file: iteration={state.get('iteration', 0)}"
-            )
+            logger.info(f"Loaded state from plugin file: iteration={state.get('iteration', 0)}")
             return state
 
     except Exception as e:
@@ -277,9 +275,7 @@ def get_ralph_state() -> dict | None:
         if stored_checksum:
             calculated = calculate_state_checksum(state)
             if stored_checksum != calculated:
-                logger.warning(
-                    f"State checksum mismatch: stored={stored_checksum}, calc={calculated}"
-                )
+                logger.warning(f"State checksum mismatch: stored={stored_checksum}, calc={calculated}")
                 # Continue anyway - might be manual edit
 
         if state.get("active"):
@@ -591,9 +587,7 @@ def run_ci_validation() -> tuple[bool, str, dict]:
             if orchestrator_file.exists():
                 import importlib.util
 
-                spec = importlib.util.spec_from_file_location(
-                    "orchestrator", orchestrator_file
-                )
+                spec = importlib.util.spec_from_file_location("orchestrator", orchestrator_file)
                 if spec and spec.loader:
                     module = importlib.util.module_from_spec(spec)
                     spec.loader.exec_module(module)
@@ -608,9 +602,7 @@ def run_ci_validation() -> tuple[bool, str, dict]:
                     }
 
                     if report.blocked:
-                        failed = (
-                            report.tiers[0].failed_dimensions if report.tiers else []
-                        )
+                        failed = report.tiers[0].failed_dimensions if report.tiers else []
                         return False, f"Tier 1 blocked: {failed}", details
 
                     logger.info("Validation passed via orchestrator")
@@ -711,9 +703,7 @@ def check_rate_limit() -> tuple[bool, str]:
                 for line in f:
                     try:
                         entry = json.loads(line)
-                        ts = datetime.fromisoformat(
-                            entry.get("timestamp", "")
-                        ).timestamp()
+                        ts = datetime.fromisoformat(entry.get("timestamp", "")).timestamp()
                         if ts > cutoff:
                             iterations_in_window += 1
                             if last_iteration_time is None or ts > last_iteration_time:
@@ -903,9 +893,7 @@ def main():
             sys.exit(0)
 
         # CI failed but not max yet - include fix instructions in continuation
-        update_progress(
-            iteration, f"⚠️ CI FAILED ({ci_failures}/{MAX_CI_FAILURES}): {ci_msg}"
-        )
+        update_progress(iteration, f"⚠️ CI FAILED ({ci_failures}/{MAX_CI_FAILURES}): {ci_msg}")
     else:
         # CI passed - reset counter
         update_ralph_state({"consecutive_ci_failures": 0})
