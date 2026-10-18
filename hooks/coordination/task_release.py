@@ -87,7 +87,7 @@ def call_claims_release(issue_id: str, claimant: str) -> dict:
         cmd = [
             "npx",
             "-y",
-            "claude-flow@latest",
+            "claude-flow@3.57.0",
             "claims",
             "release",
             "--issueId",
@@ -136,7 +136,7 @@ def call_hooks_notify(message: str, data: dict) -> dict:
         cmd = [
             "npx",
             "-y",
-            "claude-flow@latest",
+            "claude-flow@3.57.0",
             "hooks",
             "notify",
             "--message",

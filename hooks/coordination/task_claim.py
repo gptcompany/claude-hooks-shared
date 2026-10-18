@@ -108,7 +108,7 @@ def call_claims_claim(issue_id: str, claimant: str, context: str) -> dict:
         cmd = [
             "npx",
             "-y",
-            "claude-flow@latest",
+            "claude-flow@3.57.0",
             "claims",
             "claim",
             "--issueId",

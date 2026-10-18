@@ -104,7 +104,7 @@ def release_file(file_path: str, session_id: str) -> bool:
         cmd = [
             "npx",
             "-y",
-            "claude-flow@latest",
+            "claude-flow@3.57.0",
             "claims",
             "release",
             "--issueId",
@@ -152,7 +152,7 @@ def broadcast_release(file_path: str) -> bool:
         cmd = [
             "npx",
             "-y",
-            "claude-flow@latest",
+            "claude-flow@3.57.0",
             "hooks",
             "notify",
             "--message",

@@ -51,7 +51,7 @@ def _run_hive_cmd(args: list[str], timeout: int = 30) -> tuple[bool, str]:
     Returns:
         tuple: (success, output_or_error)
     """
-    cmd = ["npx", "-y", "claude-flow@latest", "hive-mind"] + args
+    cmd = ["npx", "-y", "claude-flow@3.57.0", "hive-mind"] + args
 
     log(f"Running: {' '.join(cmd)}")
 

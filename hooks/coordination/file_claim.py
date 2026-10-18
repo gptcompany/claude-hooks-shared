@@ -112,7 +112,7 @@ def claim_file(file_path: str, session_id: str) -> tuple[bool, str | None]:
         cmd = [
             "npx",
             "-y",
-            "claude-flow@latest",
+            "claude-flow@3.57.0",
             "claims",
             "claim",
             "--issueId",
