@@ -36,7 +36,7 @@ def _run_claude_flow(args: list[str], timeout: int = 10) -> tuple[bool, str]:
         tuple: (success, output)
     """
     try:
-        cmd = ["npx", "-y", "claude-flow@latest"] + args
+        cmd = ["npx", "-y", "claude-flow@3.57.0"] + args
         logger.debug(f"Running: {' '.join(cmd)}")
 
         result = subprocess.run(
