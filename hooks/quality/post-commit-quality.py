@@ -67,9 +67,7 @@ def commit_succeeded(tool_result: str) -> bool:
         return True
     if "create mode" in tool_result.lower():
         return True
-    if "files changed" in tool_result.lower():
-        return True
-    return False
+    return "files changed" in tool_result.lower()
 
 
 def get_modified_files() -> list[str]:
@@ -115,37 +113,25 @@ def check_file_complexity(file_path: Path) -> dict:
         # Count functions/methods
         if file_path.suffix in PYTHON_EXTENSIONS:
             # Python: def, async def, class
-            result["functions"] = len(
-                re.findall(r"^\s*(def |async def |class )", content, re.MULTILINE)
-            )
+            result["functions"] = len(re.findall(r"^\s*(def |async def |class )", content, re.MULTILINE))
         elif file_path.suffix in TYPESCRIPT_EXTENSIONS or file_path.suffix in {
             ".js",
             ".jsx",
         }:
             # JS/TS: function, const =>, class
-            result["functions"] = len(
-                re.findall(
-                    r"^\s*(function |const \w+ = |class )", content, re.MULTILINE
-                )
-            )
+            result["functions"] = len(re.findall(r"^\s*(function |const \w+ = |class )", content, re.MULTILINE))
         elif file_path.suffix in {".sh", ".bash"}:
             # Bash: function name() or name()
-            result["functions"] = len(
-                re.findall(r"^\s*(\w+\s*\(\)|function\s+\w+)", content, re.MULTILINE)
-            )
+            result["functions"] = len(re.findall(r"^\s*(\w+\s*\(\)|function\s+\w+)", content, re.MULTILINE))
 
         # Check thresholds
         if result["lines"] > COMPLEXITY_THRESHOLDS["max_lines"]:
             result["exceeds_threshold"] = True
-            result["reasons"].append(
-                f"lines={result['lines']} > {COMPLEXITY_THRESHOLDS['max_lines']}"
-            )
+            result["reasons"].append(f"lines={result['lines']} > {COMPLEXITY_THRESHOLDS['max_lines']}")
 
         if result["functions"] > COMPLEXITY_THRESHOLDS["max_functions"]:
             result["exceeds_threshold"] = True
-            result["reasons"].append(
-                f"functions={result['functions']} > {COMPLEXITY_THRESHOLDS['max_functions']}"
-            )
+            result["reasons"].append(f"functions={result['functions']} > {COMPLEXITY_THRESHOLDS['max_functions']}")
 
     except Exception as e:
         result["error"] = str(e)
@@ -168,8 +154,7 @@ def run_pyright(files: list[Path]) -> dict:
 
     try:
         proc = subprocess.run(
-            ["python3", "-m", "pyright", "--outputjson"]
-            + [str(f) for f in python_files],
+            ["python3", "-m", "pyright", "--outputjson"] + [str(f) for f in python_files],
             capture_output=True,
             text=True,
             timeout=30,
@@ -209,9 +194,7 @@ def generate_quality_message(complex_files: list[dict], pyright_result: dict) ->
 
     if complex_files:
         file_list = ", ".join([f["path"] for f in complex_files])
-        reasons = "; ".join(
-            [f"{f['path']}: {', '.join(f['reasons'])}" for f in complex_files]
-        )
+        reasons = "; ".join([f"{f['path']}: {', '.join(f['reasons'])}" for f in complex_files])
         parts.append(f"""
 **Code Complexity Alert** - The following files exceed complexity thresholds:
 
