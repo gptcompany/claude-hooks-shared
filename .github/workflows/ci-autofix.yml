@@ -10,7 +10,7 @@ jobs:
   autofix:
     name: Auto-Fix Failed CI
     if: ${{ github.event.workflow_run.conclusion == 'failure' }}
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.CI_RUNS_ON || 'sg-ci' }}
 
     steps:
       - name: Checkout
