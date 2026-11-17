@@ -36,3 +36,12 @@ def test_every_job_uses_a_self_hosted_selector():
                 seen += 1
                 assert spec["runs-on"] in allowed, f"{path.name}:{name} usa {spec['runs-on']}"
     assert seen >= 6
+
+
+def test_autofix_never_runs_for_fork_originated_workflow_runs():
+    # workflow_run carries the fork's CI logs into a job on the self-hosted runner;
+    # the job must be rejected before scheduling when the run's head repo is a fork.
+    data = yaml.safe_load((WORKFLOWS / "ci-autofix.yml").read_text(encoding="utf-8"))
+    condition = data["jobs"]["autofix"]["if"]
+    assert "github.event.workflow_run.head_repository.full_name == github.repository" in condition
+    assert "github.event.workflow_run.conclusion == 'failure'" in condition
